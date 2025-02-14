@@ -41,8 +41,8 @@ Welcome to the **Daily Visits Management Application**! This application is desi
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-username/daily-visits-app.git
-   cd daily-visits-app
+   git clone https://github.com/Andrewaziz99/FOE_Visits.git
+   cd FOE_Visits
    ```
 
 2. **Install Dependencies**:

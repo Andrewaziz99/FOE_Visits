@@ -58,8 +58,8 @@ Welcome to the **Daily Visits Management Application**! This application is desi
         ```
     - Replace `SUPABASE_URL`, `SUPABASE_KEY`, with your Supabase project details.
 
-4. **Configure Firebase**:
-    - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/).
+4. **Configure Supabase**:
+    - Create a Supabase project at [Supabase](https://supabase.com/).
 
 5. **Run the Application**:
    ```bash

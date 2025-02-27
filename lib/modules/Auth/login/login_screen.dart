@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:toastification/toastification.dart';
 import 'package:visits/modules/Auth/cubit/states.dart';
 import 'package:visits/shared/components/components.dart';
+import 'package:visits/shared/network/local/cache_helper.dart';
 import 'package:visits/shared/playSound.dart';
 
 import '../../../shared/components/constants.dart';
@@ -39,6 +40,58 @@ class LoginScreen extends StatelessWidget {
                     image: AssetImage('assets/images/background.jpg'),
                     fit: BoxFit.cover,
                   ),
+                ),
+              ),
+              // Logo and text
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 40.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            MUSTQBL_MISR,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            DEPT_NAME,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            OFFICE,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Image.asset(
+                          'assets/images/logo1.png',
+                          width: 200,
+                          height: 200,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
               // Blur effect
@@ -130,6 +183,7 @@ class LoginScreen extends StatelessWidget {
         }
 
         if (state is AuthSuccessState) {
+          CacheHelper.saveData(key: 'password', value: passwordController.text);
           playSound('sfx/login.mp3');
           Toastification().show(
             type: ToastificationType.error,

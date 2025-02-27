@@ -27,3 +27,15 @@ class AuthGetUserLoadingState extends AuthStates {}
 class AuthGetUserSuccessState extends AuthStates {}
 
 class AuthGetUserErrorState extends AuthStates {}
+
+class AuthUpdateUserLoadingState extends AuthStates {}
+
+class AuthUpdateUserSuccessState extends AuthStates {}
+
+class AuthUpdateUserErrorState extends AuthStates {}
+
+class AuthGetUsersLoadingState extends AuthStates {}
+
+class AuthGetUsersSuccessState extends AuthStates {}
+
+class AuthGetUsersErrorState extends AuthStates {}

@@ -58,3 +58,9 @@ class getUserDataLoading extends visitStates {}
 class getUserDataSuccess extends visitStates {}
 
 class getUserDataError extends visitStates {}
+
+class getRealTimeVisitsLoading extends visitStates {}
+
+class getRealTimeVisitsSuccess extends visitStates {}
+
+class getRealTimeVisitsError extends visitStates {}

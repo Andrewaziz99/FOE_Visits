@@ -1,13 +1,16 @@
 import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../shared/components/components.dart';
 import '../../shared/components/constants.dart';
 
-
-Widget visitData(context, data) => AlertDialog(
+Widget visitData(context, event, data) => AlertDialog(
       backgroundColor: Colors.transparent,
-      title: const Text('بيانات الزيارة', style: TextStyle(color: Colors.white),),
+      title: const Text(
+        'بيانات الزيارة',
+        style: TextStyle(color: Colors.white),
+      ),
       content: BlurryContainer(
         blur: 50,
         width: MediaQuery.of(context).size.width * 0.8,
@@ -88,6 +91,24 @@ Widget visitData(context, data) => AlertDialog(
                         ),
                       ),
                     ),
+                    TableCell(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          startDate,
+                          style: TextStyle(color: Colors.redAccent),
+                        ),
+                      ),
+                    ),
+                    TableCell(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          endDate,
+                          style: TextStyle(color: Colors.redAccent),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
 
@@ -125,7 +146,7 @@ Widget visitData(context, data) => AlertDialog(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          data['additionalPhoneNo'],
+                          data['additionalPhoneNo'] ?? 'لا يوجد',
                           style: TextStyle(color: Colors.black),
                         ),
                       ),
@@ -157,9 +178,30 @@ Widget visitData(context, data) => AlertDialog(
                         ),
                       ),
                     ),
+                    TableCell(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          DateFormat('yyyy-MM-dd hh:mma').format(DateTime.parse(
+                            '${event.startTime}',
+                          )),
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    ),
+                    TableCell(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          DateFormat('yyyy-MM-dd hh:mma').format(DateTime.parse(
+                            '${event.endTime}',
+                          )),
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-
               ],
             )
           ],

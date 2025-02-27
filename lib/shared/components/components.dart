@@ -17,14 +17,16 @@ void navigateAndFinish(context, widget) => Navigator.pushAndRemoveUntil(
       (route) => false,
     );
 
-Widget myDivider() => Padding(
+Widget myDivider({
+  Color color = Colors.amber,
+}) => Padding(
       padding: const EdgeInsetsDirectional.only(
         start: 20.0,
       ),
       child: Container(
         width: double.infinity,
         height: 1.0,
-        color: Colors.amberAccent,
+        color: color,
       ),
     );
 
@@ -125,7 +127,7 @@ Widget defaultFormField({
                 icon: Icon(suffix, color: suffixColor),
               )
             : null,
-        border: OutlineInputBorder(borderRadius: radius),
+        border: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide(color: Colors.black)),
       ),
     );
 
@@ -268,7 +270,8 @@ class CustomDropDownMenu extends StatelessWidget {
         this.textColor = Colors.black,
         this.titleColor = Colors.black,
         this.textSize = 20,
-        this.titleSize = 20
+        this.titleSize = 20,
+        this.space = 10,
       });
 
   final String title;
@@ -282,6 +285,7 @@ class CustomDropDownMenu extends StatelessWidget {
   final List<DropdownMenuEntry> entries;
   // ignore: prefer_typing_uninitialized_variables
   final onSelected;
+  final double space;
 
   @override
   Widget build(BuildContext context) {
@@ -290,8 +294,8 @@ class CustomDropDownMenu extends StatelessWidget {
       children: [
         const SizedBox(height: 10),
         Container(margin: const EdgeInsets.all(5), child: Text(title, style: TextStyle(fontSize: titleSize, color: titleColor))),
-        const SizedBox(
-          height: 15,
+        SizedBox(
+          height: space,
         ),
         SizedBox(
           width: max(screenWidth * screenRatio, 300),
@@ -313,7 +317,7 @@ class CustomDropDownMenu extends StatelessWidget {
           ),
         ),
         const SizedBox(
-          height: 20,
+          height: 5,
         )
       ],
     );

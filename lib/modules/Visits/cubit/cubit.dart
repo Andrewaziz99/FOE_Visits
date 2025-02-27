@@ -15,28 +15,41 @@ class visitCubit extends Cubit<visitStates> {
   final supabase = Supabase.instance.client;
 
   UserModel? user;
-  Future<void> getUserData() async{
+
+  Future<void> getUserData() async {
     emit(getUserDataLoading());
-    await supabase.from('users').select().eq('user_id', supabase.auth.currentUser!.id).then((value) {
+    await supabase
+        .from('users')
+        .select()
+        .eq('user_id', supabase.auth.currentUser!.id)
+        .then((value) {
       user = UserModel.fromJson(value.first);
       emit(getUserDataSuccess());
-    }).catchError((error){
+    }).catchError((error) {
       emit(getUserDataError());
       print(error);
     });
   }
 
-
   List<VisitorModel>? visitors;
 
   Future<void> getVisitors() async {
-    emit(getVisitorsLoading());
-    await supabase.from('visitors').select().then((value) {
-      visitors = value.map((e) => VisitorModel.fromJson(e)).toList();
-      emit(getVisitorsSuccess());
-      getVisits();
+    getUserData().then((value) async {
+      emit(getVisitorsLoading());
+      await supabase.from('visitors').select().then((value) {
+        visitors = value.map((e) => VisitorModel.fromJson(e)).toList();
+        emit(getVisitorsSuccess());
+        if (user!.is_admin!) {
+          getRealTimeVisits();
+        } else {
+          getVisits();
+        }
+      }).catchError((error) {
+        emit(getVisitorsError());
+        print(error);
+      });
     }).catchError((error) {
-      emit(getVisitorsError());
+      emit(getUserDataError());
       print(error);
     });
   }
@@ -69,7 +82,8 @@ class visitCubit extends Cubit<visitStates> {
         emit(addVisitorSuccess());
         getVisitors().then((value) {
           addVisit(
-              visitor_id: visitors!.firstWhere((element) => element.name == name).id!,
+              visitor_id:
+                  visitors!.firstWhere((element) => element.name == name).id!,
               visitDestination: visitDestination,
               visitReason: visitReason);
         });
@@ -103,68 +117,42 @@ class visitCubit extends Cubit<visitStates> {
 
   List<VisitModel>? visits;
   List<VisitorModel>? visitorsData;
+
   Future<void> getVisits() async {
-    getUserData().then((value) async{
+    getUserData().then((value) async {
       emit(getVisitsLoading());
       await supabase
           .from('daily_visits')
           .select()
-          .eq('user_id', supabase.auth.currentUser!.id).eq('region', user!.region!)
+          .eq('user_id', supabase.auth.currentUser!.id)
+          .eq('region', user!.region!)
           .then((value) {
         visits = value.map((e) => VisitModel.fromJson(e)).toList();
-        visitorsData = visitors!.where((element) => visits!.any((element2) => element2.visitor_id == element.id)).toList();
+        visitorsData = visitors!
+            .where((element) =>
+                visits!.any((element2) => element2.visitor_id == element.id))
+            .toList();
         emit(getVisitsSuccess());
       }).catchError((error) {
         emit(getVisitsError());
         print(error);
       });
-    }).catchError((error){
+    }).catchError((error) {
       emit(getUserDataError());
     });
   }
 
-  //
-  // Future<void> getVisitsByDate(selectedDate) async {
-  //   emit(getVisitsLoading());
-  //   await supabase.from('daily_visits').select().eq('user_id', supabase.auth.currentUser!.id).eq('visitDate', selectedDate).then((value) {
-  //     visits = value.map((e) => VisitModel.fromJson(e)).toList();
-  //     emit(getVisitsSuccess());
-  //   }).catchError((error) {
-  //     emit(getVisitsError());
-  //     print(error);
-  //   });
-  // }
-
-  List<VisitModel>? searchResults;
-
-  Future<void> searchByName(query) async {
-    emit(searchVisitsLoading());
-    await supabase
-        .from('daily_visits')
-        .select()
-        .eq('user_id', supabase.auth.currentUser!.id)
-        .ilike('name', '%$query%')
-        .then((value) {
-      searchResults = value.map((e) => VisitModel.fromJson(e)).toList();
-      emit(searchVisitsSuccess());
+  Future<void> getRealTimeVisits() async {
+    emit(getRealTimeVisitsLoading());
+    await supabase.from('daily_visits').select().then((value) {
+      visits = value.map((e) => VisitModel.fromJson(e)).toList();
+      visitorsData = visitors!
+          .where((element) =>
+              visits!.any((element2) => element2.visitor_id == element.id))
+          .toList();
+      emit(getRealTimeVisitsSuccess());
     }).catchError((error) {
-      emit(searchVisitsError());
-      print(error);
-    });
-  }
-
-  Future<void> searchByPhone(query) async {
-    emit(searchVisitsLoading());
-    await supabase
-        .from('daily_visits')
-        .select()
-        .eq('user_id', supabase.auth.currentUser!.id)
-        .ilike('phone_number', '%$query%')
-        .then((value) {
-      searchResults = value.map((e) => VisitModel.fromJson(e)).toList();
-      emit(searchVisitsSuccess());
-    }).catchError((error) {
-      emit(searchVisitsError());
+      emit(getRealTimeVisitsError());
       print(error);
     });
   }

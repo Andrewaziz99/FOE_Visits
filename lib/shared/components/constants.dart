@@ -1,13 +1,16 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:visits/shared/network/local/cache_helper.dart';
 
 import '../../modules/Auth/login/login_screen.dart';
 import 'components.dart';
 
-const String pass = '6116';
+final String pass = CacheHelper.getData(key: 'password');
 const String wrongPass = 'خطأ فى كلمة المرور';
 const String region = 'القطاع';
+
+const String add_new_visitor = 'اضافة زائر جديد';
 
 void signOut(context) {
       navigateAndFinish(context, LoginScreen());
@@ -17,11 +20,26 @@ void printFullText(String text) {
   final pattern = RegExp('.{1,800}'); // 800 is the size of each chunk
   pattern.allMatches(text).forEach((match) => print(match.group(0)));
 }
+
+const String MUSTQBL_MISR = 'جهاز مستقبل مصر للتنمية المستدامة';
+const String DEPT_NAME = 'قطاع الضبعة';
+const String OFFICE = 'مكتب السيد/ مدير الجهاز';
+
 const user = 'استقبال';
 
 const String addVisit = 'اضافة زيارة';
+const String archive = 'أرشيف';
+const String dailyVisits = 'الزيارات اليومية';
+const String agenda = 'الأجندة';
+const String totalVisitsNumber = 'عدد مرات التردد';
 
 const String appName = 'الزيارات اليومية';
+
+const String visitsLogs = 'سجل الزيارات';
+
+const String newVisitDescription = 'تم اضافة زيارة جديدة';
+const String view = 'عرض';
+
 
 const String loading = 'جارى التحميل...';
 
@@ -37,6 +55,10 @@ const String done = 'تم';
 const String cancel = 'الغاء';
 const String back = 'رجوع';
 const String exit = 'خروج';
+
+const String changePassword = 'تغيير كلمة المرور';
+const String oldPassword = 'كلمة المرور القديمة';
+const String newPassword = 'كلمة المرور الجديدة';
 
 const String loginSuccess = 'تم تسجيل الدخول بنجاح';
 const String loginError = 'خطأ فى اسم المستخدم او كلمة المرور';
@@ -63,6 +85,10 @@ const String confirmDelete = 'هل انت متأكد من حذف هذا العن
 
 const String newVisit = 'زيارة جديدة';
 
+const String name_other = 'الاسم أو اخرى';
+
+const String startDate = 'تاريخ بداية الزيارة';
+const String endDate = 'تاريخ نهاية الزيارة';
 
 const String rank = 'الرتبة';
 const String name = 'الاسم';
@@ -82,6 +108,7 @@ const String info = 'معلومة';
 
 const String noData = 'لا يوجد بيانات';
 
+const String imageSuccess = 'تم تغيير الصورة بنجاح';
 
 const String rankError = 'يجب ادخال الرتبة';
 const String nameError = 'يجب ادخال الاسم';
@@ -98,6 +125,16 @@ const String addErrorMessage = 'خطأ فى الاضافة';
 const String getErrorMessage = 'حدث خطأ';
 
 const String visitCount = 'عدد الزيارات';
+
+const List<String> visitSubject = [
+  'مقابلة مع السيد/ مدير الجهاز',
+  'إجتماع مع السيد/ مدير الجهاز',
+  'تسليم أوراق',
+  'إستلام أوراق',
+  'مقابلة مع سكرتارية السيد/ مدير الجهاز',
+  'مقابلة مع مدير مكتب السيد/ مدير الجهاز',
+  'إستفسارات',
+];
 
 const List<String> ranks = [
   'جندى',
@@ -117,6 +154,11 @@ const List<String> ranks = [
   'مدنى',
   'مهندس',
   'محاسب',
+  'دكتور',
+  'مدني',
+  'مستشار',
+  'مدير',
+  'مدير شركة',
 ];
 
 class Regions{
@@ -296,3 +338,6 @@ class ArabicNumbersInputFormatter extends TextInputFormatter {
 //   return imagesFolder;
 // }
 
+Future<void> getPassword() async{
+  CacheHelper.getData(key: 'password');
+}

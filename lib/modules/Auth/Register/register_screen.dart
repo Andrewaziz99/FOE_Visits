@@ -7,7 +7,6 @@ import 'package:visits/modules/Auth/login/login_screen.dart';
 import 'package:visits/shared/components/components.dart';
 import 'package:visits/shared/playSound.dart';
 import '../../../shared/components/constants.dart';
-import '../../Home/home_screen.dart';
 import '../cubit/cubit.dart';
 
 class RegisterScreen extends StatelessWidget {
@@ -41,14 +40,66 @@ class RegisterScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              // Logo and text
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 40.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            MUSTQBL_MISR,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            DEPT_NAME,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            OFFICE,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Image.asset(
+                          'assets/images/logo1.png',
+                          width: 200,
+                          height: 200,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
               // Blur effect
               Center(
                 child: BlurryContainer(
-                  shadowColor: Colors.black.withAlpha(65),
-                  elevation: 10,
+                  shadowColor: Colors.blue.withAlpha(150),
+                  elevation: 15,
                   borderRadius: BorderRadius.circular(20),
                   width: MediaQuery.of(context).size.width * 0.3,
-                  height: MediaQuery.of(context).size.height * 0.6,
+                  height: MediaQuery.of(context).size.height * 0.5,
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Form(
@@ -81,7 +132,7 @@ class RegisterScreen extends StatelessWidget {
                             ),
                             SizedBox(height: 30),
                             defaultFormField(
-                              radius: BorderRadius.circular(20),
+                              radius: BorderRadius.circular(10),
                               controller: userNameController,
                               type: TextInputType.text,
                               validate: (value) {
@@ -95,7 +146,7 @@ class RegisterScreen extends StatelessWidget {
                             ),
                             SizedBox(height: 30),
                             defaultFormField(
-                              radius: BorderRadius.circular(20),
+                              radius: BorderRadius.circular(10),
                               controller: passwordController,
                               type: TextInputType.visiblePassword,
                               validate: (value) {
@@ -109,9 +160,10 @@ class RegisterScreen extends StatelessWidget {
                               isPassword: true,
                               onSubmit: (value) {
                                 if (_formKey.currentState!.validate()) {
-                                  cubit.login(
+                                  cubit.register(
                                     username: userNameController.text,
                                     password: passwordController.text,
+                                    region: int.parse(regionValueController.text),
                                   );
                                 }
                               },

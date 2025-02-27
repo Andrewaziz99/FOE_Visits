@@ -20,7 +20,6 @@ Widget visitItem(index, visitor, visit) => Padding(
       Text(visit.visitDestination),
       const Spacer(),
       Text(DateFormat('yyyy-MM-dd hh:mma').format(DateTime.parse(visit.visitDate))),
-
     ],
   ),
 );

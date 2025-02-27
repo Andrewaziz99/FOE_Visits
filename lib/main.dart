@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) => AuthCubit(),
+      create: (BuildContext context) => AuthCubit()..getUsers(),
       child: ToastificationWrapper(
         child: MaterialApp(
           localizationsDelegates: [

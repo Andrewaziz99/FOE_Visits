@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:visits/models/User/user_model.dart';
 import 'package:visits/modules/Auth/login/login_screen.dart';
 import 'package:visits/shared/components/components.dart';
+import 'package:visits/shared/components/constants.dart';
 
 import '../../loading_screen.dart';
 import 'states.dart';
@@ -45,16 +46,16 @@ class AuthCubit extends Cubit<AuthStates> {
     required String password,
     required int region,
   }) async {
-    emit(AuthLoadingState());
+    emit(AuthRegisterLoadingState());
     await Supabase.instance.client.auth
         .signUp(
       email: '$username@foe.com',
       password: password,
     ).then((value) {
       createUser(user_id: value.user!.id,username: username, region: region).then((value){
-      emit(AuthSuccessState());
+      emit(AuthRegisterSuccessState());
       }).catchError((error){
-      emit(AuthErrorState());
+      emit(AuthRegisterErrorState());
       });
     }).catchError((error) {
       emit(AuthErrorState());
@@ -81,5 +82,16 @@ class AuthCubit extends Cubit<AuthStates> {
     });
   }
 
+  UserModel?  userModel;
+
+  Future<void> getUsers() async {
+    emit(AuthGetUsersLoadingState());
+    await Supabase.instance.client.from('users').select().then((value) {
+      emit(AuthGetUsersSuccessState());
+    }).catchError((error) {
+      emit(AuthGetUsersErrorState());
+      print(error);
+    });
+  }
 
 }

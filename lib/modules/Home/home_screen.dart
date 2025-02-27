@@ -1,41 +1,149 @@
+import 'dart:math';
+
 import 'package:blurrycontainer/blurrycontainer.dart';
-import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
+import 'package:cherry_toast/cherry_toast.dart';
+import 'package:cherry_toast/resources/arrays.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infinite_calendar_view/infinite_calendar_view.dart';
+import 'package:quickalert/models/quickalert_animtype.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:toastification/toastification.dart';
+import 'package:visits/modules/Archive/archive_screen.dart';
+import 'package:visits/modules/Home/add_new_visit.dart';
 import 'package:visits/modules/Home/cubit/states.dart';
 import 'package:visits/modules/Home/endrawer.dart';
-import 'package:visits/modules/Home/visit_item.dart';
+import 'package:visits/modules/Home/new_visit_dialog.dart';
+import 'package:visits/modules/Visits/visits_screen.dart';
 import 'package:visits/modules/loading_screen.dart';
 import 'package:visits/shared/components/components.dart';
 import 'package:visits/shared/components/constants.dart';
+import 'package:visits/shared/playSound.dart';
 import '../../models/Visitor/visitor_model.dart';
 import '../Auth/cubit/cubit.dart';
 import 'cubit/cubit.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+
+  // final bool is_admin;
+
+  // HomeScreen({super.key, required this.is_admin});
   HomeScreen({super.key});
 
-  EventsController controller = EventsController();
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+
+class _HomeScreenState extends State<HomeScreen> {
+
 
   TextEditingController visitorController = TextEditingController();
 
   List<VisitorModel> visitor = [];
 
+  final supabase = Supabase.instance.client;
+
+  @override
+  void initState() {
+    super.initState();
+    // if (widget.is_admin) {
+      supabase
+          .channel('public:daily_visits')
+          .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'daily_visits',
+          callback: (payload) {
+            playSound('sfx/alert.mp3');
+            CherryToast.warning(
+              height: 100,
+              textDirection: TextDirection.rtl,
+              backgroundColor: Colors.white,
+              title: Text(newVisit),
+              animationCurve: Curves.fastLinearToSlowEaseIn,
+              animationDuration: Duration(seconds: 3),
+              enableIconAnimation: true,
+              toastPosition: Position.top,
+              autoDismiss: false,
+              description: Text(newVisitDescription),
+              action: Text(view, style: TextStyle(color: Colors.grey),),
+              actionHandler: () {
+                navigateTo(context, VisitsScreen());
+              },
+            ).show(context);
+
+          })
+          .subscribe((status, error) {
+        if (error != null) {
+          print('Error: ${error}');
+        } else {
+          print('Status: ${status}');
+        }
+      },);
+    // }
+
+
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) => homeCubit()..getUserData()..getVisitors(),
+      create: (BuildContext context) => homeCubit()
+        ..getUserData()
+        ..getVisitors(),
       child: BlocConsumer<homeCubit, homeStates>(
         builder: (BuildContext context, state) {
           var cubit = homeCubit.get(context);
           return Scaffold(
             appBar: AppBar(
-              title: Text(appName,
-                  style: TextStyle(color: Colors.white, fontSize: 25)),
+              backgroundColor: Colors.transparent,
+              toolbarHeight: 150,
+              title: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height * 0.3,
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(100),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(
+                      'assets/images/bar.gif',
+                      fit: BoxFit.cover,
+                    ),
+
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(100),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            'assets/images/logo_name_black.png',
+                          ),
+                          Spacer(),
+                          Text(dailyVisits, style: TextStyle(color: Colors.black, fontSize: 30, fontWeight: FontWeight.bold),),
+                          Spacer(),
+                          Image.asset(
+                            'assets/images/logo1.png',
+                            width: 150,
+                            height: 150,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               centerTitle: true,
             ),
-            endDrawer: menu(context, cubit, AuthCubit.get(context)),
+            endDrawer: menu(context, cubit, AuthCubit.get(context), state),
             body: Stack(
               fit: StackFit.expand,
               children: [
@@ -43,115 +151,305 @@ class HomeScreen extends StatelessWidget {
                 Container(
                   decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage('assets/images/background.jpg'),
+                      image: AssetImage('assets/images/background_1.jpg'),
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
-                ConditionalBuilder(
-                  condition: state is! getVisitorsLoading || cubit.visits!.isNotEmpty,
-                  builder: (BuildContext context) {
-                    return SingleChildScrollView(
-                      child: BlurryContainer(
-                        width: MediaQuery.of(context).size.width * 0.6,
-                        height: MediaQuery.of(context).size.height,
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height: 20,
-                              ),
-                              CustomDropDownMenu(
-                                  title: name,
-                                  textColor: Colors.white,
-                                  titleColor: Colors.white,
-                                  controller: visitorController,
-                                  screenWidth:
-                                      MediaQuery.of(context).size.width * 0.2,
-                                  screenRatio:
-                                      MediaQuery.of(context).size.aspectRatio,
-                                  entries: [
-                                    for (var item in cubit.visitors ?? [])
-                                      DropdownMenuEntry(
-                                          value: item.name ?? '', label: item.name ?? ''),
-                                  ],
-                                  onSelected: (value) {
-                                    visitor = cubit.visitors!
-                                        .where((element) => element.name == value)
-                                        .toList();
 
-                                    cubit
-                                        .countVisits(cubit.visitors!.firstWhere(
-                                            (element) => element.name == value))
-                                        .then((value) {
-                                      print(cubit.visitsCount);
-                                    });
-                                  }),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white60,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                width: MediaQuery.of(context).size.width * 0.8,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.6,
-                                child: Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(20.0),
-                                      child: Row(
+                SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              height: MediaQuery.of(context).size.height * 0.4,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withAlpha(100),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  BlurryContainer(
+                                    elevation: 20,
+                                    child: Image.asset(
+                                      'assets/images/add.gif',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      // showDialog(
+                                      //     context: context,
+                                      //     builder: (context) => newVisitDialog(
+                                      //             context, function: () async {
+                                      //           await cubit.addVisitor(
+                                      //               rank: rankController.text,
+                                      //               name: nameController.text,
+                                      //               phone_number:
+                                      //                   phoneController.text,
+                                      //               additional_phone_number:
+                                      //                   additionalPhoneController
+                                      //                       .text,
+                                      //               department:
+                                      //                   departmentController.text,
+                                      //               visitDestination:
+                                      //                   destinationController
+                                      //                       .text,
+                                      //               visitReason:
+                                      //                   subjectController.text);
+                                      //         }, visitor: cubit.visitors, cubit: cubit));
+                                      navigateTo(context, AddNewVisit());
+                                    },
+                                    child: Container(
+                                      height: MediaQuery.of(context).size.height *
+                                          0.5,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withAlpha(100),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
-                                          Text('#'),
-                                          const Spacer(),
-                                          Text(name),
-                                          const Spacer(),
-                                          Text(phoneNo),
-                                          const Spacer(),
-                                          Text(additionalPhoneNo),
-                                          const Spacer(),
-                                          Text(department),
-                                          const Spacer(),
-                                          Text(visitReason),
-                                          const Spacer(),
-                                          Text(visitDestination),
-                                          const Spacer(),
-                                          Text(visitDate),
+                                          Text(
+                                            addVisit,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),
-                                    SizedBox(height: 20,),
-                                    Expanded(
-                                      child: ListView.separated(
-                                          separatorBuilder: (context, index) =>
-                                              const SizedBox(height: 10),
-                                          itemCount: cubit.visitsCount,
-                                          itemBuilder: (context, index) => visitItem(index, visitor.first,cubit.visits![index])),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(
+                              width: 50.0,
+                            ),
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              height: MediaQuery.of(context).size.height * 0.4,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withAlpha(100),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  BlurryContainer(
+                                    elevation: 20,
+                                    child: Image.asset(
+                                      'assets/images/archive.gif',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      navigateTo(context, ArchiveScreen());
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withAlpha(100),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            archive,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    );
-                  },
-                  fallback: (BuildContext context) => loadingDialog(context),
+                        SizedBox(
+                          height: 20.0,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.63,
+                              height: MediaQuery.of(context).size.height * 0.3,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withAlpha(100),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  BlurryContainer(
+                                    elevation: 20,
+                                    child: Image.asset(
+                                      'assets/images/visits.gif',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      navigateTo(context, VisitsScreen());
+                                    },
+                                    child: Container(
+                                      height: MediaQuery.of(context).size.height *
+                                          0.5,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withAlpha(100),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            visitsLogs,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
           );
         },
         listener: (BuildContext context, state) {
-          if (state is getVisitorsLoading) {
-            showDialog(context: context, builder: (context) => loadingDialog(context));
-          }
-          if (state is countVisitsLoading) {
-            showDialog(context: context, builder: (context) => loadingDialog(context));
-          }
-          if (state is countVisitsSuccess) {
+          if (state is addVisitorLoading) {
             Navigator.pop(context);
+            showDialog(
+                context: context, builder: (context) => loadingDialog(context));
+          }
+
+          if (state is addVisitLoading) {
+            Navigator.pop(context);
+            showDialog(
+                context: context, builder: (context) => loadingDialog(context));
+          }
+
+          if (state is addVisitError) {
+            QuickAlert.show(
+              width: MediaQuery.of(context).size.width * 0.2,
+              context: context,
+              animType: QuickAlertAnimType.scale,
+              type: QuickAlertType.error,
+              autoCloseDuration: Duration(seconds: 3),
+              title: addErrorMessage,
+              confirmBtnText: done,
+            );
+          } else if (state is addVisitSuccess) {
+            final Random random = Random();
+            final event = Event(
+              startTime: DateTime(
+                  DateTime.now().year,
+                  DateTime.now().month,
+                  DateTime.now().day,
+                  DateTime.now().hour,
+                  DateTime.now().minute),
+              endTime: DateTime(
+                  DateTime.now().year,
+                  DateTime.now().month,
+                  DateTime.now().day,
+                  DateTime.now().hour,
+                  DateTime.now().minute + 30),
+              title: nameController.text,
+              description: subjectController.text,
+              color: Color.fromRGBO(
+                random.nextInt(256), // Red (0-255)
+                random.nextInt(256), // Green (0-255)
+                random.nextInt(256), // Blue (0-255)
+                1.0,
+              ),
+              textColor: Colors.white,
+              data: {
+                'event_id': DateTime.now().toIso8601String(),
+                'name': nameController.text,
+                'rank': rankController.text,
+                'phoneNo': phoneController.text,
+                'additionalPhoneNo': additionalPhoneController.text,
+                'department': departmentController.text,
+                'visitDestination': destinationController.text,
+                'visitReason': subjectController.text,
+              },
+            );
+            controller.updateCalendarData((calendarData) {
+              calendarData.addEvents([event]);
+            });
+            Navigator.pop(context);
+            QuickAlert.show(
+                width: MediaQuery.of(context).size.width * 0.2,
+                borderRadius: 15,
+                animType: QuickAlertAnimType.scale,
+                context: context,
+                type: QuickAlertType.success,
+                autoCloseDuration: Duration(seconds: 3),
+                title: addSuccessMessage,
+                confirmBtnText: done);
+
+            rankController.clear();
+            nameController.clear();
+            phoneController.clear();
+            additionalPhoneController.clear();
+            departmentController.clear();
+            destinationController.clear();
+            subjectController.clear();
+          }
+
+          if (state is ImagePickerLoading) {
+            showDialog(
+                context: context, builder: (context) => loadingDialog(context));
+          }
+
+          if (state is ImagePickerSuccess) {
+            Navigator.pop(context);
+            Toastification().show(
+              style: ToastificationStyle.flatColored,
+              type: ToastificationType.success,
+              backgroundColor: Colors.green.withAlpha(100),
+              borderSide: BorderSide(color: Colors.green, width: 1.0),
+              showIcon: true,
+              showProgressBar: false,
+              title: Text(imageSuccess, style: TextStyle(color: Colors.white, fontSize: 18)),
+              borderRadius: BorderRadius.circular(20.0),
+              dragToClose: true,
+              autoCloseDuration: const Duration(seconds: 3),
+              applyBlurEffect: true,
+              direction: TextDirection.rtl,
+              icon: Icon(Icons.done_rounded, color: Colors.green),
+              alignment: Alignment.topCenter,
+            );
           }
         },
       ),

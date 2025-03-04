@@ -184,6 +184,7 @@ class LoginScreen extends StatelessWidget {
 
         if (state is AuthSuccessState) {
           CacheHelper.saveData(key: 'password', value: passwordController.text);
+          CacheHelper.saveData(key: 'loggedIn', value: true);
           playSound('sfx/login.mp3');
           Toastification().show(
             type: ToastificationType.error,

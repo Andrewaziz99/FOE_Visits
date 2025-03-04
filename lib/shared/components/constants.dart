@@ -13,7 +13,9 @@ const String region = 'القطاع';
 const String add_new_visitor = 'اضافة زائر جديد';
 
 void signOut(context) {
+  CacheHelper.removeData(key: 'loggedIn').then((value) {
       navigateAndFinish(context, LoginScreen());
+  });
 }
 
 void printFullText(String text) {
@@ -26,6 +28,8 @@ const String DEPT_NAME = 'قطاع الضبعة';
 const String OFFICE = 'مكتب السيد/ مدير الجهاز';
 
 const user = 'استقبال';
+
+const String addWarning = 'برجاء إضافة بيانات الزائر أولاً من +';
 
 const String addVisit = 'اضافة زيارة';
 const String archive = 'أرشيف';

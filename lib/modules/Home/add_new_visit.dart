@@ -263,11 +263,35 @@ class AddNewVisit extends StatelessWidget {
                                     text: add,
                                     function: () {
                                       if (_formkey.currentState!.validate()) {
-                                        cubit.addVisit(
-                                          visitor_id: visitor.firstWhere((element) => element.name == nameController.text).id!,
-                                          visitDestination: destinationController.text,
-                                          visitReason: subjectController.text,
-                                        );
+                                        final visitorId = visitor.firstWhere(
+                                              (element) => element.name == nameController.text,
+                                          orElse: () =>  VisitorModel(id: 0), // Provide a default value or handle it as needed
+                                        ).id!;
+
+                                        if (visitorId == 0) {
+                                          QuickAlert.show(
+                                            width: MediaQuery.of(context).size.width * 0.2,
+                                            context: context,
+                                            animType: QuickAlertAnimType.scale,
+                                            type: QuickAlertType.warning,
+                                            autoCloseDuration: Duration(seconds: 5),
+                                            title: addWarning,
+                                            confirmBtnText: done,
+                                            onConfirmBtnTap: () {
+                                              Navigator.pop(context);
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (context) => newVisitor(context, cubit));
+                                            },
+                                          );
+                                        }
+                                         else {
+                                          cubit.addVisit(
+                                            visitor_id: visitor.firstWhere((element) => element.name == nameController.text).id!,
+                                            visitDestination: destinationController.text,
+                                            visitReason: subjectController.text,
+                                          );
+                                        }
                                       }
                                     },
                                   ),
@@ -286,6 +310,7 @@ class AddNewVisit extends StatelessWidget {
           );
         },
         listener: (BuildContext context, state) {
+          var cubit = homeCubit.get(context);
 
           if (state is addVisitorLoading) {
             showDialog(
@@ -294,6 +319,24 @@ class AddNewVisit extends StatelessWidget {
 
           if (state is addVisitorSuccess) {
             Navigator.pop(context);
+            QuickAlert.show(
+              width: MediaQuery.of(context).size.width * 0.2,
+              context: context,
+              animType: QuickAlertAnimType.scale,
+              type: QuickAlertType.success,
+              autoCloseDuration: Duration(seconds: 3),
+              title: addSuccessMessage,
+              confirmBtnText: done,
+            );
+
+            visitorRankController.clear();
+            visitorNameController.clear();
+            visitorPhoneController.clear();
+            visitorAdditionalPhoneController.clear();
+            visitorDepartmentController.clear();
+
+            cubit.getVisitors();
+
           }
 
           if (state is addVisitLoading) {

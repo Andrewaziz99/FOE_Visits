@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import '../../shared/components/components.dart';
 import '../../shared/components/constants.dart';
 
-TextEditingController rankController = TextEditingController();
-TextEditingController nameController = TextEditingController();
-TextEditingController phoneController = TextEditingController();
-TextEditingController additionalPhoneController = TextEditingController();
-TextEditingController departmentController = TextEditingController();
+TextEditingController visitorRankController = TextEditingController();
+TextEditingController visitorNameController = TextEditingController();
+TextEditingController visitorPhoneController = TextEditingController();
+TextEditingController visitorAdditionalPhoneController = TextEditingController();
+TextEditingController visitorDepartmentController = TextEditingController();
 
 Widget newVisitor(context, cubit) {
   return AlertDialog(
@@ -19,7 +19,7 @@ Widget newVisitor(context, cubit) {
           //Rank
           CustomDropDownMenu(
             space: 0,
-            controller: rankController,
+            controller: visitorRankController,
             title: rank,
             screenWidth: MediaQuery.of(context).size.width * 0.5,
             screenRatio: MediaQuery.of(context).devicePixelRatio,
@@ -31,7 +31,7 @@ Widget newVisitor(context, cubit) {
                 )
             ],
             onSelected: (value) {
-              rankController.text = value;
+              visitorRankController.text = value;
             },
           ),
           SizedBox(height: 10),
@@ -40,7 +40,7 @@ Widget newVisitor(context, cubit) {
               radius: BorderRadius.circular(10),
               textColor: Colors.black,
               labelColor: Colors.black,
-              controller: nameController,
+              controller: visitorNameController,
               type: TextInputType.text,
               label: name,
               validate: (val) {
@@ -55,7 +55,7 @@ Widget newVisitor(context, cubit) {
               radius: BorderRadius.circular(10),
               textColor: Colors.black,
               labelColor: Colors.black,
-              controller: phoneController,
+              controller: visitorPhoneController,
               type: TextInputType.text,
               label: phoneNo,
               validate: (val) {
@@ -70,7 +70,7 @@ Widget newVisitor(context, cubit) {
               radius: BorderRadius.circular(10),
               textColor: Colors.black,
               labelColor: Colors.black,
-              controller: additionalPhoneController,
+              controller: visitorAdditionalPhoneController,
               type: TextInputType.text,
               label: additionalPhoneNo,
               validate: (val) {}),
@@ -81,7 +81,7 @@ Widget newVisitor(context, cubit) {
               radius: BorderRadius.circular(10),
               textColor: Colors.black,
               labelColor: Colors.black,
-              controller: departmentController,
+              controller: visitorDepartmentController,
               type: TextInputType.text,
               label: department,
               validate: (val) {
@@ -113,11 +113,11 @@ Widget newVisitor(context, cubit) {
           background: Colors.blue,
           function: () {
             cubit.addVisitor(
-              rank: rankController.text,
-              name: nameController.text,
-              phone_number: phoneController.text,
-              additional_phone_number: additionalPhoneController.text,
-              department: departmentController.text,
+              rank: visitorRankController.text,
+              name: visitorNameController.text,
+              phone_number: visitorPhoneController.text,
+              additional_phone_number: visitorAdditionalPhoneController.text,
+              department: visitorDepartmentController.text,
             );
             Navigator.of(context).pop();
           },

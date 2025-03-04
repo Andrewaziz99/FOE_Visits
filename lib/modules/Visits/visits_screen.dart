@@ -72,13 +72,6 @@ class VisitsScreen extends StatelessWidget {
                     },
                     daysHeaderColor: Colors.blue,
                   ),
-                  pinchToZoomParam: PinchToZoomParameters(
-                    pinchToZoom: true,
-                    onZoomChange: (heightPerMinute) {},
-                    pinchToZoomMinHeightPerMinute: 0.5,
-                    pinchToZoomMaxHeightPerMinute: 2.5,
-                    pinchToZoomSpeed: 1,
-                  ),
                   currentHourIndicatorParam: CurrentHourIndicatorParam(
                     currentHourIndicatorHourVisibility: true,
                     currentHourIndicatorLineVisibility: true,

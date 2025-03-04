@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toastification/toastification.dart';
+import 'package:visits/modules/Home/home_screen.dart';
 import 'modules/Auth/cubit/cubit.dart';
 import 'modules/Auth/login/login_screen.dart';
 import 'shared/bloc_observer.dart';
@@ -26,12 +27,28 @@ void main() async {
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
-  runApp(const MyApp());
+  Widget widget;
+
+  final TOKEN = CacheHelper.getData(key: 'loggedIn') ?? false;
+
+  if (TOKEN) {
+    widget = HomeScreen();
+  } else {
+    widget = LoginScreen();
+  }
+
+  runApp(MyApp(
+    startWidget: widget,
+  ));
 }
 
 class MyApp extends StatelessWidget {
 
-  const MyApp({super.key});
+
+  final Widget startWidget;
+
+  MyApp({required this.startWidget});
+
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +66,7 @@ class MyApp extends StatelessWidget {
           ],
           debugShowCheckedModeBanner: false,
           theme: lightTheme,
-          home: LoginScreen(),
+          home: startWidget,
         ),
       ),
     );

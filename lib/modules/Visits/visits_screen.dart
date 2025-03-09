@@ -6,7 +6,6 @@ import 'package:infinite_calendar_view/infinite_calendar_view.dart';
 import 'package:intl/intl.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../models/Visit/visit_model.dart';
 import '../../shared/components/constants.dart';
 import '../loading_screen.dart';
 import '../Home/new_visit_dialog.dart';
@@ -15,13 +14,16 @@ import 'cubit/states.dart';
 import 'visit_data_dialog.dart';
 
 class VisitsScreen extends StatelessWidget {
+  const VisitsScreen({super.key});
+
+
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (BuildContext context) => visitCubit()..getVisitors(),
       child: BlocConsumer<visitCubit, visitStates>(
         builder: (BuildContext context, state) {
-          // var cubit = visitCubit.get(context);
           return Scaffold(
             appBar: AppBar(
               title: const Text(
@@ -30,36 +32,13 @@ class VisitsScreen extends StatelessWidget {
               ),
               centerTitle: true,
             ),
-            // floatingActionButton: FloatingActionButton(
-            //   tooltip: addVisit,
-            //   hoverColor: Colors.amberAccent,
-            //   onPressed: () {
-            //     showDialog(
-            //       context: context,
-            //       builder: (context) =>
-            //           newVisitDialog(context, function: () async {
-            //         await cubit.addVisitor(
-            //             rank: rankController.text,
-            //             name: nameController.text,
-            //             phone_number: phoneController.text,
-            //             additional_phone_number: additionalPhoneController.text,
-            //             department: departmentController.text,
-            //             visitDestination: destinationController.text,
-            //             visitReason: subjectController.text);
-            //       }, visitor: cubit.visitors),
-            //     );
-            //   },
-            //   child: const Icon(
-            //     Icons.add,
-            //     color: Colors.white,
-            //   ),
-            // ),
             body: ConditionalBuilder(
-              condition: state is! getVisitsLoading || state is getRealTimeVisitsLoading,
+              condition: state is! getVisitsLoading || state is! getRealTimeVisitsLoading || state is changeCurrentDateSuccess,
               builder: (BuildContext context) {
                 return EventsPlanner(
-                  heightPerMinute: 7,
-                  daysShowed: 1,
+                  initialDate: selectedDate,
+                  heightPerMinute: 1,
+                  daysShowed: 5,
                   controller: controller,
                   automaticAdjustHorizontalScrollToDay: true,
                   daysHeaderParam: DaysHeaderParam(
@@ -395,8 +374,6 @@ class VisitsScreen extends StatelessWidget {
             final Random random = Random();
             controller.updateCalendarData((calendarData) {
               calendarData.addEvents(cubit.visits!.map((e) {
-                print('Looking for visitor_id: ${e.visitor_id}');
-                print('visitorsData contains: ${cubit.visitorsData?.map((v) => v.id).toList()}');
                 return Event(
                   startTime: DateTime.parse(e.visitDate!),
                   endTime: DateTime.parse(e.visitDate!)

@@ -129,6 +129,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  calendar_date_picker2:
+    dependency: "direct main"
+    description:
+      name: calendar_date_picker2
+      sha256: "7b5f20f2a02768df70b3d1fb181c217ab9f8992f39fd6c3fc2ff95b0885820a2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.9"
   characters:
     dependency: transitive
     description:
@@ -1051,7 +1059,7 @@ packages:
     source: hosted
     version: "0.1.6"
   web_socket_channel:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: web_socket_channel
       sha256: "0b8e2457400d8a859b7b2030786835a28a8e80836ef64402abef392ff4f1d0e5"

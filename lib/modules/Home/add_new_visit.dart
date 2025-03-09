@@ -30,6 +30,8 @@ class AddNewVisit extends StatelessWidget {
 
   final _formkey = GlobalKey<FormState>();
 
+  AddNewVisit({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -140,7 +142,9 @@ class AddNewVisit extends StatelessWidget {
                                         onChange: (value) {
                                           cubit.searchByName(value);
                                         },
-                                        validate: (val){}
+                                        validate: (val){
+                                          return null;
+                                        }
                                     ),
                                   ),
                                   if (cubit.searchByNameResults.isNotEmpty)
@@ -181,7 +185,9 @@ class AddNewVisit extends StatelessWidget {
                                         onChange: (value) {
                                           cubit.searchByPhone(value);
                                         },
-                                        validate: (val){}
+                                        validate: (val){
+                                          return null;
+                                        }
                                     ),
                                   ),
                                   if (cubit.searchByPhoneResults.isNotEmpty)

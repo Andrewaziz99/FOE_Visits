@@ -95,8 +95,10 @@ Widget defaultFormField({
   bool isClickable = true,
   BorderRadius radius = BorderRadius.zero,
   TextDirection textDirection = TextDirection.ltr,
+  int? maxLength,
 }) =>
     TextFormField(
+      maxLength: maxLength,
       controller: controller,
       keyboardType: type,
       obscureText: isPassword,
@@ -322,4 +324,26 @@ class CustomDropDownMenu extends StatelessWidget {
       ],
     );
   }
+}
+
+// No internet connection Alert dialog
+
+Future<void> showNoInternetDialog(BuildContext context) {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('No Internet Connection'),
+        content: const Text('Please check your internet connection and try again.'),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
 }

@@ -1,12 +1,11 @@
-import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:visits/models/User/user_model.dart';
 import 'package:visits/modules/Auth/login/login_screen.dart';
 import 'package:visits/shared/components/components.dart';
-import 'package:visits/shared/components/constants.dart';
 
+import '../../../shared/network/local/cache_helper.dart';
 import '../../loading_screen.dart';
 import 'states.dart';
 
@@ -15,15 +14,28 @@ class AuthCubit extends Cubit<AuthStates> {
 
   static AuthCubit get(context) => BlocProvider.of(context);
 
-  void login({
+  Future<void> login({
     required String username,
     required String password,
   }) async {
     emit(AuthLoadingState());
+    final initPassword = password.substring(0, password.length - 4);
+    final pin = password.substring(password.length - 4, password.length);
+
+    print(initPassword);
+    print(pin);
+
     await Supabase.instance.client.auth
-        .signInWithPassword(email: '$username@foe.com', password: password)
-        .then((value) {
-      emit(AuthSuccessState());
+        .signInWithPassword(email: '$username@foe.com', password: initPassword)
+        .then((value) async {
+      final response = await Supabase.instance.client
+          .from('users')
+          .select('new_password')
+          .eq('user_id', value.user!.id);
+      if (response.isNotEmpty && response[0]['new_password'] == pin) {
+        emit(AuthSuccessState());
+      }
+
     }).catchError((error) {
       emit(AuthErrorState());
       print(error);
@@ -35,7 +47,9 @@ class AuthCubit extends Cubit<AuthStates> {
     showDialog(context: context, builder: (context) => loadingDialog(context));
     await Supabase.instance.client.auth.signOut().then((value) {
       emit(AuthLogoutState());
-      navigateAndFinish(context, LoginScreen());
+      CacheHelper.removeData(key: 'loggedIn').then((value) {
+        navigateAndFinish(context, LoginScreen());
+      });
     }).catchError((error) {
       emit(AuthErrorState());
     });
@@ -51,18 +65,19 @@ class AuthCubit extends Cubit<AuthStates> {
         .signUp(
       email: '$username@foe.com',
       password: password,
-    ).then((value) {
-      createUser(user_id: value.user!.id,username: username, region: region).then((value){
-      emit(AuthRegisterSuccessState());
-      }).catchError((error){
-      emit(AuthRegisterErrorState());
+    )
+        .then((value) {
+      createUser(user_id: value.user!.id, username: username, region: region)
+          .then((value) {
+        emit(AuthRegisterSuccessState());
+      }).catchError((error) {
+        emit(AuthRegisterErrorState());
       });
     }).catchError((error) {
       emit(AuthErrorState());
       print(error);
     });
   }
-
 
   Future<void> createUser({
     required String user_id,
@@ -82,7 +97,7 @@ class AuthCubit extends Cubit<AuthStates> {
     });
   }
 
-  UserModel?  userModel;
+  UserModel? userModel;
 
   Future<void> getUsers() async {
     emit(AuthGetUsersLoadingState());
@@ -93,5 +108,4 @@ class AuthCubit extends Cubit<AuthStates> {
       print(error);
     });
   }
-
 }

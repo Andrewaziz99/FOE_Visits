@@ -11,6 +11,7 @@ import '../../shared/components/constants.dart';
 import '../Home/cubit/states.dart';
 import '../loading_screen.dart';
 
+
 class ArchiveScreen extends StatelessWidget {
   TextEditingController visitorController = TextEditingController();
   TextEditingController subjectController = TextEditingController();
@@ -18,6 +19,8 @@ class ArchiveScreen extends StatelessWidget {
   List<VisitorModel> visitor = [];
 
   VisitorModel? visitor_data;
+
+  ArchiveScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +81,9 @@ class ArchiveScreen extends StatelessWidget {
                                           onChange: (value) {
                                             cubit.searchByName(value);
                                           },
-                                          validate: (val){}
+                                          validate: (val){
+                                            return null;
+                                          }
                                       ),
                                     ),
 
@@ -97,7 +102,9 @@ class ArchiveScreen extends StatelessWidget {
                                           onChange: (value) {
                                             cubit.searchBySubject(value);
                                           },
-                                          validate: (val){}
+                                          validate: (val){
+                                            return null;
+                                          }
                                       ),
                                     ),
 
@@ -234,6 +241,10 @@ class ArchiveScreen extends StatelessWidget {
                                     ),
                                     for (var i = 0; i < cubit.visitsCount; i++)
                                       TableRow(
+                                        decoration: BoxDecoration(
+                                          color: Colors.white60,
+                                          borderRadius: BorderRadius.only(bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15)),
+                                        ),
                                         children: [
                                           TableCell(child: Padding(
                                             padding: const EdgeInsets.all(20.0),

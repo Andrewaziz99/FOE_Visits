@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +18,8 @@ class LoginScreen extends StatelessWidget {
   final TextEditingController passwordController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
+
+  LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

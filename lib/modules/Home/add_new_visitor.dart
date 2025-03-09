@@ -73,7 +73,9 @@ Widget newVisitor(context, cubit) {
               controller: visitorAdditionalPhoneController,
               type: TextInputType.text,
               label: additionalPhoneNo,
-              validate: (val) {}),
+              validate: (val) {
+                return null;
+              }),
 
           SizedBox(height: 10),
           //department

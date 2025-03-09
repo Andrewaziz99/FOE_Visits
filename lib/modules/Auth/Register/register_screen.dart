@@ -17,6 +17,8 @@ class RegisterScreen extends StatelessWidget {
 
   final _formKey = GlobalKey<FormState>();
 
+  RegisterScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthCubit, AuthStates>(

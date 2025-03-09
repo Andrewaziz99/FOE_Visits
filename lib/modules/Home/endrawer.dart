@@ -1,10 +1,10 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
-import 'package:visits/modules/Home/cubit/cubit.dart';
 import 'package:visits/modules/Home/password.dart';
 import 'package:visits/shared/components/components.dart';
 import '../../shared/components/constants.dart';
 import '../../shared/encrypt.dart';
+import '../Settings/settings_dialog.dart';
 import '../Visits/cubit/states.dart';
 
 
@@ -37,12 +37,14 @@ Widget menu(context, cubit, AuthCubit, state) => Drawer(
                   },
                   child: CircleAvatar(
                     radius: 60,
-                    backgroundImage: NetworkImage(cubit.user.image!),
+                    backgroundImage: cubit.user != null && cubit.user.image != null
+                        ? NetworkImage(cubit.user.image!)
+                        : AssetImage('assets/images/user.png') as ImageProvider,
                   ),
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  cubit.user.username!,
+                  cubit.user != null && cubit.user.username != null ? cubit.user.username! : '',
                   style: TextStyle(color: Colors.black, fontSize: 20),
                 ),
                 const SizedBox(height: 20),
@@ -64,21 +66,33 @@ Widget menu(context, cubit, AuthCubit, state) => Drawer(
             showDialog(context: context, builder: (context) => encrypt_screen(context));
           },
         ),
+        ListTile(
+          leading: Icon(Icons.password_rounded),
+          title: Text(
+            'تغيير كلمة المرور',
+            style: TextStyle(color: Colors.black, fontSize: 20),
+          ),
+          onTap: () {
+            // showDialog(context: context, builder: (context) => change_password(context));
+            navigateTo(context, ChangePasswordScreen());
+          },
+        ),
         // ListTile(
-        //   leading: Icon(Icons.password_rounded),
+        //   leading: Icon(Icons.settings_rounded),
         //   title: Text(
-        //     'تغيير كلمة المرور',
+        //     settings,
         //     style: TextStyle(color: Colors.black, fontSize: 20),
         //   ),
         //   onTap: () {
-        //     showDialog(context: context, builder: (context) => change_password(context, homeCubit()));
+        //     // showDialog(context: context, builder: (context) => SettingsDialog(context));
+        //     navigateTo(context, SettingsScreen());
         //   },
         // ),
         ListTile(
           leading: Icon(Icons.exit_to_app_rounded, color: Colors.redAccent,),
           title: Text(
             logout,
-            style: TextStyle(color: Colors.black, fontSize: 20),
+            style: TextStyle(color: Colors.redAccent, fontSize: 20),
           ),
           onTap: () {
             AuthCubit.logout(context);

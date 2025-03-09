@@ -1,4 +1,4 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:visits/models/User/user_model.dart';
@@ -156,4 +156,23 @@ class visitCubit extends Cubit<visitStates> {
       print(error);
     });
   }
+
+  void changeDate(context, selectedDate) {
+    emit(changeCurrentDateLoading());
+    showDatePicker(
+      context: context,
+      firstDate: DateTime(2024),
+      lastDate: DateTime.now().add(Duration(days: 30)),
+      initialDate: selectedDate,
+    ).then((value) {
+      if(value != null){
+        selectedDate = value;
+        emit(changeCurrentDateSuccess());
+      } else {
+        emit(changeCurrentDateError());
+      }
+    }
+    );
+  }
+
 }

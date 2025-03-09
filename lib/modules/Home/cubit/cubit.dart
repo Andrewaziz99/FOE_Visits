@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:bloc/bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,7 +10,11 @@ import 'package:visits/shared/network/local/cache_helper.dart';
 import '../../../models/User/user_model.dart';
 import '../../../models/Visit/visit_model.dart';
 import '../../../models/Visitor/visitor_model.dart';
-import 'package:collection/collection.dart';
+
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+
+import '../../../shared/components/components.dart';
 
 class homeCubit extends Cubit<homeStates> {
   homeCubit() : super(homeInitialState());
@@ -37,14 +40,14 @@ class homeCubit extends Cubit<homeStates> {
     });
   }
 
-  Future<void> changePassword(String old, String newPass) async {
+  void changePassword(String old, String newPass) async {
     getUserData().then((value) {
       emit(changePasswordLoading());
       final String oldPass = CacheHelper.getData(key: 'password');
       if (old == oldPass) {
         supabase
             .from('users')
-            .update({'password': newPass})
+            .update({'new_password': newPass})
             .eq('user_id', supabase.auth.currentUser!.id)
             .then((value) {
               emit(changePasswordSuccess());
@@ -78,20 +81,36 @@ class homeCubit extends Cubit<homeStates> {
 
   Future<void> countVisits(visitor) async {
     emit(countVisitsLoading());
-    await supabase
-        .from('daily_visits')
-        .select()
-        .eq('user_id', user!.user_id!)
-        .eq('visitor_id', visitor.id!)
-        .eq('region', user!.region!)
-        .then((value) {
-      visits = value.map((e) => VisitModel.fromJson(e)).toList();
-      visitsCount = value.length;
-      emit(countVisitsSuccess());
-    }).catchError((error) {
-      emit(countVisitsError());
-      print(error);
-    });
+    if (user!.is_admin!) {
+      await supabase
+          .from('daily_visits')
+          .select()
+          .eq('visitor_id', visitor.id!)
+          .eq('region', user!.region!)
+          .then((value) {
+        visits = value.map((e) => VisitModel.fromJson(e)).toList();
+        visitsCount = value.length;
+        emit(countVisitsSuccess());
+      }).catchError((error) {
+        emit(countVisitsError());
+        print(error);
+      });
+    } else {
+      await supabase
+          .from('daily_visits')
+          .select()
+          .eq('user_id', supabase.auth.currentUser!.id)
+          .eq('visitor_id', visitor.id!)
+          .eq('region', user!.region!)
+          .then((value) {
+        visits = value.map((e) => VisitModel.fromJson(e)).toList();
+        visitsCount = value.length;
+        emit(countVisitsSuccess());
+      }).catchError((error) {
+        emit(countVisitsError());
+        print(error);
+      });
+    }
   }
 
   // Future<void> addVisitor({
@@ -134,8 +153,6 @@ class homeCubit extends Cubit<homeStates> {
   //     });
   //   }
   // }
-
-
 
   // Future<void> addVisitor({
   //   required String rank,
@@ -215,14 +232,13 @@ class homeCubit extends Cubit<homeStates> {
   //   }
   // }
 
-
   Future<void> addVisitor({
     required String rank,
     required String name,
     required String phone_number,
     String? additional_phone_number,
     required String department,
-}) async{
+  }) async {
     emit(addVisitorLoading());
     await supabase.from('visitors').insert({
       'rank': rank,
@@ -371,4 +387,40 @@ class homeCubit extends Cubit<homeStates> {
       print(error);
     });
   }
+
+  void connectToWebSocket(context) async {
+    final String hostname = 'cwmxclgvssfivawwhyut.supabase.co';
+    final String url = 'wss://$hostname';
+
+    try {
+      final WebSocketChannel channel = IOWebSocketChannel.connect(url);
+
+      channel.stream.listen(
+            (message) {
+          print('Received: $message');
+        },
+        onDone: () {
+          print('WebSocket connection closed.');
+        },
+        onError: (error) {
+          print('WebSocket error: $error');
+        },
+      );
+    } on WebSocketChannelException catch (e) {
+      print('WebSocketChannelException: $e');
+      print('no internet');
+      // Handle the exception, e.g., show a user-friendly message
+      showNoInternetDialog(context);
+    } on SocketException catch (e) {
+      print('SocketException: $e');
+      print('no internet');
+      // Handle the exception, e.g., show a user-friendly message
+      showNoInternetDialog(context);
+    } catch (e) {
+      print('Unexpected error: $e');
+      // Handle other exceptions
+    }
+  }
+
+
 }

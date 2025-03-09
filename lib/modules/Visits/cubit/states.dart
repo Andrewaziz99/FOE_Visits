@@ -64,3 +64,9 @@ class getRealTimeVisitsLoading extends visitStates {}
 class getRealTimeVisitsSuccess extends visitStates {}
 
 class getRealTimeVisitsError extends visitStates {}
+
+class changeCurrentDateLoading extends visitStates {}
+
+class changeCurrentDateSuccess extends visitStates {}
+
+class changeCurrentDateError extends visitStates {}

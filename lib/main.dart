@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
 
   final Widget startWidget;
 
-  MyApp({required this.startWidget});
+  const MyApp({super.key, required this.startWidget});
 
 
   @override

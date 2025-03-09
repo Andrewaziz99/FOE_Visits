@@ -83,7 +83,9 @@ Widget newVisitDialog(BuildContext context, {required Function function, visitor
                       onChange: (value) {
                         cubit.searchByName(value);
                       },
-                      validate: (val){}
+                      validate: (val){
+                        return null;
+                      }
                   ),
                 ),
                 if (cubit.searchByNameResults.isNotEmpty)

@@ -30,7 +30,7 @@ class HomeScreen extends StatefulWidget {
   // final bool is_admin;
 
   // HomeScreen({super.key, required this.is_admin});
-  HomeScreen({super.key});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -78,9 +78,9 @@ class _HomeScreenState extends State<HomeScreen> {
           })
           .subscribe((status, error) {
         if (error != null) {
-          print('Error: ${error}');
+          print('Error: $error');
         } else {
-          print('Status: ${status}');
+          print('Status: $status');
         }
       },);
     // }
@@ -89,12 +89,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (BuildContext context) => homeCubit()
         ..getUserData()
-        ..getVisitors(),
+        ..getVisitors()..connectToWebSocket(context),
       child: BlocConsumer<homeCubit, homeStates>(
         builder: (BuildContext context, state) {
           var cubit = homeCubit.get(context);
@@ -160,180 +161,184 @@ class _HomeScreenState extends State<HomeScreen> {
                 SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Row(
                       children: [
-                        Row(
+                        Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
-                              width: MediaQuery.of(context).size.width * 0.3,
-                              height: MediaQuery.of(context).size.height * 0.4,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withAlpha(100),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  BlurryContainer(
-                                    elevation: 20,
-                                    child: Image.asset(
-                                      'assets/images/add.gif',
-                                      fit: BoxFit.cover,
-                                    ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: MediaQuery.of(context).size.width * 0.3,
+                                  height: MediaQuery.of(context).size.height * 0.4,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withAlpha(100),
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                  InkWell(
-                                    onTap: () {
-                                      // showDialog(
-                                      //     context: context,
-                                      //     builder: (context) => newVisitDialog(
-                                      //             context, function: () async {
-                                      //           await cubit.addVisitor(
-                                      //               rank: rankController.text,
-                                      //               name: nameController.text,
-                                      //               phone_number:
-                                      //                   phoneController.text,
-                                      //               additional_phone_number:
-                                      //                   additionalPhoneController
-                                      //                       .text,
-                                      //               department:
-                                      //                   departmentController.text,
-                                      //               visitDestination:
-                                      //                   destinationController
-                                      //                       .text,
-                                      //               visitReason:
-                                      //                   subjectController.text);
-                                      //         }, visitor: cubit.visitors, cubit: cubit));
-                                      navigateTo(context, AddNewVisit());
-                                    },
-                                    child: Container(
-                                      height: MediaQuery.of(context).size.height *
-                                          0.5,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withAlpha(100),
-                                        borderRadius: BorderRadius.circular(20),
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      BlurryContainer(
+                                        elevation: 20,
+                                        child: Image.asset(
+                                          'assets/images/add.gif',
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            addVisit,
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 30,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                      InkWell(
+                                        onTap: () {
+                                          navigateTo(context, AddNewVisit());
+                                        },
+                                        child: Container(
+                                          height: MediaQuery.of(context).size.height *
+                                              0.5,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withAlpha(100),
+                                            borderRadius: BorderRadius.circular(20),
                                           ),
-                                        ],
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                addVisit,
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 30,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                                SizedBox(
+                                  width: 50.0,
+                                ),
+                                Container(
+                                  width: MediaQuery.of(context).size.width * 0.3,
+                                  height: MediaQuery.of(context).size.height * 0.4,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withAlpha(100),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      BlurryContainer(
+                                        elevation: 20,
+                                        child: Image.asset(
+                                          'assets/images/archive.gif',
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          navigateTo(context, ArchiveScreen());
+                                        },
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withAlpha(100),
+                                            borderRadius: BorderRadius.circular(20),
+                                          ),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                archive,
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 30,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                             SizedBox(
-                              width: 50.0,
+                              height: 20.0,
                             ),
-                            Container(
-                              width: MediaQuery.of(context).size.width * 0.3,
-                              height: MediaQuery.of(context).size.height * 0.4,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withAlpha(100),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  BlurryContainer(
-                                    elevation: 20,
-                                    child: Image.asset(
-                                      'assets/images/archive.gif',
-                                      fit: BoxFit.cover,
-                                    ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: MediaQuery.of(context).size.width * 0.63,
+                                  height: MediaQuery.of(context).size.height * 0.3,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withAlpha(100),
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                  InkWell(
-                                    onTap: () {
-                                      navigateTo(context, ArchiveScreen());
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withAlpha(100),
-                                        borderRadius: BorderRadius.circular(20),
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      BlurryContainer(
+                                        elevation: 20,
+                                        child: Image.asset(
+                                          'assets/images/visits.gif',
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            archive,
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 30,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                      InkWell(
+                                        onTap: () {
+                                          navigateTo(context, VisitsScreen());
+                                        },
+                                        child: Container(
+                                          height: MediaQuery.of(context).size.height *
+                                              0.5,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withAlpha(100),
+                                            borderRadius: BorderRadius.circular(20),
                                           ),
-                                        ],
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                dailyVisitsLogs,
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 30,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                        SizedBox(
-                          height: 20.0,
-                        ),
-                        Row(
+                        SizedBox(width: 20.0,),
+                        Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
-                              width: MediaQuery.of(context).size.width * 0.63,
+                            BlurryContainer(
+                              borderRadius: BorderRadius.circular(25),
+                              color: Colors.white30,
+                              width: MediaQuery.of(context).size.width * 0.3,
                               height: MediaQuery.of(context).size.height * 0.3,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withAlpha(100),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  BlurryContainer(
-                                    elevation: 20,
-                                    child: Image.asset(
-                                      'assets/images/visits.gif',
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  InkWell(
-                                    onTap: () {
-                                      navigateTo(context, VisitsScreen());
-                                    },
-                                    child: Container(
-                                      height: MediaQuery.of(context).size.height *
-                                          0.5,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withAlpha(100),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            visitsLogs,
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 30,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              child: CalendarDatePicker(
+                                  initialDate: selectedDate,
+                                  firstDate: DateTime(2024),
+                                  lastDate: DateTime.now(),
+                                  onDateChanged: (date){
+                                    selectedDate = date;
+                                  }
                               ),
                             ),
                           ],
@@ -451,6 +456,9 @@ class _HomeScreenState extends State<HomeScreen> {
               alignment: Alignment.topCenter,
             );
           }
+
+
+
         },
       ),
     );

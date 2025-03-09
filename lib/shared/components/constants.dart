@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:visits/shared/network/local/cache_helper.dart';
@@ -29,6 +28,8 @@ const String OFFICE = 'مكتب السيد/ مدير الجهاز';
 
 const user = 'استقبال';
 
+const String selectDate = 'اختر التاريخ';
+
 const String addWarning = 'برجاء إضافة بيانات الزائر أولاً من +';
 
 const String addVisit = 'اضافة زيارة';
@@ -40,11 +41,14 @@ const String totalVisitsNumber = 'عدد مرات التردد';
 const String appName = 'الزيارات اليومية';
 
 const String visitsLogs = 'سجل الزيارات';
+const String dailyVisitsLogs = 'سجل الزيارات اليومي';
 
 const String newVisitDescription = 'تم اضافة زيارة جديدة';
 const String view = 'عرض';
+const String settings = 'الاعدادات';
+const String activate_gifs = 'تفعيل الرسوم المتحركة';
 
-
+DateTime selectedDate = DateTime.now();
 const String loading = 'جارى التحميل...';
 
 const String username = 'اسم المستخدم';
@@ -63,6 +67,8 @@ const String exit = 'خروج';
 const String changePassword = 'تغيير كلمة المرور';
 const String oldPassword = 'كلمة المرور القديمة';
 const String newPassword = 'كلمة المرور الجديدة';
+
+const String changePasswordDone = 'تم تغيير كلمة المرور بنجاح';
 
 const String loginSuccess = 'تم تسجيل الدخول بنجاح';
 const String loginError = 'خطأ فى اسم المستخدم او كلمة المرور';

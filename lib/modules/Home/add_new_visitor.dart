@@ -120,6 +120,7 @@ Widget newVisitor(context, cubit) {
               phone_number: visitorPhoneController.text,
               additional_phone_number: visitorAdditionalPhoneController.text,
               department: visitorDepartmentController.text,
+              context: context,
             );
             Navigator.of(context).pop();
           },

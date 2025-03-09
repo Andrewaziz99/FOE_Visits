@@ -48,6 +48,8 @@ const String view = 'عرض';
 const String settings = 'الاعدادات';
 const String activate_gifs = 'تفعيل الرسوم المتحركة';
 
+const String visitorExists = 'هذا الزائر موجود بالفعل';
+
 DateTime selectedDate = DateTime.now();
 const String loading = 'جارى التحميل...';
 

@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:toastification/toastification.dart';
 import 'package:visits/modules/Home/cubit/states.dart';
 import 'package:visits/shared/network/local/cache_helper.dart';
 
@@ -15,6 +18,8 @@ import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../../shared/components/components.dart';
+import '../../../shared/components/constants.dart';
+import '../../../shared/playSound.dart';
 
 class homeCubit extends Cubit<homeStates> {
   homeCubit() : super(homeInitialState());
@@ -238,20 +243,48 @@ class homeCubit extends Cubit<homeStates> {
     required String phone_number,
     String? additional_phone_number,
     required String department,
+    required context,
   }) async {
-    emit(addVisitorLoading());
-    await supabase.from('visitors').insert({
-      'rank': rank,
-      'name': name,
-      'phone_number': phone_number,
-      'additional_phone_number': additional_phone_number,
-      'department': department,
-    }).then((value) {
-      emit(addVisitorSuccess());
-    }).catchError((error) {
-      emit(addVisitorError());
-      print(error);
-    });
+    // Check if the visitor already exists
+
+    final existingVisitor = visitors?.lastWhere(
+      (visitor) => visitor.name == name && visitor.phone_number == phone_number,
+    );
+    if (existingVisitor != null) {
+      // If the visitor exists, directly add the visit
+      playSound('sfx/error.mp3');
+      Toastification().show(
+        style: ToastificationStyle.flatColored,
+        type: ToastificationType.error,
+        backgroundColor: Colors.red.withAlpha(100),
+        borderSide: BorderSide(color: Colors.red, width: 1.0),
+        showIcon: true,
+        showProgressBar: false,
+        title: Text(visitorExists, style: TextStyle(color: Colors.white, fontSize: 18)),
+        borderRadius: BorderRadius.circular(20.0),
+        dragToClose: true,
+        autoCloseDuration: const Duration(seconds: 5),
+        applyBlurEffect: true,
+        direction: TextDirection.rtl,
+        icon: Icon(Icons.warning_amber_rounded, color: Colors.amber),
+        alignment: Alignment.topCenter,
+      );
+
+    } else {
+      emit(addVisitorLoading());
+      await supabase.from('visitors').insert({
+        'rank': rank,
+        'name': name,
+        'phone_number': phone_number,
+        'additional_phone_number': additional_phone_number,
+        'department': department,
+      }).then((value) {
+        emit(addVisitorSuccess());
+      }).catchError((error) {
+        emit(addVisitorError());
+        print(error);
+      });
+    }
   }
 
   Future<void> addVisit({
@@ -396,7 +429,7 @@ class homeCubit extends Cubit<homeStates> {
       final WebSocketChannel channel = IOWebSocketChannel.connect(url);
 
       channel.stream.listen(
-            (message) {
+        (message) {
           print('Received: $message');
         },
         onDone: () {
@@ -421,6 +454,4 @@ class homeCubit extends Cubit<homeStates> {
       // Handle other exceptions
     }
   }
-
-
 }

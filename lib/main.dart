@@ -31,8 +31,10 @@ void main() async {
 
   final TOKEN = CacheHelper.getData(key: 'loggedIn') ?? false;
 
+  final isAdmin = CacheHelper.getData(key: 'admin') ?? false;
+
   if (TOKEN) {
-    widget = HomeScreen();
+    widget = HomeScreen(is_admin: isAdmin,);
   } else {
     widget = LoginScreen();
   }

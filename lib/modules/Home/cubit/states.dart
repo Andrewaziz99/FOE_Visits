@@ -81,3 +81,39 @@ class changePasswordLoading extends homeStates {}
 class changePasswordSuccess extends homeStates {}
 
 class changePasswordError extends homeStates {}
+
+class getVisitsByDateLoading extends homeStates {}
+
+class getVisitsByDateSuccess extends homeStates {}
+
+class getVisitsByDateError extends homeStates {}
+
+class getRealTimeVisitsByDateLoading extends homeStates {}
+
+class getRealTimeVisitsByDateSuccess extends homeStates {}
+
+class getRealTimeVisitsByDateError extends homeStates {}
+
+class getSubjectsLoading extends homeStates {}
+
+class getSubjectsSuccess extends homeStates {}
+
+class getSubjectsError extends homeStates {}
+
+class addSubjectLoading extends homeStates {}
+
+class addSubjectSuccess extends homeStates {}
+
+class addSubjectError extends homeStates {}
+
+class getDepartmentsLoading extends homeStates {}
+
+class getDepartmentsSuccess extends homeStates {}
+
+class getDepartmentsError extends homeStates {}
+
+class addDepartmentLoading extends homeStates {}
+
+class addDepartmentSuccess extends homeStates {}
+
+class addDepartmentError extends homeStates {}

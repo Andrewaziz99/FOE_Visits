@@ -79,19 +79,23 @@ Widget newVisitor(context, cubit) {
 
           SizedBox(height: 10),
           //department
-          defaultFormField(
-              radius: BorderRadius.circular(10),
-              textColor: Colors.black,
-              labelColor: Colors.black,
-              controller: visitorDepartmentController,
-              type: TextInputType.text,
-              label: department,
-              validate: (val) {
-                if (val!.isEmpty) {
-                  return departmentError;
-                }
-                return null;
-              }),
+          CustomDropDownMenu(
+            space: 0,
+            controller: visitorDepartmentController,
+            title: department,
+            screenWidth: MediaQuery.of(context).size.width * 0.8,
+            screenRatio: MediaQuery.of(context).devicePixelRatio,
+            entries: [
+              for (var item in cubit.departments)
+                DropdownMenuEntry(
+                  value: item,
+                  label: item,
+                )
+            ],
+            onSelected: (value) {
+              visitorDepartmentController.text = value;
+            },
+          ),
         ],
       ),
     ),

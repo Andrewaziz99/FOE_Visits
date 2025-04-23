@@ -1,4 +1,5 @@
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:visits/shared/network/local/cache_helper.dart';
 
@@ -50,6 +51,8 @@ const String activate_gifs = 'تفعيل الرسوم المتحركة';
 
 const String visitorExists = 'هذا الزائر موجود بالفعل';
 
+const String visits_data = 'بيانات الزيارات';
+
 DateTime selectedDate = DateTime.now();
 const String loading = 'جارى التحميل...';
 
@@ -80,6 +83,7 @@ const String registerError = 'خطأ فى تسجيل الحساب';
 
 const String add = 'اضافة';
 const String edit = 'تعديل';
+const String editData = 'تعديل البيانات';
 const String delete = 'حذف';
 const String save = 'حفظ';
 const String search = 'بحث';
@@ -136,7 +140,11 @@ const String addErrorMessage = 'خطأ فى الاضافة';
 
 const String getErrorMessage = 'حدث خطأ';
 
+const String notificationMsg = 'تم اضافة زيارة جديدة';
+
 const String visitCount = 'عدد الزيارات';
+
+var msg = '';
 
 const List<String> visitSubject = [
   'مقابلة مع السيد/ مدير الجهاز',
@@ -204,13 +212,23 @@ Map<String, String> weekDays = {
   'monday': 'الإثنين',
   'tuesday': 'الثلاثاء',
   'wednesday': 'الأربعاء',
-  'thursday': 'الخمبس',
+  'thursday': 'الخميس',
   'friday': 'الجمعة',
 };
 
 String getWeekDay(String day) {
-  return weekDays[day]!;
+  return weekDays[day.toLowerCase()]!;
 }
+
+// enum Weekday {
+//   saturday('Saturday', 'السبت'),
+//   sunday('Sunday', 'الأحد'),
+//   monday('Monday', 'الإثنين'),
+//   tuesday('Tuesday', 'الثلاثاء'),
+//   wednesday('Wednesday', 'الأربعاء'),
+//   thursday('Thursday', 'الخميس'),
+//   friday('Friday', 'الجمعة');
+// }
 
 String convertToArabic(String text) {
   return text.split('').map((char) {
@@ -272,83 +290,26 @@ class ArabicNumbersInputFormatter extends TextInputFormatter {
 }
 
 
+Future<void> pickTemplatesFolder() async {
+  try {
+    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
 
-// Future<String> initializeDatabase() async {
-//   // Get the application document directory
-//   final appDir = await getApplicationDocumentsDirectory();
-//   final dbPath = '${appDir.path}/Tamam/db/Soldiers.db';
-//
-//   // Check if the database already exists
-//   final dbFile = File(dbPath);
-//   if (!await dbFile.exists()) {
-//     // Load the database from assets
-//     final byteData = await rootBundle.load('assets/db/Soldiers.db');
-//     final buffer = byteData.buffer;
-//
-//     // Write the database to the app document directory
-//     await dbFile.writeAsBytes(
-//       buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
-//     );
-//     print('Database copied to: $dbPath');
-//   } else {
-//     print('Database already exists at: $dbPath');
-//   }
-//
-//   return dbPath; // Return the database path
-// }
-//
-// Future<void> pickAppDatabaseFile() async {
-//   try {
-//     // Use FilePicker to pick the file
-//     FilePickerResult? result = await FilePicker.platform.pickFiles(
-//       type: FileType.custom,
-//       allowedExtensions: ['db'], // Only allow files with the .db extension
-//     );
-//
-//     if (result != null) {
-//       // Get the file path
-//       String? filePath = result.files.single.path;
-//
-//       if (filePath != null) {
-//         print("Selected database file: $filePath");
-//
-//         // Save the database file to CacheHelper
-//         await CacheHelper.saveData(key: 'app_db_path', value: filePath);
-//       }
-//     } else {
-//       // User canceled the picker
-//       print("File selection canceled.");
-//     }
-//   } catch (e) {
-//     print("Error picking file: $e");
-//   }
-// }
-//
-// Future<String> getAppDatabaseFile() async {
-//   final appDbPath = await CacheHelper.getData(key: 'app_db_path');
-//   return appDbPath;
-// }
-//
-// Future<void> pickImagesFolder() async {
-//   try {
-//     // Allow the user to pick a folder
-//     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-//
-//     if (selectedDirectory != null) {
-//       print("Selected folder: $selectedDirectory");
-//       CacheHelper.saveData(key: 'images_folder', value: selectedDirectory);
-//     } else {
-//       print("Folder selection canceled.");
-//     }
-//   } catch (e) {
-//     print("An error occurred while picking images: $e");
-//   }
-// }
-//
-// Future<String> getImagesFolder() async {
-//   final imagesFolder = await CacheHelper.getData(key: 'images_folder');
-//   return imagesFolder;
-// }
+    if (selectedDirectory != null) {
+      print("Selected folder: $selectedDirectory");
+      CacheHelper.saveData(key: 'templates_folder', value: selectedDirectory);
+    } else {
+      print("Folder selection canceled.");
+    }
+  } catch (e) {
+    print("An error occurred while picking folder: $e");
+  }
+}
+
+
+Future<String> getTemplatesFolder() async {
+  final templatesFolder = await CacheHelper.getData(key: 'templates_folder');
+  return templatesFolder;
+}
 
 Future<void> getPassword() async{
   CacheHelper.getData(key: 'password');

@@ -36,7 +36,7 @@ class AddNewVisit extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (BuildContext context) => homeCubit()..getUserData()
-        ..getVisitors(),
+        ..getVisitors()..getSubjects()..getDepartments(),
       child: BlocConsumer<homeCubit, homeStates>(
         builder: (BuildContext context, state) {
           var cubit = homeCubit.get(context);
@@ -224,12 +224,14 @@ class AddNewVisit extends StatelessWidget {
                                       screenWidth: MediaQuery.of(context).size.width * 0.5,
                                       screenRatio: MediaQuery.of(context).devicePixelRatio,
                                       entries: [
-                                        for (var item in visitSubject)
+                                        for (var item in cubit.visitSubject)
                                           DropdownMenuEntry(
                                               value: item,
                                               label: item)
                                       ],
-                                      onSelected: (value){}
+                                      onSelected: (value){
+                                        subjectController.text = value;
+                                      }
                                   ),
                                   const SizedBox(height: 10,),
                                   //Additional Phone Number
@@ -292,6 +294,7 @@ class AddNewVisit extends StatelessWidget {
                                           );
                                         }
                                          else {
+                                          cubit.addSubject(subjectName: subjectController.text);
                                           cubit.addVisit(
                                             visitor_id: visitor.firstWhere((element) => element.name == nameController.text).id!,
                                             visitDestination: destinationController.text,
@@ -324,13 +327,21 @@ class AddNewVisit extends StatelessWidget {
           }
 
           if (state is addVisitorSuccess) {
+            rankController.text = visitorRankController.text;
+            nameController.text = visitorNameController.text;
+            phoneController.text = visitorPhoneController.text;
+            additionalPhoneController.text = visitorAdditionalPhoneController.text;
+            departmentController.text = visitorDepartmentController.text;
+
             Navigator.pop(context);
             QuickAlert.show(
               width: MediaQuery.of(context).size.width * 0.2,
               context: context,
               animType: QuickAlertAnimType.scale,
               type: QuickAlertType.success,
-              autoCloseDuration: Duration(seconds: 3),
+              barrierDismissible: true,
+
+              autoCloseDuration: Duration(seconds: 2),
               title: addSuccessMessage,
               confirmBtnText: done,
             );
@@ -405,7 +416,8 @@ class AddNewVisit extends StatelessWidget {
                 animType: QuickAlertAnimType.scale,
                 context: context,
                 type: QuickAlertType.success,
-                autoCloseDuration: Duration(seconds: 3),
+                autoCloseDuration: Duration(seconds: 2),
+                barrierDismissible: true,
                 title: addSuccessMessage,
                 confirmBtnText: done);
 

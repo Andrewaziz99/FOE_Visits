@@ -260,7 +260,7 @@ class ChangePasswordScreen extends StatelessWidget {
                 type: QuickAlertType.success,
                 autoCloseDuration: Duration(seconds: 3),
                 title: changePasswordDone,
-                confirmBtnText: done).then((value) {navigateAndFinish(context, HomeScreen());});
+                confirmBtnText: done).then((value) {navigateAndFinish(context, HomeScreen(is_admin: true,));});
 
             oldPasswordController.clear();
             newPasswordController.clear();

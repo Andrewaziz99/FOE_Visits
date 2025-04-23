@@ -77,17 +77,18 @@ Widget menu(context, cubit, AuthCubit, state) => Drawer(
             navigateTo(context, ChangePasswordScreen());
           },
         ),
-        // ListTile(
-        //   leading: Icon(Icons.settings_rounded),
-        //   title: Text(
-        //     settings,
-        //     style: TextStyle(color: Colors.black, fontSize: 20),
-        //   ),
-        //   onTap: () {
-        //     // showDialog(context: context, builder: (context) => SettingsDialog(context));
-        //     navigateTo(context, SettingsScreen());
-        //   },
-        // ),
+
+        ListTile(
+          leading: Icon(Icons.folder_open_outlined, color: Colors.black,),
+          title: Text(
+            'Template Folder',
+            style: TextStyle(color: Colors.black, fontSize: 20),
+          ),
+          onTap: () async {
+            pickTemplatesFolder();
+          },
+        ),
+
         ListTile(
           leading: Icon(Icons.exit_to_app_rounded, color: Colors.redAccent,),
           title: Text(

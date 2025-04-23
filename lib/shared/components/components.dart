@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:visits/modules/Visits/visits_screen.dart';
 import 'constants.dart';
 
 void navigateTo(context, widget) => Navigator.push(
@@ -347,3 +348,23 @@ Future<void> showNoInternetDialog(BuildContext context) {
     },
   );
 }
+
+Widget NotificationDialog(context, String title) => AlertDialog(
+      title: Text(title),
+      content: const Text(notificationMsg),
+      actions: <Widget>[
+        TextButton(
+          child: const Text(back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        SizedBox(width: 10.0,),
+        TextButton(
+          child: const Text(view),
+          onPressed: () {
+            navigateTo(context, VisitsScreen());
+          },
+        ),
+      ],
+    );

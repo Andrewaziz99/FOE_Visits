@@ -178,6 +178,8 @@ class LoginScreen extends StatelessWidget {
       },
       listener: (BuildContext context, state) {
 
+        var cubit = AuthCubit.get(context);
+
         if (state is AuthLoadingState) {
           showDialog(context: context, builder: (context) => loadingDialog(context));
 
@@ -203,7 +205,7 @@ class LoginScreen extends StatelessWidget {
             icon: Icon(Icons.check_circle, color: Colors.green),
             alignment: Alignment.topCenter,
           );
-          navigateAndFinish(context, HomeScreen());
+          navigateAndFinish(context, HomeScreen(is_admin: cubit.is_admin));
         }
 
         if (state is AuthErrorState) {

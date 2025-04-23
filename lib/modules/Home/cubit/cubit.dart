@@ -1,22 +1,20 @@
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:quickalert/quickalert.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toastification/toastification.dart';
 import 'package:visits/modules/Home/cubit/states.dart';
 import 'package:visits/shared/network/local/cache_helper.dart';
-
 import '../../../models/User/user_model.dart';
+import '../../../models/Visit/visit_data_model.dart';
 import '../../../models/Visit/visit_model.dart';
 import '../../../models/Visitor/visitor_model.dart';
-
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-
 import '../../../shared/components/components.dart';
 import '../../../shared/components/constants.dart';
 import '../../../shared/playSound.dart';
@@ -27,6 +25,76 @@ class homeCubit extends Cubit<homeStates> {
   static homeCubit get(context) => BlocProvider.of(context);
 
   final supabase = Supabase.instance.client;
+
+  Future<void> addSubject({
+    required String subjectName,
+  }) async {
+    getSubjects().then((value) async {
+      if (!visitSubject.any((element) => element == subjectName)) {
+        emit(addSubjectLoading());
+        await supabase.from('subjects').insert({
+          'subjectName': subjectName,
+        }).then((value) {
+          emit(addSubjectSuccess());
+          getSubjects();
+        }).catchError((error) {
+          emit(addSubjectError());
+          print(error);
+        });
+      }
+    });
+  }
+
+  Future<void> addDepartment({
+    required String departmentName,
+  }) async {
+    getSubjects().then((value) async {
+      if (!departments.any((element) => element == departmentName)) {
+        emit(addDepartmentLoading());
+        await supabase.from('departments').insert({
+          'depName': departmentName,
+        }).then((value) {
+          emit(addDepartmentSuccess());
+          getSubjects();
+        }).catchError((error) {
+          emit(addDepartmentError());
+          print(error);
+        });
+      }
+    });
+  }
+
+  List<String> visitSubject = [];
+  Future<void> getSubjects() async {
+    emit(getSubjectsLoading());
+    await supabase
+        .from('subjects')
+        .select()
+        .then((value) {
+      visitSubject = value.map((e) => e['subjectName'] as String).toList();
+      print(visitSubject);
+      emit(getSubjectsSuccess());
+    }).catchError((error) {
+      emit(getSubjectsError());
+      print(error);
+    });
+  }
+
+  List<String> departments = [];
+  void getDepartments() {
+    emit(getDepartmentsLoading());
+    supabase
+        .from('departments')
+        .select()
+        .then((value) {
+      departments = value.map((e) => e['depName'] as String).toList();
+      emit(getDepartmentsSuccess());
+    })
+        .catchError((error) {
+      emit(getDepartmentsError());
+      print(error);
+    });
+  }
 
   UserModel? user;
 
@@ -246,9 +314,9 @@ class homeCubit extends Cubit<homeStates> {
     required context,
   }) async {
     // Check if the visitor already exists
-
-    final existingVisitor = visitors?.lastWhere(
-      (visitor) => visitor.name == name && visitor.phone_number == phone_number,
+print(visitors?.length);
+    final existingVisitor = visitors?.lastWhereOrNull(
+      (visitor) => visitor.name == name || visitor.phone_number == phone_number
     );
     if (existingVisitor != null) {
       // If the visitor exists, directly add the visit
@@ -382,6 +450,7 @@ class homeCubit extends Cubit<homeStates> {
         .ilike('name', '%$search%')
         .then((value) {
       searchByNameResults = value.map((e) => VisitorModel.fromJson(e)).toList();
+      searchBySubjectResults = [];
       emit(searchByNameSuccess());
     }).catchError((error) {
       emit(searchByNameError());
@@ -389,18 +458,17 @@ class homeCubit extends Cubit<homeStates> {
     });
   }
 
-  List<VisitModel> searchBySubjectResults = [];
-
+  List<VisitDataModel> searchBySubjectResults = [];
   Future<void> searchBySubject(String search) async {
     emit(searchBySubjectLoading());
     await supabase
         .from('daily_visits')
-        .select()
-        .eq('user_id', supabase.auth.currentUser!.id)
+        .select('*, visitors (*)')
         .ilike('subject', '%$search%')
         .then((value) {
       searchBySubjectResults =
-          value.map((e) => VisitModel.fromJson(e)).toList();
+          value.map((e) => VisitDataModel.fromJson(e)).toList();
+      searchByNameResults = [];
       emit(searchBySubjectSuccess());
     }).catchError((error) {
       emit(searchBySubjectError());
@@ -454,4 +522,64 @@ class homeCubit extends Cubit<homeStates> {
       // Handle other exceptions
     }
   }
+
+
+
+
+  List<VisitModel>? visits_data;
+  List<VisitorModel>? visitorsData;
+
+
+  Future<void> getVisitsByDate(DateTime date) async {
+    getUserData().then((value) async {
+      emit(getVisitsByDateLoading());
+      await supabase
+          .from('daily_visits')
+          .select()
+          .eq('user_id', supabase.auth.currentUser!.id)
+          .eq('region', user!.region!)
+          .eq('visitDate', date)
+          .then((value) {
+        visits_data = value.map((e) => VisitModel.fromJson(e)).toList();
+        visitorsData = visitors!
+            .where((element) =>
+            visits_data!.any((element2) => element2.visitor_id == element.id))
+            .toList();
+        emit(getVisitsByDateSuccess());
+      }).catchError((error) {
+        emit(getVisitsByDateError());
+        print(error);
+      });
+    }).catchError((error) {
+      emit(getUserDataError());
+    });
+  }
+
+  Future<void> getRealTimeVisitsByDate(DateTime date) async {
+    emit(getRealTimeVisitsByDateLoading());
+    await supabase
+        .from('daily_visits')
+        .select()
+        .eq('visitDate', date.toString())
+        .then((value) {
+      visits_data = value.map((e) => VisitModel.fromJson(e)).toList();
+      visitorsData = visitors!
+          .where((element) =>
+          visits_data!.any((element2) => element2.visitor_id == element.id))
+          .toList();
+      emit(getRealTimeVisitsByDateSuccess());
+    }).catchError((error) {
+      emit(getRealTimeVisitsByDateError());
+      print(error);
+    });
+  }
+
+
+
+
+
+
+
+
+
 }

@@ -14,6 +14,9 @@ class AuthCubit extends Cubit<AuthStates> {
 
   static AuthCubit get(context) => BlocProvider.of(context);
 
+
+  bool is_admin = false;
+
   Future<void> login({
     required String username,
     required String password,
@@ -33,6 +36,16 @@ class AuthCubit extends Cubit<AuthStates> {
           .select('new_password')
           .eq('user_id', value.user!.id);
       if (response.isNotEmpty && response[0]['new_password'] == pin) {
+        await Supabase.instance.client.from('users').select().eq('user_id',value.user!.id).eq('is_admin', true).then((value) {
+          if (value.isNotEmpty) {
+            is_admin = true;
+            CacheHelper.saveData(key: 'admin', value: true);
+          }
+          else {
+            is_admin = false;
+            CacheHelper.saveData(key: 'admin', value: false);
+          }
+        });
         emit(AuthSuccessState());
       }
 

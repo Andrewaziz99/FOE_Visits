@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:cherry_toast/cherry_toast.dart';
 import 'package:cherry_toast/resources/arrays.dart';
@@ -16,6 +17,8 @@ import 'package:visits/modules/Home/add_new_visit.dart';
 import 'package:visits/modules/Home/cubit/states.dart';
 import 'package:visits/modules/Home/endrawer.dart';
 import 'package:visits/modules/Home/new_visit_dialog.dart';
+import 'package:visits/modules/Home/visits_by_date.dart';
+import 'package:visits/modules/Visits/cubit/cubit.dart';
 import 'package:visits/modules/Visits/visits_screen.dart';
 import 'package:visits/modules/loading_screen.dart';
 import 'package:visits/shared/components/components.dart';
@@ -26,20 +29,16 @@ import '../Auth/cubit/cubit.dart';
 import 'cubit/cubit.dart';
 
 class HomeScreen extends StatefulWidget {
+  final bool is_admin;
 
-  // final bool is_admin;
-
-  // HomeScreen({super.key, required this.is_admin});
-  const HomeScreen({super.key});
+  HomeScreen({super.key, required this.is_admin});
+  // const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-
 class _HomeScreenState extends State<HomeScreen> {
-
-
   TextEditingController visitorController = TextEditingController();
 
   List<VisitorModel> visitor = [];
@@ -49,53 +48,60 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // if (widget.is_admin) {
-      supabase
-          .channel('public:daily_visits')
-          .onPostgresChanges(
-          event: PostgresChangeEvent.insert,
-          schema: 'public',
-          table: 'daily_visits',
-          callback: (payload) {
-            playSound('sfx/alert.mp3');
-            CherryToast.warning(
-              height: 100,
-              textDirection: TextDirection.rtl,
-              backgroundColor: Colors.white,
-              title: Text(newVisit),
-              animationCurve: Curves.fastLinearToSlowEaseIn,
-              animationDuration: Duration(seconds: 3),
-              enableIconAnimation: true,
-              toastPosition: Position.top,
-              autoDismiss: false,
-              description: Text(newVisitDescription),
-              action: Text(view, style: TextStyle(color: Colors.grey),),
-              actionHandler: () {
-                navigateTo(context, VisitsScreen());
-              },
-            ).show(context);
-
-          })
-          .subscribe((status, error) {
+    if (widget.is_admin) {
+    supabase
+        .channel('public:daily_visits')
+        .onPostgresChanges(
+            event: PostgresChangeEvent.insert,
+            schema: 'public',
+            table: 'daily_visits',
+            callback: (payload) {
+              playSound('sfx/alert.mp3');
+              CherryToast.warning(
+                height: MediaQuery
+                    .of(context)
+                    .size
+                    .height * 0.2,
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width * 0.5,
+                textDirection: TextDirection.rtl,
+                backgroundColor: Colors.amber.withAlpha(100),
+                title: Text(newVisit,
+                    style: TextStyle(color: Colors.white, fontSize: 14)),
+                animationCurve: Curves.easeInCubic,
+                animationDuration: Duration(seconds: 3),
+                enableIconAnimation: true,
+                toastPosition: Position.top,
+                autoDismiss: true,
+                toastDuration: Duration(minutes: 1),
+                description: Text(newVisitDescription,
+                    style: TextStyle(color: Colors.white,)),
+                action: Text(view, style: TextStyle(color: Colors.blue),),
+                actionHandler: () {
+                  navigateTo(context, VisitsScreen());
+                },
+              ).show(context);
+            })
+        .subscribe(
+      (status, error) {
         if (error != null) {
           print('Error: $error');
         } else {
           print('Status: $status');
         }
-      },);
-    // }
-
-
+      },
+    );
+    }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (BuildContext context) => homeCubit()
         ..getUserData()
-        ..getVisitors()..connectToWebSocket(context),
+        ..getVisitors(),
       child: BlocConsumer<homeCubit, homeStates>(
         builder: (BuildContext context, state) {
           var cubit = homeCubit.get(context);
@@ -117,7 +123,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       'assets/images/bar.gif',
                       fit: BoxFit.cover,
                     ),
-
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white.withAlpha(100),
@@ -129,7 +134,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             'assets/images/logo_name_black.png',
                           ),
                           Spacer(),
-                          Text(dailyVisits, style: TextStyle(color: Colors.black, fontSize: 30, fontWeight: FontWeight.bold),),
+                          Text(
+                            dailyVisits,
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold),
+                          ),
                           Spacer(),
                           Image.asset(
                             'assets/images/logo1.png',
@@ -169,9 +180,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
+                                if (widget.is_admin || !widget.is_admin)
                                 Container(
-                                  width: MediaQuery.of(context).size.width * 0.3,
-                                  height: MediaQuery.of(context).size.height * 0.4,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.4,
                                   decoration: BoxDecoration(
                                     color: Colors.white.withAlpha(100),
                                     borderRadius: BorderRadius.circular(20),
@@ -191,11 +205,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                           navigateTo(context, AddNewVisit());
                                         },
                                         child: Container(
-                                          height: MediaQuery.of(context).size.height *
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
                                               0.5,
                                           decoration: BoxDecoration(
                                             color: Colors.white.withAlpha(100),
-                                            borderRadius: BorderRadius.circular(20),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
                                           ),
                                           child: Column(
                                             mainAxisAlignment:
@@ -216,12 +233,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ],
                                   ),
                                 ),
+
                                 SizedBox(
                                   width: 50.0,
                                 ),
+                                if(widget.is_admin)
                                 Container(
-                                  width: MediaQuery.of(context).size.width * 0.3,
-                                  height: MediaQuery.of(context).size.height * 0.4,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.4,
                                   decoration: BoxDecoration(
                                     color: Colors.white.withAlpha(100),
                                     borderRadius: BorderRadius.circular(20),
@@ -243,7 +264,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: Colors.white.withAlpha(100),
-                                            borderRadius: BorderRadius.circular(20),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
                                           ),
                                           child: Column(
                                             mainAxisAlignment:
@@ -269,12 +291,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             SizedBox(
                               height: 20.0,
                             ),
+                            if (widget.is_admin)
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Container(
-                                  width: MediaQuery.of(context).size.width * 0.63,
-                                  height: MediaQuery.of(context).size.height * 0.3,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.63,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.3,
                                   decoration: BoxDecoration(
                                     color: Colors.white.withAlpha(100),
                                     borderRadius: BorderRadius.circular(20),
@@ -294,11 +319,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                           navigateTo(context, VisitsScreen());
                                         },
                                         child: Container(
-                                          height: MediaQuery.of(context).size.height *
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
                                               0.5,
                                           decoration: BoxDecoration(
                                             color: Colors.white.withAlpha(100),
-                                            borderRadius: BorderRadius.circular(20),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
                                           ),
                                           child: Column(
                                             mainAxisAlignment:
@@ -323,7 +351,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ],
                         ),
-                        SizedBox(width: 20.0,),
+                        SizedBox(
+                          width: 20.0,
+                        ),
+                        if (widget.is_admin)
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -336,10 +367,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                   initialDate: selectedDate,
                                   firstDate: DateTime(2024),
                                   lastDate: DateTime.now(),
-                                  onDateChanged: (date){
+                                  onDateChanged: (date) {
                                     selectedDate = date;
-                                  }
-                              ),
+                                    // if (cubit.user!.is_admin!) {
+                                    //   print(cubit.visits_data?.length);
+                                    //   cubit.getRealTimeVisitsByDate(date).then((value){
+                                    //     showDialog(context: context, builder: (BuildContext context) => visitDialog(context, cubit.visits_data, cubit.visitorsData));
+                                    //   });
+                                    // } else {
+                                    //   cubit.getVisitsByDate(date);
+                                    // }
+
+                                  }),
                             ),
                           ],
                         ),
@@ -446,7 +485,8 @@ class _HomeScreenState extends State<HomeScreen> {
               borderSide: BorderSide(color: Colors.green, width: 1.0),
               showIcon: true,
               showProgressBar: false,
-              title: Text(imageSuccess, style: TextStyle(color: Colors.white, fontSize: 18)),
+              title: Text(imageSuccess,
+                  style: TextStyle(color: Colors.white, fontSize: 18)),
               borderRadius: BorderRadius.circular(20.0),
               dragToClose: true,
               autoCloseDuration: const Duration(seconds: 3),
@@ -456,9 +496,6 @@ class _HomeScreenState extends State<HomeScreen> {
               alignment: Alignment.topCenter,
             );
           }
-
-
-
         },
       ),
     );

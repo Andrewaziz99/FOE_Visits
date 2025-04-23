@@ -47,6 +47,12 @@ class getVisitsSuccess extends visitStates {}
 
 class getVisitsError extends visitStates {}
 
+class getVisitsByDateLoading extends visitStates {}
+
+class getVisitsByDateSuccess extends visitStates {}
+
+class getVisitsByDateError extends visitStates {}
+
 class searchVisitsLoading extends visitStates {}
 
 class searchVisitsSuccess extends visitStates {}
@@ -65,8 +71,20 @@ class getRealTimeVisitsSuccess extends visitStates {}
 
 class getRealTimeVisitsError extends visitStates {}
 
+class getRealTimeVisitsByDateLoading extends visitStates {}
+
+class getRealTimeVisitsByDateSuccess extends visitStates {}
+
+class getRealTimeVisitsByDateError extends visitStates {}
+
 class changeCurrentDateLoading extends visitStates {}
 
 class changeCurrentDateSuccess extends visitStates {}
 
 class changeCurrentDateError extends visitStates {}
+
+class printDailyVisitsLoading extends visitStates {}
+
+class printDailyVisitsSuccess extends visitStates {}
+
+class printDailyVisitsError extends visitStates {}

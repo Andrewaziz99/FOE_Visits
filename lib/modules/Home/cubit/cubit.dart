@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toastification/toastification.dart';
+import 'package:visits/models/Engineers/engineers_model.dart';
 import 'package:visits/modules/Home/cubit/states.dart';
 import 'package:visits/shared/network/local/cache_helper.dart';
 import '../../../models/User/user_model.dart';
@@ -72,7 +73,6 @@ class homeCubit extends Cubit<homeStates> {
         .select()
         .then((value) {
       visitSubject = value.map((e) => e['subjectName'] as String).toList();
-      print(visitSubject);
       emit(getSubjectsSuccess());
     }).catchError((error) {
       emit(getSubjectsError());
@@ -192,7 +192,7 @@ class homeCubit extends Cubit<homeStates> {
   //   required phone_number,
   //   required additional_phone_number,
   //   required department,
-  //   required visitDestination,
+  //   required feedback,
   //   required visitReason,
   // }) async {
   //
@@ -201,7 +201,7 @@ class homeCubit extends Cubit<homeStates> {
   //     addVisit(
   //         visitor_id:
   //             visitors!.firstWhere((element) => element.name == name).id!,
-  //         visitDestination: visitDestination,
+  //         feedback: feedback,
   //         visitReason: visitReason);
   //   } else {
   //     emit(addVisitorLoading());
@@ -217,7 +217,7 @@ class homeCubit extends Cubit<homeStates> {
   //         addVisit(
   //             visitor_id:
   //                 visitors!.where((element) => element.name == name).first.id!,
-  //             visitDestination: visitDestination,
+  //             feedback: feedback,
   //             visitReason: visitReason);
   //       });
   //     }).catchError((error) {
@@ -233,7 +233,7 @@ class homeCubit extends Cubit<homeStates> {
   //   required String phone_number,
   //   required String? additional_phone_number,
   //   required String department,
-  //   required String visitDestination,
+  //   required String feedback,
   //   required String visitReason,
   // }) async {
   //   // Ensure visitors list is initialized
@@ -251,7 +251,7 @@ class homeCubit extends Cubit<homeStates> {
   //     // If the visitor exists, directly add the visit
   //     addVisit(
   //       visitor_id: existingVisitor.id!,
-  //       visitDestination: visitDestination,
+  //       feedback: feedback,
   //       visitReason: visitReason,
   //     );
   //     return;
@@ -292,7 +292,7 @@ class homeCubit extends Cubit<homeStates> {
   //     // Add the visit for the newly added visitor
   //     addVisit(
   //       visitor_id: newVisitor.id!,
-  //       visitDestination: visitDestination,
+  //       feedback: feedback,
   //       visitReason: visitReason,
   //     );
   //
@@ -314,7 +314,6 @@ class homeCubit extends Cubit<homeStates> {
     required context,
   }) async {
     // Check if the visitor already exists
-print(visitors?.length);
     final existingVisitor = visitors?.lastWhereOrNull(
       (visitor) => visitor.name == name || visitor.phone_number == phone_number
     );
@@ -357,14 +356,14 @@ print(visitors?.length);
 
   Future<void> addVisit({
     required int visitor_id,
-    required String visitDestination,
+    required String feedback,
     required String visitReason,
   }) async {
     emit(addVisitLoading());
     await supabase.from('daily_visits').insert({
       'user_id': supabase.auth.currentUser!.id,
       'visitor_id': visitor_id,
-      'visitDestination': visitDestination,
+      'feedback': feedback,
       'subject': visitReason,
       'visitDate': DateTime.now().toIso8601String(),
       'region': user?.region,
@@ -375,6 +374,100 @@ print(visitors?.length);
       print(error);
     });
   }
+
+
+  Future<void> addVisitorAndVisit({
+    required String rank,
+    required String name,
+    required String phone_number,
+    String? additional_phone_number,
+    required String department,
+    required String feedback,
+    required String visitReason,
+    required BuildContext context,
+  }) async {
+    // Check if the visitor already exists
+    final existingVisitor = visitors?.lastWhereOrNull(
+            (visitor) => visitor.name == name || visitor.phone_number == phone_number
+    );
+
+    if (existingVisitor != null) {
+      // Visitor exists - add visit directly
+      try {
+        emit(addVisitLoading());
+        await supabase.from('daily_visits').insert({
+          'user_id': supabase.auth.currentUser!.id,
+          'visitor_id': existingVisitor.id, // Use the existing visitor's ID
+          'feedback': feedback,
+          'subject': visitReason,
+          'visitDate': DateTime.now().toIso8601String(),
+          'region': user?.region,
+        });
+        emit(addVisitSuccess());
+      } catch (error) {
+        emit(addVisitError());
+        print(error);
+        // Optionally show error toast here
+        return;
+      }
+    } else {
+      // Visitor doesn't exist - add visitor first, then add visit
+      try {
+        // Add new visitor
+        final response = await supabase.from('visitors').insert({
+          'rank': rank,
+          'name': name,
+          'phone_number': phone_number,
+          'additional_phone_number': additional_phone_number,
+          'department': department,
+          'created_at': DateTime.now().toIso8601String(),
+        }).select();
+
+        if (response.isNotEmpty) {
+          final newVisitorId = response[0]['id'] as int;
+
+          // Now add the visit
+          try {
+            emit(addVisitLoading());
+            await supabase.from('daily_visits').insert({
+              'user_id': supabase.auth.currentUser!.id,
+              'visitor_id': newVisitorId,
+              'feedback': feedback,
+              'subject': visitReason,
+              'visitDate': DateTime.now().toIso8601String(),
+              'region': user?.region,
+            });
+            emit(addVisitSuccess());
+          } catch (error) {
+            emit(addVisitError());
+            print(error);
+            // Optionally show error toast here
+          }
+        }
+      } catch (error) {
+        playSound('sfx/error.mp3');
+        Toastification().show(
+          style: ToastificationStyle.flatColored,
+          type: ToastificationType.error,
+          backgroundColor: Colors.red.withAlpha(100),
+          borderSide: BorderSide(color: Colors.red, width: 1.0),
+          showIcon: true,
+          showProgressBar: false,
+          title: Text(addError, style: TextStyle(color: Colors.white, fontSize: 18)),
+          borderRadius: BorderRadius.circular(20.0),
+          dragToClose: true,
+          autoCloseDuration: const Duration(seconds: 5),
+          applyBlurEffect: true,
+          direction: TextDirection.rtl,
+          icon: Icon(Icons.warning_amber_rounded, color: Colors.amber),
+          alignment: Alignment.topCenter,
+        );
+        print(error);
+      }
+    }
+  }
+
+
 
   File? image;
   final ImagePicker picker = ImagePicker();
@@ -489,43 +582,6 @@ print(visitors?.length);
     });
   }
 
-  void connectToWebSocket(context) async {
-    final String hostname = 'cwmxclgvssfivawwhyut.supabase.co';
-    final String url = 'wss://$hostname';
-
-    try {
-      final WebSocketChannel channel = IOWebSocketChannel.connect(url);
-
-      channel.stream.listen(
-        (message) {
-          print('Received: $message');
-        },
-        onDone: () {
-          print('WebSocket connection closed.');
-        },
-        onError: (error) {
-          print('WebSocket error: $error');
-        },
-      );
-    } on WebSocketChannelException catch (e) {
-      print('WebSocketChannelException: $e');
-      print('no internet');
-      // Handle the exception, e.g., show a user-friendly message
-      showNoInternetDialog(context);
-    } on SocketException catch (e) {
-      print('SocketException: $e');
-      print('no internet');
-      // Handle the exception, e.g., show a user-friendly message
-      showNoInternetDialog(context);
-    } catch (e) {
-      print('Unexpected error: $e');
-      // Handle other exceptions
-    }
-  }
-
-
-
-
   List<VisitModel>? visits_data;
   List<VisitorModel>? visitorsData;
 
@@ -574,12 +630,23 @@ print(visitors?.length);
     });
   }
 
+  List<EngineersModel> engineers = [];
 
-
-
-
-
-
+  void getEngineers() {
+    emit(getEngineersLoading());
+    supabase
+        .from('engineers')
+        .select('*, visitors (*)')
+        .then((value) {
+      engineers = (value as List)
+          .map((e) => EngineersModel.fromJson(e))
+          .toList();
+      emit(getEngineersSuccess());
+    }).catchError((error) {
+      emit(getEngineersError());
+      print(error);
+    });
+  }
 
 
 }

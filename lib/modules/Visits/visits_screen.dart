@@ -130,6 +130,17 @@ class VisitsScreen extends StatelessWidget {
                                           ),
                                         ),
                                       ),
+                                      //FEEDBACK
+                                      TableCell(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            feedback,
+                                            style:
+                                                TextStyle(color: Colors.black),
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
 
@@ -195,7 +206,7 @@ class VisitsScreen extends StatelessWidget {
                                         child: Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(
-                                            cubit.visitsData![index].subject ?? '',
+                                            cubit.visitsData![index].subject,
                                             style:
                                                 TextStyle(color: Colors.black),
                                           ),
@@ -209,6 +220,16 @@ class VisitsScreen extends StatelessWidget {
                                                     .format(DateTime.parse(cubit.visitsData![index]
                                                         .visitDate
                                                         .toString())),
+                                            style:
+                                                TextStyle(color: Colors.black),
+                                          ),
+                                        ),
+                                      ),
+                                      TableCell(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            cubit.visitsData![index].feedback,
                                             style:
                                                 TextStyle(color: Colors.black),
                                           ),

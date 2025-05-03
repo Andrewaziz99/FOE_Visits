@@ -6,7 +6,8 @@ import '../../shared/components/constants.dart';
 TextEditingController visitorRankController = TextEditingController();
 TextEditingController visitorNameController = TextEditingController();
 TextEditingController visitorPhoneController = TextEditingController();
-TextEditingController visitorAdditionalPhoneController = TextEditingController();
+TextEditingController visitorAdditionalPhoneController =
+    TextEditingController();
 TextEditingController visitorDepartmentController = TextEditingController();
 
 Widget newVisitor(context, cubit) {
@@ -36,7 +37,7 @@ Widget newVisitor(context, cubit) {
           ),
           SizedBox(height: 10),
           //Name
-          defaultFormField(
+          arabicLettersFormField(
               radius: BorderRadius.circular(10),
               textColor: Colors.black,
               labelColor: Colors.black,
@@ -51,7 +52,8 @@ Widget newVisitor(context, cubit) {
               }),
           SizedBox(height: 10),
           //Phone
-          defaultFormField(
+          numbersFormField(
+              maxLength: 11,
               radius: BorderRadius.circular(10),
               textColor: Colors.black,
               labelColor: Colors.black,
@@ -66,7 +68,8 @@ Widget newVisitor(context, cubit) {
               }),
           SizedBox(height: 10),
           //Add_Phone
-          defaultFormField(
+          numbersFormField(
+              maxLength: 11,
               radius: BorderRadius.circular(10),
               textColor: Colors.black,
               labelColor: Colors.black,

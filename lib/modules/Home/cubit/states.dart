@@ -117,3 +117,9 @@ class addDepartmentLoading extends homeStates {}
 class addDepartmentSuccess extends homeStates {}
 
 class addDepartmentError extends homeStates {}
+
+class getEngineersLoading extends homeStates {}
+
+class getEngineersSuccess extends homeStates {}
+
+class getEngineersError extends homeStates {}

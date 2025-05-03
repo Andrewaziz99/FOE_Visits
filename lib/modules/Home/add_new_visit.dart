@@ -1,6 +1,4 @@
 import 'dart:math';
-
-import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,299 +13,605 @@ import '../../shared/components/constants.dart';
 import 'add_new_visitor.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
+import 'eng_screen.dart';
 
-class AddNewVisit extends StatelessWidget {
+class AddNewVisit extends StatefulWidget {
+  AddNewVisit({super.key});
 
+  @override
+  State<AddNewVisit> createState() => _AddNewVisitState();
+}
+
+class _AddNewVisitState extends State<AddNewVisit> {
   EventsController controller = EventsController();
 
   TextEditingController rankController = TextEditingController();
+
   TextEditingController nameController = TextEditingController();
+
   TextEditingController phoneController = TextEditingController();
+
   TextEditingController additionalPhoneController = TextEditingController();
+
   TextEditingController subjectController = TextEditingController();
+
   TextEditingController departmentController = TextEditingController();
-  TextEditingController destinationController = TextEditingController();
+
+  TextEditingController feedbackController = TextEditingController();
 
   final _formkey = GlobalKey<FormState>();
-
-  AddNewVisit({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) => homeCubit()..getUserData()
-        ..getVisitors()..getSubjects()..getDepartments(),
+      create: (BuildContext context) => homeCubit()
+        ..getUserData()
+        ..getVisitors()
+        ..getSubjects()
+        ..getDepartments()
+        ..getEngineers(),
       child: BlocConsumer<homeCubit, homeStates>(
         builder: (BuildContext context, state) {
           var cubit = homeCubit.get(context);
           List<VisitorModel> visitor = cubit.visitors ?? [];
           return Scaffold(
-              appBar: AppBar(
-                backgroundColor: Colors.transparent,
-                toolbarHeight: 150,
-                title: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height * 0.3,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(100),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.asset(
-                        'assets/images/bar.gif',
-                        fit: BoxFit.cover,
-                      ),
-
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(100),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/logo_name_black.png',
-                            ),
-                            Spacer(),
-                            Text(dailyVisits, style: TextStyle(color: Colors.black, fontSize: 30, fontWeight: FontWeight.bold),),
-                            Spacer(),
-                            Image.asset(
-                              'assets/images/logo1.png',
-                              width: 150,
-                              height: 150,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              toolbarHeight: 150,
+              title: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height * 0.3,
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(100),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                centerTitle: true,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(
+                      'assets/images/bar.gif',
+                      fit: BoxFit.cover,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(100),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            'assets/images/logo_name_black.png',
+                          ),
+                          Spacer(),
+                          Text(
+                            dailyVisits,
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Spacer(),
+                          Image.asset(
+                            'assets/images/logo1.png',
+                            width: 150,
+                            height: 150,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (context) => newVisitor(context, cubit));
-                },
-                child: Icon(Icons.add),
+              centerTitle: true,
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) => newVisitor(context, cubit));
+              },
+              child: Icon(
+                Icons.add,
+                color: Colors.white,
               ),
-              body: ConditionalBuilder(
-                condition: state is! getUserDataLoading && state is! getVisitorsLoading && cubit.visitors != null,
+            ),
+            persistentFooterButtons: [
+              defaultButton(
+                  isDisabled: true,
+                  isClicked: false,
+                  function: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) => engPage(context, cubit));
+                  },
+                  width: 500,
+                  radius: 10,
+                  fSize: 20,
+                  background: Colors.green,
+                  tColor: Colors.white,
+                  text: engRegister)
+            ],
+            body: Center(
+              child: ConditionalBuilder(
+                condition: state is! getUserDataLoading &&
+                    state is! getVisitorsLoading &&
+                    cubit.visitors != null,
                 builder: (BuildContext context) {
-                  return SingleChildScrollView(
-                    child: Form(
-                      key: _formkey,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Center(
-                          child: BlurryContainer(
-                            width: MediaQuery.of(context).size.width * 0.5,
-                            height: MediaQuery.of(context).size.height * 0.7,
-                            child: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  //Rank
-                                  CustomDropDownMenu(
-                                    space: 0,
-                                    controller: rankController,
-                                    title: rank,
-                                    screenWidth: MediaQuery.of(context).size.width * 0.5,
-                                    screenRatio: MediaQuery.of(context).devicePixelRatio,
-                                    entries: [
-                                      for (var item in ranks)
-                                        DropdownMenuEntry(
-                                          value: item,
-                                          label: item,
-                                        )
-                                    ],
-                                    onSelected: (value) {
-                                      rankController.text = value;
-                                      visitor = visitor.where((element) => element.rank == value).toList();
-                                    },
-                                  ),
-                                  //name
-                                  SizedBox(
-                                    width: MediaQuery.of(context).size.width * 0.5,
-                                    child: defaultFormField(
-                                        radius: BorderRadius.circular(5),
-                                        textColor: Colors.black,
-                                        labelColor: Colors.black,
-                                        controller: nameController,
-                                        type: TextInputType.text,
-                                        label: name,
-                                        onChange: (value) {
-                                          cubit.searchByName(value);
-                                        },
-                                        validate: (val){
-                                          return null;
-                                        }
-                                    ),
-                                  ),
-                                  if (cubit.searchByNameResults.isNotEmpty)
-                                    SingleChildScrollView(
-                                      child: SizedBox(
-                                        width: MediaQuery.of(context).size.width * 0.5,
-                                        height: MediaQuery.of(context).size.height * 0.2,
-                                        child: ListView.separated(
-                                          itemCount: cubit.searchByNameResults.length,
-                                          separatorBuilder: (context, index) => myDivider(color: Colors.grey),
-                                          itemBuilder: (context, index) => InkWell(
-                                            onTap: () {
-                                              nameController.text = cubit.searchByNameResults[index].name!;
-                                              rankController.text = visitor.lastWhere((element) => element.name == nameController.text).rank!;
-                                              phoneController.text = visitor.lastWhere((element) => element.name == nameController.text).phone_number!;
-                                              additionalPhoneController.text = visitor.firstWhere((element) => element.name == nameController.text).additional_phone_number ?? '';
-                                              departmentController.text = visitor.firstWhere((element) => element.name == nameController.text).department!;
-                                              cubit.searchByNameResults.clear();
-                                            },
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Text(cubit.searchByNameResults[index].name!),
-                                            ),
-                                          ),
+                  return Form(
+                    key: _formkey,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Center(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    //Rank
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.military_tech,
+                                          color: Colors.blue,
                                         ),
-                                      ),
-                                    ),
-                                  SizedBox(height: 20,),
-                                  SizedBox(
-                                    width: MediaQuery.of(context).size.width * 0.5,
-                                    child: defaultFormField(
-                                        radius: BorderRadius.circular(5),
-                                        textColor: Colors.black,
-                                        labelColor: Colors.black,
-                                        controller: phoneController,
-                                        type: TextInputType.text,
-                                        label: phoneNo,
-                                        onChange: (value) {
-                                          cubit.searchByPhone(value);
-                                        },
-                                        validate: (val){
-                                          return null;
-                                        }
-                                    ),
-                                  ),
-                                  if (cubit.searchByPhoneResults.isNotEmpty)
-                                    SingleChildScrollView(
-                                      child: SizedBox(
-                                        width: MediaQuery.of(context).size.width * 0.5,
-                                        height: MediaQuery.of(context).size.height * 0.2,
-                                        child: ListView.separated(
-                                          itemCount: cubit.searchByPhoneResults.length,
-                                          separatorBuilder: (context, index) => myDivider(color: Colors.grey),
-                                          itemBuilder: (context, index) => InkWell(
-                                            onTap: () {
-                                              nameController.text = cubit.searchByPhoneResults[index].name!;
-                                              rankController.text = visitor.firstWhere((element) => element.name == nameController.text).rank!;
-                                              phoneController.text = visitor.firstWhere((element) => element.name == nameController.text).phone_number!;
-                                              additionalPhoneController.text = visitor.firstWhere((element) => element.name == nameController.text).additional_phone_number ?? '';
-                                              departmentController.text = visitor.firstWhere((element) => element.name == nameController.text).department!;
-                                              cubit.searchByPhoneResults.clear();
-                                            },
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Text(cubit.searchByPhoneResults[index].phone_number!),
-                                            ),
-                                          ),
+                                        SizedBox(
+                                          width: 10.0,
                                         ),
-                                      ),
-                                    ),
-
-                                  SizedBox(height: 10,),
-                                  //Subject
-                                  CustomDropDownMenu(
-                                      title: visitReason,
-                                      controller: subjectController,
-                                      screenWidth: MediaQuery.of(context).size.width * 0.5,
-                                      screenRatio: MediaQuery.of(context).devicePixelRatio,
-                                      entries: [
-                                        for (var item in cubit.visitSubject)
-                                          DropdownMenuEntry(
-                                              value: item,
-                                              label: item)
+                                        CustomDropDownMenu(
+                                          space: 0,
+                                          controller: rankController,
+                                          title: rank,
+                                          screenWidth: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.5,
+                                          screenRatio: MediaQuery.of(context)
+                                              .devicePixelRatio,
+                                          entries: [
+                                            for (var item in ranks)
+                                              DropdownMenuEntry(
+                                                value: item,
+                                                label: item,
+                                              )
+                                          ],
+                                          onSelected: (value) {
+                                            rankController.text = value;
+                                            visitor = visitor
+                                                .where((element) =>
+                                                    element.rank == value)
+                                                .toList();
+                                          },
+                                        ),
                                       ],
-                                      onSelected: (value){
-                                        subjectController.text = value;
-                                      }
-                                  ),
-                                  const SizedBox(height: 10,),
-                                  //Additional Phone Number
-                                  defaultFormField(
-                                      labelColor: Colors.blueAccent.withAlpha(190),
-                                      textColor: Colors.black,
-                                      radius: BorderRadius.circular(10),
-                                      controller: additionalPhoneController,
-                                      type: TextInputType.text,
-                                      label: additionalPhoneNo,
-                                      validate: (value) {
-                                        return null;
-                                      }),
-                                  SizedBox(height: 10),
-                                  //Department
-                                  defaultFormField(
-                                      labelColor: Colors.blueAccent.withAlpha(190),
-                                      textColor: Colors.black,
-                                      radius: BorderRadius.circular(10),
-                                      controller: departmentController,
-                                      type: TextInputType.text,
-                                      label: department,
-                                      validate: (value) {
-                                        if (value!.isEmpty) {
-                                          return departmentError;
-                                        }
-                                        return null;
-                                      }),
+                                    ),
+                                    //name
+                                    Row(
+                                      children: [
+                                        Icon(Icons.person, color: Colors.blue),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.5,
+                                          child: arabicLettersFormField(
+                                              radius: BorderRadius.circular(5),
+                                              textColor: Colors.black,
+                                              labelColor: Colors.black,
+                                              controller: nameController,
+                                              type: TextInputType.text,
+                                              label: name,
+                                              onChange: (value) {
+                                                cubit.searchByName(value);
+                                              },
+                                              validate: (val) {
+                                                return null;
+                                              }),
+                                        ),
+                                      ],
+                                    ),
+                                    // For name search
+                                    if (nameController.text.isNotEmpty &&
+                                        cubit.searchByNameResults.isNotEmpty)
+                                      SingleChildScrollView(
+                                        child: SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.5,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.2,
+                                          child: ListView.separated(
+                                            itemCount: cubit
+                                                .searchByNameResults.length,
+                                            separatorBuilder: (context,
+                                                    index) =>
+                                                myDivider(color: Colors.grey),
+                                            itemBuilder: (context, index) =>
+                                                InkWell(
+                                              onTap: () {
+                                                nameController.text = cubit
+                                                    .searchByNameResults[index]
+                                                    .name!;
+                                                rankController.text = visitor
+                                                    .lastWhere((element) =>
+                                                        element.name ==
+                                                        nameController.text)
+                                                    .rank!;
+                                                phoneController.text = visitor
+                                                    .lastWhere((element) =>
+                                                        element.name ==
+                                                        nameController.text)
+                                                    .phone_number!;
+                                                additionalPhoneController
+                                                    .text = visitor
+                                                        .firstWhere((element) =>
+                                                            element.name ==
+                                                            nameController.text)
+                                                        .additional_phone_number ??
+                                                    '';
+                                                departmentController.text =
+                                                    visitor
+                                                        .firstWhere((element) =>
+                                                            element.name ==
+                                                            nameController.text)
+                                                        .department!;
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Text(cubit
+                                                    .searchByNameResults[index]
+                                                    .name!),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    SizedBox(
+                                      height: 20,
+                                    ),
+                                    //Phone
+                                    Row(
+                                      children: [
+                                        Icon(Icons.phone, color: Colors.blue),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.5,
+                                          child: numbersFormField(
+                                              maxLength: 11,
+                                              radius: BorderRadius.circular(5),
+                                              textColor: Colors.black,
+                                              labelColor: Colors.black,
+                                              controller: phoneController,
+                                              type: TextInputType.text,
+                                              label: phoneNo,
+                                              onChange: (value) {
+                                                cubit.searchByPhone(value);
+                                              },
+                                              validate: (val) {
+                                                return null;
+                                              }),
+                                        ),
+                                      ],
+                                    ),
+                                    // For phone search
+                                    if (phoneController.text.isNotEmpty &&
+                                        cubit.searchByPhoneResults.isNotEmpty)
+                                      SingleChildScrollView(
+                                        child: SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.5,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.2,
+                                          child: ListView.separated(
+                                            itemCount: cubit
+                                                .searchByPhoneResults.length,
+                                            separatorBuilder: (context,
+                                                    index) =>
+                                                myDivider(color: Colors.grey),
+                                            itemBuilder: (context, index) =>
+                                                InkWell(
+                                              onTap: () {
+                                                nameController.text = cubit
+                                                    .searchByPhoneResults[index]
+                                                    .name!;
+                                                rankController.text = visitor
+                                                    .firstWhere((element) =>
+                                                        element.name ==
+                                                        nameController.text)
+                                                    .rank!;
+                                                phoneController.text = visitor
+                                                    .firstWhere((element) =>
+                                                        element.name ==
+                                                        nameController.text)
+                                                    .phone_number!;
+                                                additionalPhoneController
+                                                    .text = visitor
+                                                        .firstWhere((element) =>
+                                                            element.name ==
+                                                            nameController.text)
+                                                        .additional_phone_number ??
+                                                    '';
+                                                departmentController.text =
+                                                    visitor
+                                                        .firstWhere((element) =>
+                                                            element.name ==
+                                                            nameController.text)
+                                                        .department!;
 
-                                  SizedBox(height: 20),
-                                  defaultButton(
-                                    width: 200,
-                                    radius: 15,
-                                    fSize: 20,
-                                    background: Colors.blue,
-                                    tColor: Colors.white,
-                                    text: add,
-                                    function: () {
-                                      if (_formkey.currentState!.validate()) {
-                                        final visitorId = visitor.firstWhere(
-                                              (element) => element.name == nameController.text,
-                                          orElse: () =>  VisitorModel(id: 0), // Provide a default value or handle it as needed
-                                        ).id!;
-
-                                        if (visitorId == 0) {
-                                          QuickAlert.show(
-                                            width: MediaQuery.of(context).size.width * 0.2,
-                                            context: context,
-                                            animType: QuickAlertAnimType.scale,
-                                            type: QuickAlertType.warning,
-                                            autoCloseDuration: Duration(seconds: 5),
-                                            title: addWarning,
-                                            confirmBtnText: done,
-                                            onConfirmBtnTap: () {
-                                              Navigator.pop(context);
-                                              showDialog(
-                                                  context: context,
-                                                  builder: (context) => newVisitor(context, cubit));
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Text(cubit
+                                                    .searchByPhoneResults[index]
+                                                    .phone_number!),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    //Additional Phone Number
+                                    Row(
+                                      children: [
+                                        Icon(Icons.contact_phone,
+                                            color: Colors.blue),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                              .size
+                                              .width *
+                                              0.5,
+                                          child: numbersFormField(
+                                              maxLength: 11,
+                                              labelColor: Colors.blueAccent
+                                                  .withAlpha(190),
+                                              textColor: Colors.black,
+                                              radius: BorderRadius.circular(10),
+                                              controller:
+                                              additionalPhoneController,
+                                              type: TextInputType.text,
+                                              label: additionalPhoneNo,
+                                              validate: (value) {
+                                                return null;
+                                              }),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    //Department
+                                    Row(
+                                      children: [
+                                        Icon(Icons.place_rounded,
+                                            color: Colors.blue),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        //department
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                              .size
+                                              .width *
+                                              0.5,
+                                          child: CustomDropDownMenu(
+                                            space: 0,
+                                            controller:
+                                            departmentController,
+                                            title: department,
+                                            screenWidth: MediaQuery.of(context)
+                                                .size
+                                                .width *
+                                                0.8,
+                                            screenRatio: MediaQuery.of(context)
+                                                .devicePixelRatio,
+                                            entries: [
+                                              for (var item
+                                              in cubit.departments)
+                                                DropdownMenuEntry(
+                                                  value: item,
+                                                  label: item,
+                                                )
+                                            ],
+                                            onSelected: (value) {
+                                              visitorDepartmentController.text =
+                                                  value;
                                             },
-                                          );
-                                        }
-                                         else {
-                                          cubit.addSubject(subjectName: subjectController.text);
-                                          cubit.addVisit(
-                                            visitor_id: visitor.firstWhere((element) => element.name == nameController.text).id!,
-                                            visitDestination: destinationController.text,
+                                          ),
+                                        ),
+                                        // SizedBox(
+                                        //   width:
+                                        //       MediaQuery.of(context).size.width * 0.5,
+                                        //   child: defaultFormField(
+                                        //       labelColor:
+                                        //           Colors.blueAccent.withAlpha(190),
+                                        //       textColor: Colors.black,
+                                        //       radius: BorderRadius.circular(10),
+                                        //       controller: departmentController,
+                                        //       type: TextInputType.text,
+                                        //       label: department,
+                                        //       validate: (value) {
+                                        //         if (value!.isEmpty) {
+                                        //           return departmentError;
+                                        //         }
+                                        //         return null;
+                                        //       }),
+                                        // ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 10),
+                                    //Subject
+                                    Row(
+                                      children: [
+                                        Icon(Icons.subject, color: Colors.blue),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        CustomDropDownMenu(
+                                            title: visitReason,
+                                            controller: subjectController,
+                                            screenWidth: MediaQuery.of(context)
+                                                .size
+                                                .width *
+                                                0.5,
+                                            screenRatio: MediaQuery.of(context)
+                                                .devicePixelRatio,
+                                            entries: [
+                                              for (var item
+                                              in cubit.visitSubject)
+                                                DropdownMenuEntry(
+                                                    value: item, label: item)
+                                            ],
+                                            onSelected: (value) {
+                                              subjectController.text = value;
+                                            }),
+                                      ],
+                                    ),
+                                    SizedBox(height: 10),
+                                    //Feedback
+                                    Row(
+                                      children: [
+                                        Icon(Icons.feedback, color: Colors.blue),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                              .size
+                                              .width *
+                                              0.5,
+                                          child: arabicLettersFormField(
+                                              radius: BorderRadius.circular(5),
+                                              textColor: Colors.black,
+                                              labelColor: Colors.black,
+                                              controller: feedbackController,
+                                              type: TextInputType.text,
+                                              label: feedback,
+                                              onChange: (value) {
+                                                cubit.searchByName(value);
+                                              },
+                                              validate: (val) {
+                                                return null;
+                                              }),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 20),
+                                    defaultButton(
+                                      width: 200,
+                                      radius: 15,
+                                      fSize: 20,
+                                      background: Colors.blue,
+                                      tColor: Colors.white,
+                                      text: add,
+                                      function: () {
+                                        if (_formkey.currentState!.validate()) {
+                                          cubit.addSubject(
+                                              subjectName:
+                                                  subjectController.text);
+                                          cubit.addVisitorAndVisit(
+                                            rank: rankController.text,
+                                            name: nameController.text,
+                                            phone_number: phoneController.text,
+                                            additional_phone_number:
+                                                additionalPhoneController.text,
+                                            department:
+                                                departmentController.text,
+                                            feedback:
+                                            feedbackController.text,
                                             visitReason: subjectController.text,
+                                            context: context,
                                           );
-                                        }
-                                      }
-                                    },
-                                  ),
 
-                                ],
+                                          // final visitorId = visitor
+                                          //     .firstWhere(
+                                          //       (element) =>
+                                          //           element.name ==
+                                          //           nameController.text,
+                                          //       orElse: () => VisitorModel(
+                                          //           id: 0), // Provide a default value or handle it as needed
+                                          //     )
+                                          //     .id!;
+                                          //
+                                          // if (visitorId == 0) {
+                                          //   QuickAlert.show(
+                                          //     width: MediaQuery.of(context)
+                                          //             .size
+                                          //             .width *
+                                          //         0.2,
+                                          //     context: context,
+                                          //     animType: QuickAlertAnimType.scale,
+                                          //     type: QuickAlertType.warning,
+                                          //     autoCloseDuration:
+                                          //         Duration(seconds: 5),
+                                          //     title: addWarning,
+                                          //     confirmBtnText: done,
+                                          //     onConfirmBtnTap: () {
+                                          //       Navigator.pop(context);
+                                          //       showDialog(
+                                          //           context: context,
+                                          //           builder: (context) =>
+                                          //               newVisitor(context, cubit));
+                                          //     },
+                                          //   );
+                                          // } else {
+                                          //   cubit.addSubject(
+                                          //       subjectName:
+                                          //           subjectController.text);
+                                          //   cubit.addVisitorAndVisit(
+                                          //     rank: rankController.text,
+                                          //     name: nameController.text,
+                                          //     phone_number: phoneController.text,
+                                          //     additional_phone_number:
+                                          //         additionalPhoneController.text,
+                                          //     department: departmentController.text,
+                                          //     feedback:
+                                          //         destinationController.text,
+                                          //     visitReason: subjectController.text,
+                                          //     context: context,
+                                          //   );
+                                          //   // cubit.addVisit(
+                                          //   //   visitor_id: visitor
+                                          //   //       .firstWhere((element) =>
+                                          //   //           element.name ==
+                                          //   //           nameController.text)
+                                          //   //       .id!,
+                                          //   //   feedback:
+                                          //   //       destinationController.text,
+                                          //   //   visitReason: subjectController.text,
+                                          //   // );
+                                          // }
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       ),
@@ -316,6 +620,7 @@ class AddNewVisit extends StatelessWidget {
                 },
                 fallback: (BuildContext context) => loadingDialog(context),
               ),
+            ),
           );
         },
         listener: (BuildContext context, state) {
@@ -330,7 +635,8 @@ class AddNewVisit extends StatelessWidget {
             rankController.text = visitorRankController.text;
             nameController.text = visitorNameController.text;
             phoneController.text = visitorPhoneController.text;
-            additionalPhoneController.text = visitorAdditionalPhoneController.text;
+            additionalPhoneController.text =
+                visitorAdditionalPhoneController.text;
             departmentController.text = visitorDepartmentController.text;
 
             Navigator.pop(context);
@@ -340,7 +646,6 @@ class AddNewVisit extends StatelessWidget {
               animType: QuickAlertAnimType.scale,
               type: QuickAlertType.success,
               barrierDismissible: true,
-
               autoCloseDuration: Duration(seconds: 2),
               title: addSuccessMessage,
               confirmBtnText: done,
@@ -353,7 +658,6 @@ class AddNewVisit extends StatelessWidget {
             visitorDepartmentController.clear();
 
             cubit.getVisitors();
-
           }
 
           if (state is addVisitLoading) {
@@ -402,7 +706,7 @@ class AddNewVisit extends StatelessWidget {
                 'phoneNo': phoneController.text,
                 'additionalPhoneNo': additionalPhoneController.text,
                 'department': departmentController.text,
-                'visitDestination': destinationController.text,
+                'feedback': feedbackController.text,
                 'visitReason': subjectController.text,
               },
             );
@@ -426,11 +730,11 @@ class AddNewVisit extends StatelessWidget {
             phoneController.clear();
             additionalPhoneController.clear();
             departmentController.clear();
-            destinationController.clear();
+            feedbackController.clear();
             subjectController.clear();
+
+            cubit.getVisitors();
           }
-
-
         },
       ),
     );

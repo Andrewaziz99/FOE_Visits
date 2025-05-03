@@ -114,6 +114,7 @@ const String department = 'الجهة التابع لها';
 const String visitDestination = 'جهة الزيارة';
 const String visitReason = 'سبب الزيارة';
 const String visitDate = 'تاريخ الزيارة';
+const String feedback = 'ملاحظات';
 
 const String subject = 'سبب الزيارة';
 
@@ -145,6 +146,9 @@ const String notificationMsg = 'تم اضافة زيارة جديدة';
 const String visitCount = 'عدد الزيارات';
 
 var msg = '';
+
+
+const String engRegister = 'تسجيل المهندسين';
 
 const List<String> visitSubject = [
   'مقابلة مع السيد/ مدير الجهاز',

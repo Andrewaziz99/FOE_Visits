@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:visits/modules/Visits/visits_screen.dart';
 import 'constants.dart';
 
@@ -20,7 +21,8 @@ void navigateAndFinish(context, widget) => Navigator.pushAndRemoveUntil(
 
 Widget myDivider({
   Color color = Colors.amber,
-}) => Padding(
+}) =>
+    Padding(
       padding: const EdgeInsetsDirectional.only(
         start: 20.0,
       ),
@@ -46,6 +48,7 @@ Widget defaultButton({
   Color background = Colors.white,
   bool isUpperCase = true,
   bool isClicked = false,
+  bool isDisabled = false,
   double radius = 0.0,
   double? fSize,
   Color tColor = Colors.black,
@@ -57,7 +60,7 @@ Widget defaultButton({
       height: 40.0,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        color: isClicked? background : Colors.amberAccent,
+        color: isClicked ? background : Colors.amberAccent,
       ),
       child: MaterialButton(
         shape: RoundedRectangleBorder(
@@ -67,7 +70,7 @@ Widget defaultButton({
         elevation: 0.8,
         hoverColor: Colors.amberAccent,
         hoverElevation: 0.8,
-        onPressed: function,
+        onPressed: isDisabled ? null : function,
         child: Text(
           isUpperCase ? text.toUpperCase() : text,
           style: TextStyle(color: tColor, fontSize: fSize),
@@ -75,7 +78,72 @@ Widget defaultButton({
       ),
     );
 
-Widget defaultFormField({
+Widget defaultFormField(
+        {required TextEditingController controller,
+        required TextInputType type,
+        required String label,
+        required String? Function(String?)? validate,
+        Function(String)? onSubmit,
+        Function(String)? onChange,
+        Function()? suffixPressed,
+        Function()? onTap,
+        Color labelColor = Colors.white60,
+        Color textColor = Colors.white,
+        Color prefixColor = Colors.white,
+        Color suffixColor = Colors.white,
+        double labelSize = 20,
+        double textSize = 20,
+        bool isPassword = false,
+        IconData? prefix,
+        IconData? suffix,
+        bool isClickable = true,
+        BorderRadius radius = BorderRadius.zero,
+        TextDirection textDirection = TextDirection.ltr,
+        int? maxLength,
+        bool restrictToLettersOnly = false}) =>
+    TextFormField(
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\u0600-\u06FF\s]'))
+      ],
+      // Allow only numbers
+      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+      maxLength: maxLength,
+      controller: controller,
+      keyboardType: type,
+      obscureText: isPassword,
+      enabled: isClickable,
+      onFieldSubmitted: onSubmit,
+      onChanged: onChange,
+      onTap: onTap,
+      validator: validate,
+      style: TextStyle(color: textColor, fontSize: textSize),
+      decoration: InputDecoration(
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Colors.greenAccent,
+          ),
+        ),
+        alignLabelWithHint: true,
+        label: Text(label,
+            textDirection: textDirection,
+            textAlign: TextAlign.right,
+            style: TextStyle(fontSize: labelSize)),
+        labelStyle: TextStyle(
+          color: labelColor,
+        ),
+        prefixIcon: Icon(prefix, color: prefixColor),
+        suffixIcon: suffix != null
+            ? IconButton(
+                onPressed: suffixPressed,
+                icon: Icon(suffix, color: suffixColor),
+              )
+            : null,
+        border: OutlineInputBorder(
+            borderRadius: radius, borderSide: BorderSide(color: Colors.black)),
+      ),
+    );
+
+Widget arabicLettersFormField({
   required TextEditingController controller,
   required TextInputType type,
   required String label,
@@ -99,6 +167,11 @@ Widget defaultFormField({
   int? maxLength,
 }) =>
     TextFormField(
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\u0600-\u06FF\s]'))
+      ],
+      // Allow only letters
+      maxLengthEnforcement: MaxLengthEnforcement.enforced,
       maxLength: maxLength,
       controller: controller,
       keyboardType: type,
@@ -108,10 +181,7 @@ Widget defaultFormField({
       onChanged: onChange,
       onTap: onTap,
       validator: validate,
-      style: TextStyle(
-        color: textColor,
-        fontSize: textSize
-      ),
+      style: TextStyle(color: textColor, fontSize: textSize),
       decoration: InputDecoration(
         focusedBorder: const OutlineInputBorder(
           borderSide: BorderSide(
@@ -119,7 +189,10 @@ Widget defaultFormField({
           ),
         ),
         alignLabelWithHint: true,
-        label: Text(label, textDirection: textDirection, textAlign: TextAlign.right, style: TextStyle(fontSize: labelSize)),
+        label: Text(label,
+            textDirection: textDirection,
+            textAlign: TextAlign.right,
+            style: TextStyle(fontSize: labelSize)),
         labelStyle: TextStyle(
           color: labelColor,
         ),
@@ -130,7 +203,71 @@ Widget defaultFormField({
                 icon: Icon(suffix, color: suffixColor),
               )
             : null,
-        border: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide(color: Colors.black)),
+        border: OutlineInputBorder(
+            borderRadius: radius, borderSide: BorderSide(color: Colors.black)),
+      ),
+    );
+
+Widget numbersFormField({
+  required TextEditingController controller,
+  required String label,
+  required String? Function(String?)? validate,
+  required int maxLength, // Made required to enforce length control
+  Function(String)? onSubmit,
+  Function(String)? onChange,
+  Function()? suffixPressed,
+  Function()? onTap,
+  TextInputType type = TextInputType.number,
+  Color labelColor = Colors.white60,
+  Color textColor = Colors.white,
+  Color prefixColor = Colors.white,
+  Color suffixColor = Colors.white,
+  double labelSize = 20,
+  double textSize = 20,
+  bool isPassword = false,
+  IconData? prefix,
+  IconData? suffix,
+  bool isClickable = true,
+  BorderRadius radius = BorderRadius.zero,
+  TextDirection textDirection = TextDirection.ltr,
+  bool showCounter = false, // Option to show/hide character counter
+}) =>
+    TextFormField(
+      inputFormatters: [ FilteringTextInputFormatter.digitsOnly],
+      maxLength: maxLength, // Conditionally show counter
+      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+      controller: controller,
+      keyboardType: type,
+      obscureText: isPassword,
+      enabled: isClickable,
+      onFieldSubmitted: onSubmit,
+      onChanged: onChange,
+      onTap: onTap,
+      validator: validate,
+      style: TextStyle(color: textColor, fontSize: textSize),
+      decoration: InputDecoration(
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Colors.greenAccent,
+          ),
+        ),
+        alignLabelWithHint: true,
+        label: Text(label,
+            textDirection: textDirection,
+            textAlign: TextAlign.right,
+            style: TextStyle(fontSize: labelSize)),
+        labelStyle: TextStyle(
+          color: labelColor,
+        ),
+        prefixIcon: Icon(prefix, color: prefixColor),
+        suffixIcon: suffix != null
+            ? IconButton(
+                onPressed: suffixPressed,
+                icon: Icon(suffix, color: suffixColor),
+              )
+            : null,
+        border: OutlineInputBorder(
+            borderRadius: radius, borderSide: BorderSide(color: Colors.black)),
       ),
     );
 
@@ -164,10 +301,7 @@ Widget defaultArabicFormField({
       onChanged: onChange,
       onTap: onTap,
       validator: validate,
-      style: TextStyle(
-        color: textColor,
-        fontSize: textSize
-      ),
+      style: TextStyle(color: textColor, fontSize: textSize),
       decoration: InputDecoration(
         focusedBorder: const OutlineInputBorder(
           borderSide: BorderSide(
@@ -175,7 +309,10 @@ Widget defaultArabicFormField({
           ),
         ),
         alignLabelWithHint: true,
-        label: Text(label, textDirection: textDirection, textAlign: TextAlign.right, style: TextStyle(fontSize: labelSize)),
+        label: Text(label,
+            textDirection: textDirection,
+            textAlign: TextAlign.right,
+            style: TextStyle(fontSize: labelSize)),
         labelStyle: TextStyle(
           color: labelColor,
         ),
@@ -235,7 +372,8 @@ Widget newFormField({
           color: labelColor,
         ),
         // prefixIcon: Icon(prefix, color: prefixColor),
-        prefixIcon: IconButton(onPressed: prefixPressed, icon: Icon(prefix, color: prefixColor)),
+        prefixIcon: IconButton(
+            onPressed: prefixPressed, icon: Icon(prefix, color: prefixColor)),
         suffixIcon: suffix != null
             ? IconButton(
                 onPressed: suffixPressed,
@@ -259,23 +397,21 @@ Future showLoadingDialog(context) => showDialog(
       ),
     );
 
-
-
 class CustomDropDownMenu extends StatelessWidget {
-  const CustomDropDownMenu(
-      {super.key,
-        required this.title,
-        required this.controller,
-        required this.screenWidth,
-        required this.screenRatio,
-        required this.entries,
-        required this.onSelected,
-        this.textColor = Colors.black,
-        this.titleColor = Colors.black,
-        this.textSize = 20,
-        this.titleSize = 20,
-        this.space = 10,
-      });
+  const CustomDropDownMenu({
+    super.key,
+    required this.title,
+    required this.controller,
+    required this.screenWidth,
+    required this.screenRatio,
+    required this.entries,
+    required this.onSelected,
+    this.textColor = Colors.black,
+    this.titleColor = Colors.black,
+    this.textSize = 20,
+    this.titleSize = 20,
+    this.space = 10,
+  });
 
   final String title;
   final Color textColor;
@@ -286,6 +422,7 @@ class CustomDropDownMenu extends StatelessWidget {
   final double screenWidth;
   final double screenRatio;
   final List<DropdownMenuEntry> entries;
+
   // ignore: prefer_typing_uninitialized_variables
   final onSelected;
   final double space;
@@ -296,7 +433,10 @@ class CustomDropDownMenu extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10),
-        Container(margin: const EdgeInsets.all(5), child: Text(title, style: TextStyle(fontSize: titleSize, color: titleColor))),
+        Container(
+            margin: const EdgeInsets.all(5),
+            child: Text(title,
+                style: TextStyle(fontSize: titleSize, color: titleColor))),
         SizedBox(
           height: space,
         ),
@@ -307,7 +447,8 @@ class CustomDropDownMenu extends StatelessWidget {
             child: Align(
               alignment: Alignment.center,
               child: DropdownMenu(
-                textStyle: TextStyle(fontSize: textSize, fontFamily: "Cairo", color: textColor),
+                textStyle: TextStyle(
+                    fontSize: textSize, fontFamily: "Cairo", color: textColor),
                 requestFocusOnTap: true,
                 controller: controller,
                 menuHeight: 200,
@@ -335,7 +476,8 @@ Future<void> showNoInternetDialog(BuildContext context) {
     builder: (BuildContext context) {
       return AlertDialog(
         title: const Text('No Internet Connection'),
-        content: const Text('Please check your internet connection and try again.'),
+        content:
+            const Text('Please check your internet connection and try again.'),
         actions: <Widget>[
           TextButton(
             child: const Text('OK'),
@@ -359,7 +501,9 @@ Widget NotificationDialog(context, String title) => AlertDialog(
             Navigator.of(context).pop();
           },
         ),
-        SizedBox(width: 10.0,),
+        SizedBox(
+          width: 10.0,
+        ),
         TextButton(
           child: const Text(view),
           onPressed: () {

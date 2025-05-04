@@ -103,7 +103,7 @@ Widget defaultFormField(
         bool restrictToLettersOnly = false}) =>
     TextFormField(
       inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\u0600-\u06FF\s]'))
+        restrictToLettersOnly? FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\u0600-\u06FF\s]')) : FilteringTextInputFormatter.allow(RegExp(r'.*'))
       ],
       // Allow only numbers
       maxLengthEnforcement: MaxLengthEnforcement.enforced,

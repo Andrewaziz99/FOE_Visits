@@ -114,6 +114,7 @@ class LoginScreen extends StatelessWidget {
                             SizedBox(height: 30),
 
                             defaultFormField(
+                              restrictToLettersOnly: false,
                               radius: BorderRadius.circular(20),
                               controller: userNameController,
                               type: TextInputType.text,

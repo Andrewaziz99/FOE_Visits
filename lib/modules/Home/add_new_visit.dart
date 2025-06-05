@@ -41,6 +41,9 @@ class _AddNewVisitState extends State<AddNewVisit> {
 
   final _formkey = GlobalKey<FormState>();
 
+  bool showWarningIcon = false;
+
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -117,8 +120,6 @@ class _AddNewVisitState extends State<AddNewVisit> {
             ),
             persistentFooterButtons: [
               defaultButton(
-                  isDisabled: true,
-                  isClicked: false,
                   function: () {
                     showDialog(
                         context: context,
@@ -156,7 +157,7 @@ class _AddNewVisitState extends State<AddNewVisit> {
                                       children: [
                                         Icon(
                                           Icons.military_tech,
-                                          color: Colors.blue,
+                                          color: Colors.red,
                                         ),
                                         SizedBox(
                                           width: 10.0,
@@ -191,7 +192,7 @@ class _AddNewVisitState extends State<AddNewVisit> {
                                     //name
                                     Row(
                                       children: [
-                                        Icon(Icons.person, color: Colors.blue),
+                                        Icon(Icons.person, color: Colors.red),
                                         SizedBox(
                                           width: 10,
                                         ),
@@ -211,7 +212,7 @@ class _AddNewVisitState extends State<AddNewVisit> {
                                                 cubit.searchByName(value);
                                               },
                                               validate: (val) {
-                                                return null;
+                                                return nameError;
                                               }),
                                         ),
                                       ],
@@ -282,7 +283,7 @@ class _AddNewVisitState extends State<AddNewVisit> {
                                     //Phone
                                     Row(
                                       children: [
-                                        Icon(Icons.phone, color: Colors.blue),
+                                        Icon(Icons.phone, color: Colors.red),
                                         SizedBox(
                                           width: 10,
                                         ),
@@ -303,7 +304,7 @@ class _AddNewVisitState extends State<AddNewVisit> {
                                                 cubit.searchByPhone(value);
                                               },
                                               validate: (val) {
-                                                return null;
+                                                return phoneNoError;
                                               }),
                                         ),
                                       ],
@@ -408,7 +409,7 @@ class _AddNewVisitState extends State<AddNewVisit> {
                                     Row(
                                       children: [
                                         Icon(Icons.place_rounded,
-                                            color: Colors.blue),
+                                            color: Colors.red),
                                         SizedBox(
                                           width: 10,
                                         ),
@@ -443,31 +444,13 @@ class _AddNewVisitState extends State<AddNewVisit> {
                                             },
                                           ),
                                         ),
-                                        // SizedBox(
-                                        //   width:
-                                        //       MediaQuery.of(context).size.width * 0.5,
-                                        //   child: defaultFormField(
-                                        //       labelColor:
-                                        //           Colors.blueAccent.withAlpha(190),
-                                        //       textColor: Colors.black,
-                                        //       radius: BorderRadius.circular(10),
-                                        //       controller: departmentController,
-                                        //       type: TextInputType.text,
-                                        //       label: department,
-                                        //       validate: (value) {
-                                        //         if (value!.isEmpty) {
-                                        //           return departmentError;
-                                        //         }
-                                        //         return null;
-                                        //       }),
-                                        // ),
                                       ],
                                     ),
                                     SizedBox(height: 10),
                                     //Subject
                                     Row(
                                       children: [
-                                        Icon(Icons.subject, color: Colors.blue),
+                                        Icon(Icons.subject, color: Colors.red),
                                         SizedBox(
                                           width: 10,
                                         ),
@@ -511,9 +494,6 @@ class _AddNewVisitState extends State<AddNewVisit> {
                                               controller: feedbackController,
                                               type: TextInputType.text,
                                               label: feedback,
-                                              onChange: (value) {
-                                                cubit.searchByName(value);
-                                              },
                                               validate: (val) {
                                                 return null;
                                               }),
@@ -521,92 +501,58 @@ class _AddNewVisitState extends State<AddNewVisit> {
                                       ],
                                     ),
                                     SizedBox(height: 20),
-                                    defaultButton(
-                                      width: 200,
-                                      radius: 15,
-                                      fSize: 20,
-                                      background: Colors.blue,
-                                      tColor: Colors.white,
-                                      text: add,
-                                      function: () {
-                                        if (_formkey.currentState!.validate()) {
-                                          cubit.addSubject(
-                                              subjectName:
-                                                  subjectController.text);
-                                          cubit.addVisitorAndVisit(
-                                            rank: rankController.text,
-                                            name: nameController.text,
-                                            phone_number: phoneController.text,
-                                            additional_phone_number:
-                                                additionalPhoneController.text,
-                                            department:
-                                                departmentController.text,
-                                            feedback:
-                                            feedbackController.text,
-                                            visitReason: subjectController.text,
-                                            context: context,
-                                          );
-
-                                          // final visitorId = visitor
-                                          //     .firstWhere(
-                                          //       (element) =>
-                                          //           element.name ==
-                                          //           nameController.text,
-                                          //       orElse: () => VisitorModel(
-                                          //           id: 0), // Provide a default value or handle it as needed
-                                          //     )
-                                          //     .id!;
-                                          //
-                                          // if (visitorId == 0) {
-                                          //   QuickAlert.show(
-                                          //     width: MediaQuery.of(context)
-                                          //             .size
-                                          //             .width *
-                                          //         0.2,
-                                          //     context: context,
-                                          //     animType: QuickAlertAnimType.scale,
-                                          //     type: QuickAlertType.warning,
-                                          //     autoCloseDuration:
-                                          //         Duration(seconds: 5),
-                                          //     title: addWarning,
-                                          //     confirmBtnText: done,
-                                          //     onConfirmBtnTap: () {
-                                          //       Navigator.pop(context);
-                                          //       showDialog(
-                                          //           context: context,
-                                          //           builder: (context) =>
-                                          //               newVisitor(context, cubit));
-                                          //     },
-                                          //   );
-                                          // } else {
-                                          //   cubit.addSubject(
-                                          //       subjectName:
-                                          //           subjectController.text);
-                                          //   cubit.addVisitorAndVisit(
-                                          //     rank: rankController.text,
-                                          //     name: nameController.text,
-                                          //     phone_number: phoneController.text,
-                                          //     additional_phone_number:
-                                          //         additionalPhoneController.text,
-                                          //     department: departmentController.text,
-                                          //     feedback:
-                                          //         destinationController.text,
-                                          //     visitReason: subjectController.text,
-                                          //     context: context,
-                                          //   );
-                                          //   // cubit.addVisit(
-                                          //   //   visitor_id: visitor
-                                          //   //       .firstWhere((element) =>
-                                          //   //           element.name ==
-                                          //   //           nameController.text)
-                                          //   //       .id!,
-                                          //   //   feedback:
-                                          //   //       destinationController.text,
-                                          //   //   visitReason: subjectController.text,
-                                          //   // );
-                                          // }
-                                        }
-                                      },
+                                    //Add Button
+                                    Row(
+                                      children: [
+                                        defaultButton(
+                                          width: 200,
+                                          radius: 15,
+                                          fSize: 20,
+                                          background: Colors.blue,
+                                          tColor: Colors.white,
+                                          text: add,
+                                          function: () {
+                                            if (subjectController.text.isEmpty || departmentController.text.isEmpty) {
+                                              setState(() {
+                                                showWarningIcon = true;
+                                              });
+                                            }
+                                            else if (_formkey.currentState!.validate() || subjectController.text.isNotEmpty || departmentController.text.isNotEmpty) {
+                                              setState(() {
+                                                showWarningIcon = false;
+                                              });
+                                              cubit.addSubject(
+                                                  subjectName:
+                                                      subjectController.text);
+                                              cubit.addVisitorAndVisit(
+                                                rank: rankController.text,
+                                                name: nameController.text,
+                                                phone_number: phoneController.text,
+                                                additional_phone_number:
+                                                    additionalPhoneController.text,
+                                                department:
+                                                    departmentController.text,
+                                                feedback:
+                                                feedbackController.text,
+                                                visitReason: subjectController.text,
+                                                context: context,
+                                              );
+                                            }
+                                          },
+                                        ),
+                                        SizedBox(
+                                          width: 20,
+                                        ),
+                                        //Warning widgets
+                                        if (showWarningIcon)
+                                        Row(
+                                          children: [
+                                            Icon(Icons.warning_amber, color: Colors.red,),
+                                            SizedBox(width: 20.0,),
+                                            Text(emptyDataError, style: TextStyle(color: Colors.red),)
+                                          ],
+                                        )
+                                      ],
                                     ),
                                   ],
                                 ),

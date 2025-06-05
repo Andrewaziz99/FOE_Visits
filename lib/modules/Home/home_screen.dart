@@ -26,6 +26,7 @@ import 'package:visits/shared/components/constants.dart';
 import 'package:visits/shared/playSound.dart';
 import '../../models/Visitor/visitor_model.dart';
 import '../Auth/cubit/cubit.dart';
+import '../Complaining/complaining_screen.dart';
 import 'cubit/cubit.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -233,7 +234,60 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ],
                                   ),
                                 ),
-
+                                SizedBox(width: 50.0,),
+                                if(!widget.is_admin)
+                                  Container(
+                                    width:
+                                    MediaQuery.of(context).size.width * 0.3,
+                                    height:
+                                    MediaQuery.of(context).size.height * 0.4,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withAlpha(100),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        BlurryContainer(
+                                          elevation: 20,
+                                          child: Image.asset(
+                                            'assets/images/comlpaining.gif',
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        InkWell(
+                                          onTap: () {
+                                            navigateTo(context, ComplainingScreen());
+                                          },
+                                          child: Container(
+                                            height: MediaQuery.of(context)
+                                                .size
+                                                .height *
+                                                0.5,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withAlpha(100),
+                                              borderRadius:
+                                              BorderRadius.circular(20),
+                                            ),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  complaining,
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 30,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 SizedBox(
                                   width: 50.0,
                                 ),
@@ -297,9 +351,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               children: [
                                 Container(
                                   width:
-                                      MediaQuery.of(context).size.width * 0.63,
+                                      MediaQuery.of(context).size.width * 0.3,
                                   height:
-                                      MediaQuery.of(context).size.height * 0.3,
+                                      MediaQuery.of(context).size.height * 0.4,
                                   decoration: BoxDecoration(
                                     color: Colors.white.withAlpha(100),
                                     borderRadius: BorderRadius.circular(20),
@@ -334,6 +388,61 @@ class _HomeScreenState extends State<HomeScreen> {
                                             children: [
                                               Text(
                                                 dailyVisitsLogs,
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 30,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 50.0,
+                                ),
+                                Container(
+                                  width:
+                                  MediaQuery.of(context).size.width * 0.3,
+                                  height:
+                                  MediaQuery.of(context).size.height * 0.4,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withAlpha(100),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      BlurryContainer(
+                                        elevation: 20,
+                                        child: Image.asset(
+                                          'assets/images/comlpaining.gif',
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          navigateTo(context, ComplainingScreen());
+                                        },
+                                        child: Container(
+                                          height: MediaQuery.of(context)
+                                              .size
+                                              .height *
+                                              0.5,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withAlpha(100),
+                                            borderRadius:
+                                            BorderRadius.circular(20),
+                                          ),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                complaining,
                                                 style: TextStyle(
                                                   color: Colors.black,
                                                   fontSize: 30,

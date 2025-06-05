@@ -34,6 +34,7 @@ const String selectDate = 'اختر التاريخ';
 const String addWarning = 'برجاء إضافة بيانات الزائر أولاً من +';
 
 const String addVisit = 'اضافة زيارة';
+const String complaining = 'تسجيل شكوى';
 const String archive = 'أرشيف';
 const String dailyVisits = 'الزيارات اليومية';
 const String agenda = 'الأجندة';
@@ -89,6 +90,8 @@ const String save = 'حفظ';
 const String search = 'بحث';
 const String close = 'اغلاق';
 
+const String addComplaint = 'اضافة شكوى';
+
 const String addSuccess = 'تمت الاضافة بنجاح';
 const String editSuccess = 'تم التعديل بنجاح';
 const String deleteSuccess = 'تم الحذف بنجاح';
@@ -111,12 +114,16 @@ const String name = 'الاسم';
 const String phoneNo = 'رقم الهاتف';
 const String additionalPhoneNo = 'رقم الهاتف الاضافى';
 const String department = 'الجهة التابع لها';
+const String departmentOrJob = 'الجهة أو الوظيفة';
 const String visitDestination = 'جهة الزيارة';
 const String visitReason = 'سبب الزيارة';
 const String visitDate = 'تاريخ الزيارة';
 const String feedback = 'ملاحظات';
+const String nationalId = 'الرقم القومى';
+const String address = 'العنوان';
 
 const String subject = 'سبب الزيارة';
+const String complaint = 'موضوع الشكوى';
 
 const String error = 'خطأ';
 const String warning = 'تحذير';
@@ -135,6 +142,13 @@ const String departmentError = 'يجب ادخال الجهة التابع لها
 const String visitDestinationError = 'يجب ادخال جهة الزيارة';
 const String visitReasonError = 'يجب ادخال سبب الزيارة';
 const String visitDateError = 'يجب ادخال تاريخ الزيارة';
+const String emptyDataError = 'لا يمكن ترك البيانات فارغة';
+const String complaintError = 'يجب ادخال موضوع الشكوى';
+const String nationalIdError = 'يجب ادخال الرقم القومى';
+const String addressError = 'يجب ادخال العنوان';
+
+const String phoneNoFormatError = 'رقم الهاتف يجب أن يكون 11 رقمًا';
+const String nationalIdFormatError = 'الرقم القومى يجب أن يكون 14 رقمًا';
 
 const String addSuccessMessage = 'تمت الاضافة بنجاح';
 const String addErrorMessage = 'خطأ فى الاضافة';

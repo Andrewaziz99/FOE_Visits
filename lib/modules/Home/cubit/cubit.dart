@@ -648,5 +648,12 @@ class homeCubit extends Cubit<homeStates> {
     });
   }
 
+  void removeEngineerAt(int index) {
+    if (index >= 0 && index < engineers.length) {
+      engineers.removeAt(index);
+      emit(EngineersUpdatedState(engineers)); // Replace with the appropriate state
+    }
+  }
+
 
 }

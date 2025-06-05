@@ -143,6 +143,68 @@ Widget defaultFormField(
       ),
     );
 
+
+Widget subjectFormField(
+    {required TextEditingController controller,
+      required TextInputType type,
+      required String label,
+      required String? Function(String?)? validate,
+      Function(String)? onSubmit,
+      Function(String)? onChange,
+      Function()? suffixPressed,
+      Function()? onTap,
+      Color labelColor = Colors.white60,
+      Color textColor = Colors.white,
+      Color prefixColor = Colors.white,
+      Color suffixColor = Colors.white,
+      double labelSize = 20,
+      double textSize = 20,
+      bool isPassword = false,
+      IconData? prefix,
+      IconData? suffix,
+      bool isClickable = true,
+      BorderRadius radius = BorderRadius.zero,
+      TextDirection textDirection = TextDirection.ltr,
+      bool restrictToLettersOnly = false}) =>
+    TextFormField(
+      inputFormatters: [
+        restrictToLettersOnly? FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\u0600-\u06FF\s]')) : FilteringTextInputFormatter.allow(RegExp(r'.*'))
+      ],
+      // Allow only numbers
+      minLines: null,
+      maxLines: null,
+      controller: controller,
+      keyboardType: type,
+      obscureText: isPassword,
+      enabled: isClickable,
+      onFieldSubmitted: onSubmit,
+      onChanged: onChange,
+      onTap: onTap,
+      validator: validate,
+      style: TextStyle(color: textColor, fontSize: textSize),
+      decoration: InputDecoration(
+        isCollapsed: false,
+        alignLabelWithHint: true,
+        label: Text(label,
+            textDirection: textDirection,
+            textAlign: TextAlign.right,
+            style: TextStyle(fontSize: labelSize)),
+        labelStyle: TextStyle(
+          color: labelColor,
+        ),
+        prefixIcon: Icon(prefix, color: prefixColor),
+        suffixIcon: suffix != null
+            ? IconButton(
+          onPressed: suffixPressed,
+          icon: Icon(suffix, color: suffixColor),
+        )
+            : null,
+        border: OutlineInputBorder(
+            borderRadius: radius, borderSide: BorderSide(color: Colors.black)),
+      ),
+    );
+
+
 Widget arabicLettersFormField({
   required TextEditingController controller,
   required TextInputType type,
@@ -185,7 +247,7 @@ Widget arabicLettersFormField({
       decoration: InputDecoration(
         focusedBorder: const OutlineInputBorder(
           borderSide: BorderSide(
-            color: Colors.greenAccent,
+            color: Colors.blueAccent,
           ),
         ),
         alignLabelWithHint: true,
@@ -248,7 +310,7 @@ Widget numbersFormField({
       decoration: InputDecoration(
         focusedBorder: const OutlineInputBorder(
           borderSide: BorderSide(
-            color: Colors.greenAccent,
+            color: Colors.blueAccent,
           ),
         ),
         alignLabelWithHint: true,

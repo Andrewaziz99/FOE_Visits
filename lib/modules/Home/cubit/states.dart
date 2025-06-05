@@ -1,3 +1,5 @@
+import 'package:visits/models/Engineers/engineers_model.dart';
+
 abstract class homeStates {}
 
 class homeInitialState extends homeStates {
@@ -123,3 +125,9 @@ class getEngineersLoading extends homeStates {}
 class getEngineersSuccess extends homeStates {}
 
 class getEngineersError extends homeStates {}
+
+class EngineersUpdatedState extends homeStates {
+  final List<EngineersModel> engineers;
+
+  EngineersUpdatedState(this.engineers);
+}

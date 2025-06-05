@@ -124,6 +124,7 @@ const String address = 'العنوان';
 
 const String subject = 'سبب الزيارة';
 const String complaint = 'موضوع الشكوى';
+const String complaintFileName = 'شكوى';
 
 const String error = 'خطأ';
 const String warning = 'تحذير';

@@ -9,6 +9,7 @@ import 'package:visits/modules/Complaining/cubit/states.dart';
 
 import '../../../models/Visitor/visitor_model.dart';
 import '../../../shared/components/constants.dart';
+import '../../../models/Complaining/complaining_model.dart';
 
 class ComplainingCubit extends Cubit<ComplainingStates> {
   ComplainingCubit() : super(ComplainingInitial());
@@ -81,7 +82,12 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       print(error);
     });
   }
-  
+
+
+
+
+
+
   
 
   final currentDate =
@@ -95,6 +101,9 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
   Future<void> printComplaint(String name, String nationalId, String phone, String phone2, String address, String department, String subject) async {
     emit(printComplaintLoading());
     final weekday = getWeekDay(DateFormat('EEEE').format(DateTime.now()));
+    final submitDate = DateTime.now();
+    final reminderTime = submitDate.add(Duration(days: 1));
+    String? docPath;
     try {
       // Locate and read the template
       final appDir = await getTemplatesFolder();
@@ -130,28 +139,55 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       // Generate the document for the current item
       final generatedDoc = await doc.generate(content);
 
-      //Generate unique complaint file number for each complaint
-
-
       if (generatedDoc != null) {
         final Doc = File('$appDir\\output\\$complaintFileName $name $dayDate.docx');
         await Doc.writeAsBytes(generatedDoc, flush: true);
-
+        docPath = Doc.path;
         print("Document generated successfully at: ${Doc.path}");
-
-        emit(printComplaintSuccess());
-
-        final result = await OpenFilex.open(Doc.path);
-        print('Open file result: ${result.type}');
       } else {
         emit(printComplaintError(msg));
         msg = 'Failed to generate document';
         throw Exception("Failed to generate document");
       }
+
+      // Save complaint to DB
+      final complaint = ComplainingModel(
+        name: name,
+        nationalId: nationalId,
+        phone: phone,
+        phone2: phone2,
+        address: address,
+        department: department,
+        subject: subject,
+        submitDate: submitDate,
+        reminderTime: reminderTime,
+        docPath: docPath,
+      );
+      await supabase.from('complaints').insert(complaint.toJson()).then((value) async {
+        emit(printComplaintSuccess());
+
+        final result = await OpenFilex.open(docPath!);
+        print('Open file result: ${result.type}');
+      });
     } catch (e) {
       emit(printComplaintError(e.toString()));
       msg = e.toString();
       print("Error: $e");
+    }
+  }
+
+
+  List<ComplainingModel>? complaints = [];
+
+  Future<void> fetchAllComplaints() async {
+    emit(fetchAllComplaintsLoadingState());
+    try {
+      final response = await supabase.from('complaints').select();
+      complaints =  response.map<ComplainingModel>((json) => ComplainingModel.fromJson(json)).toList();
+      emit(fetchAllComplaintsSuccessState());
+    } catch (e) {
+      emit(fetchAllComplaintsErrorState());
+      print('Error fetching complaints: $e');
     }
   }
 

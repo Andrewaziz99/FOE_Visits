@@ -68,3 +68,10 @@ class printComplaintError extends ComplainingStates {
 
   printComplaintError(this.error);
 }
+
+class fetchAllComplaintsLoadingState extends ComplainingStates {}
+
+class fetchAllComplaintsSuccessState extends ComplainingStates {}
+
+class fetchAllComplaintsErrorState extends ComplainingStates {}
+

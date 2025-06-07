@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:cherry_toast/cherry_toast.dart';
 import 'package:cherry_toast/resources/arrays.dart';
@@ -13,12 +12,11 @@ import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toastification/toastification.dart';
 import 'package:visits/modules/Archive/archive_screen.dart';
+import 'package:visits/modules/Complaining/manage_screen.dart';
 import 'package:visits/modules/Home/add_new_visit.dart';
 import 'package:visits/modules/Home/cubit/states.dart';
 import 'package:visits/modules/Home/endrawer.dart';
 import 'package:visits/modules/Home/new_visit_dialog.dart';
-import 'package:visits/modules/Home/visits_by_date.dart';
-import 'package:visits/modules/Visits/cubit/cubit.dart';
 import 'package:visits/modules/Visits/visits_screen.dart';
 import 'package:visits/modules/loading_screen.dart';
 import 'package:visits/shared/components/components.dart';
@@ -404,6 +402,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 SizedBox(
                                   width: 50.0,
                                 ),
+                                //Complaining Section
                                 Container(
                                   width:
                                   MediaQuery.of(context).size.width * 0.3,
@@ -425,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                       InkWell(
                                         onTap: () {
-                                          navigateTo(context, ComplainingScreen());
+                                          navigateTo(context, ManageScreen());
                                         },
                                         child: Container(
                                           height: MediaQuery.of(context)
@@ -442,7 +441,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             MainAxisAlignment.center,
                                             children: [
                                               Text(
-                                                complaining,
+                                                manageComplaints,
                                                 style: TextStyle(
                                                   color: Colors.black,
                                                   fontSize: 30,

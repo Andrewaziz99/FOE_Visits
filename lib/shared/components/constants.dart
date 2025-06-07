@@ -35,6 +35,7 @@ const String addWarning = 'برجاء إضافة بيانات الزائر أو�
 
 const String addVisit = 'اضافة زيارة';
 const String complaining = 'تسجيل شكوى';
+const String manageComplaints = 'ادارة الشكاوى';
 const String archive = 'أرشيف';
 const String dailyVisits = 'الزيارات اليومية';
 const String agenda = 'الأجندة';

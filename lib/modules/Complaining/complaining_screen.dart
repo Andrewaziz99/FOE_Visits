@@ -1,6 +1,7 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:toastification/toastification.dart';
 import 'package:visits/shared/components/constants.dart';
 import '../../models/Visitor/visitor_model.dart';
 import '../../shared/components/components.dart';
@@ -162,7 +163,8 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                     //National ID
                                     Row(
                                       children: [
-                                        Icon(Icons.credit_card, color: Colors.blue),
+                                        Icon(Icons.credit_card,
+                                            color: Colors.blue),
                                         SizedBox(
                                           width: 10,
                                         ),
@@ -172,18 +174,17 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                                   .width *
                                               0.5,
                                           child: numbersFormField(
-                                            maxLength: 14,
+                                              maxLength: 14,
                                               radius: BorderRadius.circular(5),
                                               textColor: Colors.black,
                                               labelColor: Colors.black,
-                                              controller:  nationalIdController,
+                                              controller: nationalIdController,
                                               type: TextInputType.text,
                                               label: nationalId,
                                               validate: (val) {
                                                 if (val!.isEmpty) {
                                                   return nationalIdError;
-                                                }
-                                                else if (val.length < 14) {
+                                                } else if (val.length < 14) {
                                                   return nationalIdFormatError;
                                                 }
                                                 return null;
@@ -220,8 +221,7 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                               validate: (val) {
                                                 if (val!.isEmpty) {
                                                   return phoneNoError;
-                                                }
-                                                else if (val.length < 11) {
+                                                } else if (val.length < 11) {
                                                   return phoneNoFormatError;
                                                 }
                                                 return null;
@@ -301,15 +301,16 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                         ),
                                         SizedBox(
                                           width: MediaQuery.of(context)
-                                              .size
-                                              .width *
+                                                  .size
+                                                  .width *
                                               0.5,
                                           child: numbersFormField(
                                               maxLength: 11,
                                               radius: BorderRadius.circular(5),
                                               textColor: Colors.black,
                                               labelColor: Colors.black,
-                                              controller: additionalPhoneController,
+                                              controller:
+                                                  additionalPhoneController,
                                               type: TextInputType.text,
                                               label: additionalPhoneNo,
                                               validate: (val) {
@@ -318,18 +319,22 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                         ),
                                       ],
                                     ),
-                                    SizedBox(height: 10.0,),
+                                    SizedBox(
+                                      height: 10.0,
+                                    ),
                                     //Address
                                     Row(
                                       children: [
-                                        Icon(Icons.location_on, color: Colors.blue),
+                                        Icon(Icons.location_on,
+                                            color: Colors.blue),
                                         SizedBox(width: 10.0),
                                         SizedBox(
                                           width: MediaQuery.of(context)
                                                   .size
                                                   .width *
                                               0.5,
-                                          child: arabicLettersFormField(
+                                          child: defaultFormField(
+                                              restrictToLettersOnly: false,
                                               radius: BorderRadius.circular(5),
                                               textColor: Colors.black,
                                               labelColor: Colors.black,
@@ -345,11 +350,14 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                         ),
                                       ],
                                     ),
-                                    SizedBox(height: 20.0,),
+                                    SizedBox(
+                                      height: 20.0,
+                                    ),
                                     //Job or department
                                     Row(
                                       children: [
-                                        Icon(Icons.business, color: Colors.blue),
+                                        Icon(Icons.business,
+                                            color: Colors.blue),
                                         SizedBox(width: 10.0),
                                         SizedBox(
                                           width: MediaQuery.of(context)
@@ -372,7 +380,9 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                         ),
                                       ],
                                     ),
-                                    SizedBox(height: 20.0,),
+                                    SizedBox(
+                                      height: 20.0,
+                                    ),
                                     //Complaint subject multi-line TextField
                                     Row(
                                       children: [
@@ -414,7 +424,7 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                       text: addComplaint,
                                       function: () {
                                         if (_formkey.currentState!.validate()) {
-                                          cubit.printComplaint(
+                                          cubit.addComplaint(
                                             nameController.text,
                                             nationalIdController.text,
                                             phoneController.text,
@@ -441,7 +451,34 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
             ),
           );
         },
-        listener: (BuildContext context, state) {},
+        listener: (BuildContext context, state) {
+          if (state is addComplaintLoadingState) {
+            showDialog(
+                context: context, builder: (context) => loadingDialog(context));
+          }
+          if (state is addComplaintSuccessState) {
+            Navigator.pop(context);
+            Toastification().show(
+              context: context,
+              autoCloseDuration: Duration(seconds: 2),
+              backgroundColor: Colors.green,
+              dragToClose: true,
+              type: ToastificationType.success,
+              title: Text(addComplaintSuccessMsg),
+            );
+          }
+          if (state is addComplaintErrorState) {
+            Navigator.pop(context);
+            Toastification().show(
+              context: context,
+              autoCloseDuration: Duration(seconds: 2),
+              backgroundColor: Colors.red,
+              dragToClose: true,
+              type: ToastificationType.error,
+              title: Text(errorMsg),
+            );
+          }
+        },
       ),
     );
   }

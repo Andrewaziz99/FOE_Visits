@@ -2,11 +2,13 @@ import 'package:conditional_builder_null_safety/conditional_builder_null_safety.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:toastification/toastification.dart';
+import 'package:visits/models/User/user_model.dart';
 import 'package:visits/modules/Complaining/cubit/states.dart';
 import 'package:visits/modules/Complaining/edit_dialog.dart';
 import 'package:visits/modules/Complaining/reminder.dart';
 import 'package:visits/shared/components/components.dart';
 import 'package:visits/shared/components/constants.dart';
+import 'package:visits/shared/network/local/cache_helper.dart';
 import '../../models/Complaining/complaining_model.dart';
 import '../loading_screen.dart';
 import 'cubit/cubit.dart';
@@ -177,7 +179,7 @@ class _ManageScreenState extends State<ManageScreen> {
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height * 0.3,
+                        height: MediaQuery.of(context).size.height * 0.7,
                         child: ConditionalBuilder(
                             condition:
                                 state is! fetchAllComplaintsLoadingState &&
@@ -318,6 +320,7 @@ Widget complaintItem(context, ComplainingModel complaint, index, cubit) {
                 onPressed: () {
                   // Handle print action
                   cubit.printComplaint(complaint);
+                  cubit.printComplaintPdf(complaint);
                 },
               ),
               IconButton(

@@ -5,6 +5,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:printing/printing.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:visits/modules/Complaining/cubit/states.dart';
 
@@ -119,6 +121,9 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
         ..add(TextContent("day", weekday))
         ..add(TextContent("date", date))
         ..add(TextContent("spacer", '\n'))
+        ..add(TextContent("username", currentUser.name))
+        ..add(TextContent("user_nationalId", currentUser.nationalId))
+        ..add(TextContent("user_phone", currentUser.phone))
         ..add(TextContent("name", complaint.name))
         ..add(TextContent("nationalId", complaint.nationalId))
         ..add(TextContent("phone", complaint.phone))
@@ -282,6 +287,42 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
     } catch (e) {
       emit(getTodaysReminderErrorState(e.toString()));
       print('Error fetching todays reminders: $e');
+    }
+  }
+
+  Future<void> printComplaintPdf(ComplainingModel complaint) async {
+    emit(printComplaintLoading());
+    try {
+      final arabicFont = await PdfGoogleFonts.cairoRegular();
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) {
+            return pw.Directionality(
+              textDirection: pw.TextDirection.rtl,
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text('تفاصيل الشكوى', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, font: arabicFont)),
+                  pw.SizedBox(height: 16),
+                  pw.Text('الاسم: ${complaint.name ?? ''}', style: pw.TextStyle(font: arabicFont)),
+                  pw.Text('الرقم القومي: ${complaint.nationalId ?? ''}', style: pw.TextStyle(font: arabicFont)),
+                  pw.Text('رقم الهاتف: ${complaint.phone ?? ''}', style: pw.TextStyle(font: arabicFont)),
+                  pw.Text('رقم هاتف إضافي: ${complaint.phone2 ?? ''}', style: pw.TextStyle(font: arabicFont)),
+                  pw.Text('العنوان: ${complaint.address ?? ''}', style: pw.TextStyle(font: arabicFont)),
+                  pw.Text('القسم: ${complaint.department ?? ''}', style: pw.TextStyle(font: arabicFont)),
+                  pw.Text('الموضوع: ${complaint.subject ?? ''}', style: pw.TextStyle(font: arabicFont)),
+                  pw.Text('تاريخ التقديم: ${complaint.submitDate.toString()}', style: pw.TextStyle(font: arabicFont)),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+      await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+      emit(printComplaintSuccess());
+    } catch (e) {
+      emit(printComplaintError(e.toString()));
     }
   }
 

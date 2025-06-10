@@ -44,7 +44,7 @@ Widget menu(context, cubit, AuthCubit, state) => Drawer(
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  cubit.user != null && cubit.user.username != null ? cubit.user.username! : '',
+                  cubit.user != null && cubit.user.name != null ? cubit.user.name! : '',
                   style: TextStyle(color: Colors.black, fontSize: 20),
                 ),
                 const SizedBox(height: 20),

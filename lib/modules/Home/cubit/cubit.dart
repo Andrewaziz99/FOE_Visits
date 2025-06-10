@@ -108,6 +108,7 @@ class homeCubit extends Cubit<homeStates> {
         .then((value) {
       user = UserModel.fromJson(value.first);
       emit(getUserDataSuccess());
+      currentUser = user!;
     }).catchError((error) {
       emit(getUserDataError());
       print(error);

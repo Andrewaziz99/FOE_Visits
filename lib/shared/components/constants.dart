@@ -1,6 +1,7 @@
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
+import 'package:visits/models/User/user_model.dart';
 import 'package:visits/shared/network/local/cache_helper.dart';
 
 import '../../modules/Auth/login/login_screen.dart';
@@ -175,6 +176,19 @@ const String engRegister = 'تسجيل المهندسين';
 const String addAttachment = 'اضافة مرفق';
 
 List<String> departmentsList = [];
+
+UserModel currentUser = UserModel(
+  id: 0,
+  region: 0,
+  username: '',
+  name: '',
+  nationalId: '',
+  phone: '',
+  user_id: '',
+  image: '',
+  is_admin: false,
+  password: '',
+);
 
 const List<String> visitSubject = [
   'مقابلة مع السيد/ مدير الجهاز',

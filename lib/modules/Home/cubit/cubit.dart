@@ -88,6 +88,7 @@ class homeCubit extends Cubit<homeStates> {
         .select()
         .then((value) {
       departments = value.map((e) => e['depName'] as String).toList();
+      departmentsList = departments;
       emit(getDepartmentsSuccess());
     })
         .catchError((error) {

@@ -462,7 +462,6 @@ Future showLoadingDialog(context) => showDialog(
 class CustomDropDownMenu extends StatelessWidget {
   const CustomDropDownMenu({
     super.key,
-    required this.title,
     required this.controller,
     required this.screenWidth,
     required this.screenRatio,
@@ -473,9 +472,11 @@ class CustomDropDownMenu extends StatelessWidget {
     this.textSize = 20,
     this.titleSize = 20,
     this.space = 10,
+    this.title,
+    this.showTitle = true,
   });
 
-  final String title;
+  final String? title;
   final Color textColor;
   final Color titleColor;
   final double textSize;
@@ -484,6 +485,7 @@ class CustomDropDownMenu extends StatelessWidget {
   final double screenWidth;
   final double screenRatio;
   final List<DropdownMenuEntry> entries;
+  final bool showTitle;
 
   // ignore: prefer_typing_uninitialized_variables
   final onSelected;
@@ -495,9 +497,10 @@ class CustomDropDownMenu extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10),
+        if(showTitle)
         Container(
             margin: const EdgeInsets.all(5),
-            child: Text(title,
+            child: Text(title!,
                 style: TextStyle(fontSize: titleSize, color: titleColor))),
         SizedBox(
           height: space,
@@ -509,6 +512,7 @@ class CustomDropDownMenu extends StatelessWidget {
             child: Align(
               alignment: Alignment.center,
               child: DropdownMenu(
+                hintText: title,
                 textStyle: TextStyle(
                     fontSize: textSize, fontFamily: "Cairo", color: textColor),
                 requestFocusOnTap: true,

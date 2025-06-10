@@ -97,6 +97,9 @@ const String addSuccess = 'تمت الاضافة بنجاح';
 const String editSuccess = 'تم التعديل بنجاح';
 const String deleteSuccess = 'تم الحذف بنجاح';
 
+const String addComplaintSuccessMsg = 'تم إضافة الشكوى بنجاح';
+const String errorMsg = 'حدث خطأ، يرجى إعادة المحاولة';
+
 const String addError = 'خطأ فى الاضافة';
 const String editError = 'خطأ فى التعديل';
 const String deleteError = 'خطأ فى الحذف';
@@ -122,6 +125,8 @@ const String visitDate = 'تاريخ الزيارة';
 const String feedback = 'ملاحظات';
 const String nationalId = 'الرقم القومى';
 const String address = 'العنوان';
+
+const String departments = 'الإدارات';
 
 const String subject = 'سبب الزيارة';
 const String complaint = 'موضوع الشكوى';
@@ -163,8 +168,13 @@ const String visitCount = 'عدد الزيارات';
 
 var msg = '';
 
+const String emptyNotifications = 'لا توجد إشعارات';
 
 const String engRegister = 'تسجيل المهندسين';
+
+const String addAttachment = 'اضافة مرفق';
+
+List<String> departmentsList = [];
 
 const List<String> visitSubject = [
   'مقابلة مع السيد/ مدير الجهاز',

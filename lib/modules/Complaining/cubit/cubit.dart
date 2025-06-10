@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:docx_template/docx_template.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
@@ -30,7 +31,6 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       print(error);
     });
   }
-
 
   List<VisitorModel> searchByPhoneResults = [];
 
@@ -68,41 +68,26 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
   }
 
   List<String> departments = [];
+
   void getDepartments() {
     emit(getDepartmentsLoading());
-    supabase
-        .from('departments')
-        .select()
-        .then((value) {
+    supabase.from('departments').select().then((value) {
       departments = value.map((e) => e['depName'] as String).toList();
       emit(getDepartmentsSuccess(departments));
-    })
-        .catchError((error) {
+    }).catchError((error) {
       emit(getDepartmentsError(error));
       print(error);
     });
   }
 
-
-
-
-
-
-  
-
   final currentDate =
-  convertToArabic(DateFormat('yyyy/MM/dd').format(DateTime.now()));
+      convertToArabic(DateFormat('yyyy/MM/dd').format(DateTime.now()));
   final dayDate =
-  convertToArabic(DateFormat('yyyy-MM-dd').format(DateTime.now()));
+      convertToArabic(DateFormat('yyyy-MM-dd').format(DateTime.now()));
 
-
-
-
-  Future<void> printComplaint(String name, String nationalId, String phone, String phone2, String address, String department, String subject) async {
+  Future<void> printComplaint(ComplainingModel complaint) async {
     emit(printComplaintLoading());
     final weekday = getWeekDay(DateFormat('EEEE').format(DateTime.now()));
-    final submitDate = DateTime.now();
-    final reminderTime = submitDate.add(Duration(days: 1));
     String? docPath;
     try {
       // Locate and read the template
@@ -121,26 +106,32 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
 
       final logo = await File('$appDir\\logo1.png').readAsBytes();
 
+      //set date as 2025/06/10 07:00 AM from the complaint submit date
+      final date = DateFormat('a hh:mm - yyyy/MM/dd')
+          .format(complaint.submitDate.toLocal());
+
+
       // Populate placeholders
       Content content = Content();
       content
         ..add(ImageContent("logo", logo))
         ..add(TextContent("currentDate", currentDate))
         ..add(TextContent("day", weekday))
-        ..add(TextContent("date", currentDate))
+        ..add(TextContent("date", date))
         ..add(TextContent("spacer", '\n'))
-        ..add(TextContent("name", name))
-        ..add(TextContent("nationalId", nationalId))
-        ..add(TextContent("phone", phone))
-        ..add(TextContent("phone2", phone2))
-        ..add(TextContent("address", address))
-        ..add(TextContent("department", department))
-        ..add(TextContent("subject", subject));
+        ..add(TextContent("name", complaint.name))
+        ..add(TextContent("nationalId", complaint.nationalId))
+        ..add(TextContent("phone", complaint.phone))
+        ..add(TextContent("phone2", complaint.phone2))
+        ..add(TextContent("address", complaint.address))
+        ..add(TextContent("department", complaint.department))
+        ..add(TextContent("subject", complaint.subject));
       // Generate the document for the current item
       final generatedDoc = await doc.generate(content);
 
       if (generatedDoc != null) {
-        final Doc = File('$appDir\\output\\$complaintFileName $name $dayDate.docx');
+        final Doc =
+            File('$appDir\\output\\$complaintFileName ${complaint.name} $dayDate.docx');
         await Doc.writeAsBytes(generatedDoc, flush: true);
         docPath = Doc.path;
         print("Document generated successfully at: ${Doc.path}");
@@ -149,9 +140,51 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
         msg = 'Failed to generate document';
         throw Exception("Failed to generate document");
       }
+      emit(printComplaintSuccess());
 
-      // Save complaint to DB
-      final complaint = ComplainingModel(
+      final result = await OpenFilex.open(docPath);
+      print('Open file result: ${result.type}');
+    } catch (e) {
+      emit(printComplaintError(e.toString()));
+      msg = e.toString();
+      print("Error: $e");
+    }
+  }
+
+  var filePath = '';
+
+  Future<FilePickerResult?> pickAttachment() async {
+    emit(getAttachmentLoadingState());
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png'],
+        allowMultiple: true,
+      );
+      if (result != null) {
+        // Optionally, you can store all file paths if needed
+        filePath = result.paths.join(',');
+        emit(getAttachmentSuccessState(result));
+        return result;
+      } else {
+        emit(getAttachmentCancelledState());
+        return null;
+      }
+    } catch (e) {
+      emit(getAttachmentErrorState(e.toString()));
+      return null;
+    }
+  }
+
+
+  Future<void> addComplaint(String name, String nationalId, String phone,
+      String phone2, String address, String department, String subject) async {
+    emit(addComplaintLoadingState());
+    try {
+      final submitDate = DateTime.now();
+      final reminderTime = DateTime.now();
+
+      final newComplaint = ComplainingModel(
         name: name,
         nationalId: nationalId,
         phone: phone,
@@ -161,21 +194,16 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
         subject: subject,
         submitDate: submitDate,
         reminderTime: reminderTime,
-        docPath: docPath,
+        docPath: '',
       );
-      await supabase.from('complaints').insert(complaint.toJson()).then((value) async {
-        emit(printComplaintSuccess());
 
-        final result = await OpenFilex.open(docPath!);
-        print('Open file result: ${result.type}');
-      });
+      await supabase.from('complaints').insert(newComplaint.toJson());
+      emit(addComplaintSuccessState());
     } catch (e) {
-      emit(printComplaintError(e.toString()));
-      msg = e.toString();
-      print("Error: $e");
+      emit(addComplaintErrorState(e.toString()));
+      print('Error adding complaint: $e');
     }
   }
-
 
   List<ComplainingModel>? complaints = [];
 
@@ -183,13 +211,78 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
     emit(fetchAllComplaintsLoadingState());
     try {
       final response = await supabase.from('complaints').select();
-      complaints =  response.map<ComplainingModel>((json) => ComplainingModel.fromJson(json)).toList();
+      complaints = response
+          .map<ComplainingModel>((json) => ComplainingModel.fromJson(json))
+          .toList();
       emit(fetchAllComplaintsSuccessState());
+      getTodaysReminder();
     } catch (e) {
       emit(fetchAllComplaintsErrorState());
       print('Error fetching complaints: $e');
     }
   }
 
+  Future<void> deleteComplaint(complaint_submit_date) async {
+    emit(deleteComplaintLoadingState());
+    try {
+      await supabase
+          .from('complaints')
+          .delete()
+          .eq('submit_date', complaint_submit_date);
+      emit(deleteComplaintSuccessState());
+    } catch (e) {
+      emit(deleteComplaintErrorState());
+    }
+  }
+
+  Future<void> editComplaint (ComplainingModel complaint) async {
+    emit(editComplaintLoadingState());
+    try{
+      await supabase.from('complaints').update({
+        'name': complaint.name,
+        'nationalId': complaint.nationalId,
+        'phone': complaint.phone,
+        'phone2': complaint.phone2,
+        'address': complaint.address,
+        'department': complaint.department,
+        'subject': complaint.subject,
+      }).eq('submit_date', complaint.submitDate).then((value) {
+        emit(editComplaintSuccessState());
+        fetchAllComplaints();
+      });
+    } catch (e) {
+      emit(editComplaintErrorState());
+      print('Error editing complaint: $e');
+    }
+  }
+
+  List<ComplainingModel> todaysReminders = [];
+
+  Future<void> getTodaysReminder() async {
+    emit(getTodaysReminderLoadingState());
+    try {
+
+      final today = DateTime.now();
+
+     final startOfDay = DateTime(today.year, today.month, today.day, 1, 0, 0);
+     final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
+
+
+      final response = await supabase
+          .from('complaints')
+          .select()
+          .gte('reminder_time', startOfDay.toIso8601String())
+          .lte('reminder_time', endOfDay.toIso8601String());
+
+      todaysReminders = response
+          .map<ComplainingModel>((json) => ComplainingModel.fromJson(json))
+          .toList();
+
+      emit(getTodaysReminderSuccessState());
+    } catch (e) {
+      emit(getTodaysReminderErrorState(e.toString()));
+      print('Error fetching todays reminders: $e');
+    }
+  }
 
 }

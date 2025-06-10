@@ -1,3 +1,5 @@
+import 'package:file_picker/file_picker.dart';
+
 abstract class ComplainingStates {}
 
 class ComplainingInitial extends ComplainingStates {}
@@ -74,4 +76,52 @@ class fetchAllComplaintsLoadingState extends ComplainingStates {}
 class fetchAllComplaintsSuccessState extends ComplainingStates {}
 
 class fetchAllComplaintsErrorState extends ComplainingStates {}
+
+class addComplaintLoadingState extends ComplainingStates {}
+
+class addComplaintSuccessState extends ComplainingStates {}
+
+class addComplaintErrorState extends ComplainingStates {
+  final String error;
+
+  addComplaintErrorState(this.error);
+}
+
+class deleteComplaintLoadingState extends ComplainingStates {}
+
+class deleteComplaintSuccessState extends ComplainingStates {}
+
+class deleteComplaintErrorState extends ComplainingStates {}
+
+class editComplaintLoadingState extends ComplainingStates {}
+
+class editComplaintSuccessState extends ComplainingStates {}
+
+class editComplaintErrorState extends ComplainingStates {}
+
+class getTodaysReminderLoadingState extends ComplainingStates {}
+
+class getTodaysReminderSuccessState extends ComplainingStates {}
+
+class getTodaysReminderErrorState extends ComplainingStates {
+  final String error;
+
+  getTodaysReminderErrorState(this.error);
+}
+
+class getAttachmentLoadingState extends ComplainingStates {}
+
+class getAttachmentSuccessState extends ComplainingStates {
+  final FilePickerResult attachmentUrl;
+
+  getAttachmentSuccessState(this.attachmentUrl);
+}
+
+class getAttachmentErrorState extends ComplainingStates {
+  final String error;
+
+  getAttachmentErrorState(this.error);
+}
+
+class getAttachmentCancelledState extends ComplainingStates {}
 

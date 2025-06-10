@@ -2,6 +2,7 @@ import 'package:conditional_builder_null_safety/conditional_builder_null_safety.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:toastification/toastification.dart';
+import 'package:visits/modules/Home/home_screen.dart';
 import 'package:visits/shared/components/constants.dart';
 import '../../models/Visitor/visitor_model.dart';
 import '../../shared/components/components.dart';
@@ -415,26 +416,47 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                       ],
                                     ),
                                     SizedBox(height: 20),
-                                    defaultButton(
-                                      width: 200,
-                                      radius: 15,
-                                      fSize: 20,
-                                      background: Colors.blue,
-                                      tColor: Colors.white,
-                                      text: addComplaint,
-                                      function: () {
-                                        if (_formkey.currentState!.validate()) {
-                                          cubit.addComplaint(
-                                            nameController.text,
-                                            nationalIdController.text,
-                                            phoneController.text,
-                                            additionalPhoneController.text,
-                                            addressController.text,
-                                            departmentController.text,
-                                            subjectController.text,
-                                          );
-                                        }
-                                      },
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        defaultButton(
+                                          width: 200,
+                                          radius: 15,
+                                          fSize: 20,
+                                          background: Colors.blue,
+                                          tColor: Colors.white,
+                                          text: addComplaint,
+                                          function: () {
+                                            if (_formkey.currentState!.validate()) {
+                                              cubit.addComplaint(
+                                                nameController.text,
+                                                nationalIdController.text,
+                                                phoneController.text,
+                                                additionalPhoneController.text,
+                                                addressController.text,
+                                                departmentController.text,
+                                                subjectController.text,
+                                              );
+                                            }
+                                          },
+                                        ),
+                                        // Add Spacer
+                                        SizedBox(width: 20.0),
+                                        defaultButton(
+                                          width: 200,
+                                          radius: 15,
+                                          fSize: 20,
+                                          background: Colors.green,
+                                          tColor: Colors.white,
+                                          text: addAttachment,
+                                          function: () {
+                                            cubit.pickAttachment();
+                                          },
+                                        ),
+                                        SizedBox(width: 20.0,),
+                                        Text(cubit.filePath ?? '', style: TextStyle(color: Colors.green),),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -457,6 +479,13 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                 context: context, builder: (context) => loadingDialog(context));
           }
           if (state is addComplaintSuccessState) {
+            nameController.clear();
+            nationalIdController.clear();
+            phoneController.clear();
+            additionalPhoneController.clear();
+            addressController.clear();
+            departmentController.clear();
+            subjectController.clear();
             Navigator.pop(context);
             Toastification().show(
               context: context,
@@ -466,6 +495,7 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
               type: ToastificationType.success,
               title: Text(addComplaintSuccessMsg),
             );
+            navigateAndFinish(context, HomeScreen(is_admin: false));
           }
           if (state is addComplaintErrorState) {
             Navigator.pop(context);

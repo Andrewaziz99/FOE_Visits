@@ -22,9 +22,7 @@ import 'package:visits/modules/loading_screen.dart';
 import 'package:visits/shared/components/components.dart';
 import 'package:visits/shared/components/constants.dart';
 import 'package:visits/shared/playSound.dart';
-import '../../models/User/user_model.dart';
 import '../../models/Visitor/visitor_model.dart';
-import '../../shared/network/local/cache_helper.dart';
 import '../Auth/cubit/cubit.dart';
 import '../Complaining/complaining_screen.dart';
 import 'cubit/cubit.dart';
@@ -102,7 +100,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return BlocProvider(
       create: (BuildContext context) => homeCubit()
         ..getUserData()
-        ..getVisitors(),
+        ..getVisitors()
+        ..getDepartments(),
       child: BlocConsumer<homeCubit, homeStates>(
         builder: (BuildContext context, state) {
           var cubit = homeCubit.get(context);

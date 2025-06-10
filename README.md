@@ -24,18 +24,6 @@ Welcome to the **Daily Visits Management Application**! This application is desi
     - Filter visits by date, status, or destination.
 
 
----
-
-## Screenshots
-
-![Home Screen](screenshots/home.jpg)
-*Home Screen with visit details*
-
-
-![Visit Calendar](screenshots/daily_visits.png)
-*Calendar view for scheduled visits*
-
----
 
 ### Steps
 
@@ -98,30 +86,6 @@ Welcome to the **Daily Visits Management Application**! This application is desi
 - **State Management**: Flutter Bloc
 - **Database**: Supabase Realtime Database
 - **UI Components**: Flutter Material Design
-
----
-
-## Folder Structure
-
-```
-lib/
-├── main.dart
-├── models/
-│   ├── visitor_model.dart
-│   ├── visit_model.dart
-├── modules/
-│   ├── Auth/
-│   │   ├── cubit/
-│   │   ├── screens/
-│   ├── Home/
-│   │   ├── cubit/
-│   │   ├── screens/
-│   │   ├── widgets/
-├── shared/
-│   ├── components/
-│   ├── constants/
-│   ├── styles/
-```
 
 ---
 

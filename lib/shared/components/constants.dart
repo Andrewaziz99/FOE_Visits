@@ -131,6 +131,7 @@ const String departments = 'الإدارات';
 
 const String subject = 'سبب الزيارة';
 const String complaint = 'موضوع الشكوى';
+const String complaintDetails = 'تفاصيل الشكوى';
 const String complaintFileName = 'شكوى';
 
 const String error = 'خطأ';
@@ -167,6 +168,9 @@ const String notificationMsg = 'تم اضافة زيارة جديدة';
 
 const String visitCount = 'عدد الزيارات';
 
+const String noComplaintsFound = 'لا توجد شكاوى';
+
+const String assign = 'تعيين';
 var msg = '';
 
 const String emptyNotifications = 'لا توجد إشعارات';

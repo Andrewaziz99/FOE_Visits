@@ -2,15 +2,14 @@ import 'package:conditional_builder_null_safety/conditional_builder_null_safety.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:toastification/toastification.dart';
-import 'package:visits/models/User/user_model.dart';
 import 'package:visits/modules/Complaining/cubit/states.dart';
 import 'package:visits/modules/Complaining/edit_dialog.dart';
 import 'package:visits/modules/Complaining/reminder.dart';
 import 'package:visits/shared/components/components.dart';
 import 'package:visits/shared/components/constants.dart';
-import 'package:visits/shared/network/local/cache_helper.dart';
 import '../../models/Complaining/complaining_model.dart';
 import '../loading_screen.dart';
+import 'complaint_dialog.dart';
 import 'cubit/cubit.dart';
 
 class ManageScreen extends StatefulWidget {
@@ -22,6 +21,7 @@ class ManageScreen extends StatefulWidget {
 
 class _ManageScreenState extends State<ManageScreen> {
   final TextEditingController departmentsController = TextEditingController();
+  List<ComplainingModel>? complaints = [];
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class _ManageScreenState extends State<ManageScreen> {
       child: BlocConsumer<ComplainingCubit, ComplainingStates>(
         builder: (BuildContext context, state) {
           final cubit = ComplainingCubit.get(context);
-          List<ComplainingModel>? complaints = cubit.complaints;
+          complaints = cubit.complaints;
           return Scaffold(
             appBar: AppBar(
               iconTheme: const IconThemeData(
@@ -58,7 +58,8 @@ class _ManageScreenState extends State<ManageScreen> {
               ),
               centerTitle: true,
               actions: [
-                Stack(children: [
+                Stack(
+                    children: [
                   IconButton(
                       onPressed: () {
                         showModalBottomSheet(
@@ -87,13 +88,14 @@ class _ManageScreenState extends State<ManageScreen> {
                               itemBuilder: (context, index) {
                                 final reminder = reminders[index];
                                 return ListTile(
+                                  onTap: (){showDialog(context: context, builder: (context) => ComplaintDialog(context, reminder, cubit));},
                                   leading: Icon(Icons.notifications, color: Colors.amberAccent),
                                   title: Text(
-                                    reminder.name ?? 'Notification',
+                                    reminder.compDepartment!,
                                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                   ),
                                   subtitle: Text(
-                                    reminder.subject ?? '',
+                                    status[reminder.status]!,
                                     style: TextStyle(color: Colors.white70),
                                   ),
                                 );
@@ -147,7 +149,6 @@ class _ManageScreenState extends State<ManageScreen> {
                     gradient: RadialGradient(colors: [
                       Color(0xFF3B3B40),
                       Color(0xFF2b2d30),
-                      // Color(0xFF4ECDC4),
                     ]),
                   ),
                 ),
@@ -175,32 +176,48 @@ class _ManageScreenState extends State<ManageScreen> {
                               for (var value in departmentsList)
                                 DropdownMenuEntry(value: value, label: value)
                             ],
-                            onSelected: (val) {}),
+                            onSelected: (val) {
+                              cubit.fetchComplaintsByDepartment(val);
+                            }),
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height * 0.7,
                         child: ConditionalBuilder(
-                            condition:
-                                state is! fetchAllComplaintsLoadingState &&
-                                    state is! getTodaysReminderLoadingState,
-                            builder: (context) {
-                              return Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: ListView.separated(
-                                    itemBuilder: (context, index) =>
-                                        complaintItem(context,
-                                            complaints[index], index, cubit),
-                                    separatorBuilder: (context, index) =>
-                                        myDivider(color: Colors.white),
-                                    itemCount: complaints!.length),
-                              );
-                            },
-                            fallback: (context) => Center(
-                                  child: CircularProgressIndicator(
+                          condition:
+                              state is! fetchAllComplaintsLoadingState &&
+                              state is! getTodaysReminderLoadingState,
+                          builder: (context) {
+                            if (complaints == null || complaints!.isEmpty) {
+                              return Center(
+                                child: Text(
+                                  noComplaintsFound,
+                                  style: TextStyle(
                                     color: Colors.white,
+                                    fontSize: 18,
                                   ),
-                                )),
+                                ),
+                              );
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: ListView.separated(
+                                  itemBuilder: (context, index) =>
+                                      complaintItem(context, complaints![index], index, cubit),
+                                  separatorBuilder: (context, index) =>
+                                      SizedBox(height: 10.0,),
+                                  itemCount: complaints!.length),
+                            );
+                          },
+                          fallback: (context) {
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.0,
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -210,6 +227,7 @@ class _ManageScreenState extends State<ManageScreen> {
           );
         },
         listener: (BuildContext context, state) {
+          final cubit = ComplainingCubit.get(context);
           if (state is fetchAllComplaintsLoadingState) {
             showDialog(
                 context: context, builder: (context) => loadingDialog(context));
@@ -248,13 +266,23 @@ class _ManageScreenState extends State<ManageScreen> {
               title: Text(errorMsg, style: TextStyle(color: Colors.white)),
             );
           }
+
+          if(state is filterComplaintsByDepartmentLoadingState){
+          }
+          if (state is filterComplaintsByDepartmentSuccessState) {
+            // Navigator.pop(context); // Close the loading dialog
+          }
+          if (state is filterComplaintsByDepartmentErrorState) {
+            // Navigator.pop(context);
+          }
+
         },
       ),
     );
   }
 }
 
-Widget complaintItem(context, ComplainingModel complaint, index, cubit) {
+Widget complaintItem(context, ComplainingModel complaint, index, ComplainingCubit cubit) {
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: Card(
@@ -275,7 +303,7 @@ Widget complaintItem(context, ComplainingModel complaint, index, cubit) {
               Text(
                 complaint.subject,
                 style: TextStyle(color: Colors.white70),
-                maxLines: 6,
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
               Align(
@@ -290,12 +318,12 @@ Widget complaintItem(context, ComplainingModel complaint, index, cubit) {
                           title: Text('تفاصيل الشكوى'),
                           // "Complaint Details" in Arabic
                           content: SingleChildScrollView(
-                            child: Text(complaint.subject),
+                            child: Text(complaint.subject,),
                           ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
-                              child: Text('إغلاق'), // "Close" in Arabic
+                              child: Text(close), // "Close" in Arabic
                             ),
                           ],
                         );
@@ -315,12 +343,20 @@ Widget complaintItem(context, ComplainingModel complaint, index, cubit) {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
+                icon: Icon(Icons.add, color: Colors.white),
+                tooltip: assign,
+                onPressed: () {
+                  // Handle download action
+
+                },
+              ),
+              IconButton(
                 icon: Icon(Icons.print, color: Colors.white),
                 tooltip: 'حفظ ملف word',
                 onPressed: () {
                   // Handle print action
                   cubit.printComplaint(complaint);
-                  cubit.printComplaintPdf(complaint);
+                  // cubit.printComplaintPdf(complaint);
                 },
               ),
               IconButton(

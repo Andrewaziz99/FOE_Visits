@@ -205,8 +205,12 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
         subject: subject,
         submitDate: submitDate,
         reminderTime: reminderTime,
-        docPath: '',
         attachments: attachments,
+        docPath: '',
+        specialistName: '',
+        specialistPhone: '',
+        compDepartment: '',
+        status: 0,
       );
 
       await supabase.from('complaints').insert(newComplaint.toJson());
@@ -234,13 +238,31 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
     }
   }
 
-  Future<void> deleteComplaint(complaint_submit_date) async {
+  // Fetch complaints filtered by department from the database
+  Future<void> fetchComplaintsByDepartment(String department) async {
+    emit(filterComplaintsByDepartmentLoadingState());
+    try {
+      final response = await supabase
+          .from('complaints')
+          .select()
+          .eq('compDepartment', department);
+      complaints = response
+          .map<ComplainingModel>((json) => ComplainingModel.fromJson(json))
+          .toList();
+      emit(filterComplaintsByDepartmentSuccessState());
+    } catch (e) {
+      emit(filterComplaintsByDepartmentErrorState(error));
+      print('Error fetching complaints by department: $e');
+    }
+  }
+
+  Future<void> deleteComplaint(complaintSubmitDate) async {
     emit(deleteComplaintLoadingState());
     try {
       await supabase
           .from('complaints')
           .delete()
-          .eq('submit_date', complaint_submit_date);
+          .eq('submit_date', complaintSubmitDate);
       emit(deleteComplaintSuccessState());
     } catch (e) {
       emit(deleteComplaintErrorState());
@@ -282,15 +304,13 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
     emit(getTodaysReminderLoadingState());
     try {
       final today = DateTime.now();
-
-      final startOfDay = DateTime(today.year, today.month, today.day, 1, 0, 0);
+      final startOfDay = DateTime(today.year, today.month, today.day, 0, 0, 0);
       final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
 
       final response = await supabase
           .from('complaints')
           .select()
-          .gte('reminder_time', startOfDay.toIso8601String())
-          .lte('reminder_time', endOfDay.toIso8601String());
+          .or('and(reminder_time.gte.${startOfDay.toIso8601String()},reminder_time.lte.${endOfDay.toIso8601String()}),status.eq.0,status.eq.1');
 
       todaysReminders = response
           .map<ComplainingModel>((json) => ComplainingModel.fromJson(json))
@@ -371,7 +391,8 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
                               font: arabicFont)),
                     ),
                     pw.SizedBox(height: 16),
-                    pw.Text('تاريخ ووقت التقديم: ${complaint.submitDate.toString()}',
+                    pw.Text(
+                        'تاريخ ووقت التقديم: ${complaint.submitDate.toString()}',
                         style: pw.TextStyle(font: arabicFont)),
                     pw.Divider(),
                     pw.Text('موضوع الشكوى:',

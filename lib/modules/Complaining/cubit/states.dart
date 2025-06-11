@@ -125,3 +125,12 @@ class getAttachmentErrorState extends ComplainingStates {
 
 class getAttachmentCancelledState extends ComplainingStates {}
 
+class filterComplaintsByDepartmentLoadingState extends ComplainingStates {}
+
+class filterComplaintsByDepartmentSuccessState extends ComplainingStates {}
+
+class filterComplaintsByDepartmentErrorState extends ComplainingStates {
+  final String error;
+
+  filterComplaintsByDepartmentErrorState(this.error);
+}

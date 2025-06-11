@@ -175,6 +175,12 @@ const String engRegister = 'تسجيل المهندسين';
 
 const String addAttachment = 'اضافة مرفق';
 
+final Map<int, String> status = {
+  0: 'تم إستلام الشكوى',
+  1: 'جاري العمل على الشكوى وتوجيهها إلى المختصين',
+  2: 'تم حل الشكوى',
+};
+
 List<String> departmentsList = [];
 
 UserModel currentUser = UserModel(

@@ -121,7 +121,14 @@ Widget updateDialog(context, ComplainingModel data, cubit) {
               department: departmentController.text,
               subject: subjectController.text,
               submitDate: data.submitDate,
-              reminderTime: data.reminderTime,);
+              reminderTime: data.reminderTime,
+              docPath: data.docPath,
+              attachments: data.attachments,
+              specialistName: data.specialistName,
+              specialistPhone: data.specialistPhone,
+              compDepartment: data.compDepartment,
+              status: data.status,
+          );
           cubit.editComplaint(updated_complaint);
         },
         child: const Text(edit),

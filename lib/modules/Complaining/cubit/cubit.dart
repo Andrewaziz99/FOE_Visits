@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -112,7 +113,6 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       final date = DateFormat('a hh:mm - yyyy/MM/dd')
           .format(complaint.submitDate.toLocal());
 
-
       // Populate placeholders
       Content content = Content();
       content
@@ -135,8 +135,8 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       final generatedDoc = await doc.generate(content);
 
       if (generatedDoc != null) {
-        final Doc =
-            File('$appDir\\output\\$complaintFileName ${complaint.name} $dayDate.docx');
+        final Doc = File(
+            '$appDir\\output\\$complaintFileName ${complaint.name} $dayDate.docx');
         await Doc.writeAsBytes(generatedDoc, flush: true);
         docPath = Doc.path;
         print("Document generated successfully at: ${Doc.path}");
@@ -181,9 +181,15 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
     }
   }
 
-
-  Future<void> addComplaint(String name, String nationalId, String phone,
-      String phone2, String address, String department, String subject) async {
+  Future<void> addComplaint(
+      String name,
+      String nationalId,
+      String phone,
+      String phone2,
+      String address,
+      String department,
+      String subject,
+      String attachments) async {
     emit(addComplaintLoadingState());
     try {
       final submitDate = DateTime.now();
@@ -200,6 +206,7 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
         submitDate: submitDate,
         reminderTime: reminderTime,
         docPath: '',
+        attachments: attachments,
       );
 
       await supabase.from('complaints').insert(newComplaint.toJson());
@@ -240,21 +247,29 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
     }
   }
 
-  Future<void> editComplaint (ComplainingModel complaint) async {
+  Future<void> editComplaint(ComplainingModel complaint) async {
     emit(editComplaintLoadingState());
-    try{
-      await supabase.from('complaints').update({
-        'name': complaint.name,
-        'nationalId': complaint.nationalId,
-        'phone': complaint.phone,
-        'phone2': complaint.phone2,
-        'address': complaint.address,
-        'department': complaint.department,
-        'subject': complaint.subject,
-      }).eq('submit_date', complaint.submitDate).then((value) {
-        emit(editComplaintSuccessState());
-        fetchAllComplaints();
-      });
+    try {
+      await supabase
+          .from('complaints')
+          .update({
+            'name': complaint.name,
+            'nationalId': complaint.nationalId,
+            'phone': complaint.phone,
+            'phone2': complaint.phone2,
+            'address': complaint.address,
+            'department': complaint.department,
+            'subject': complaint.subject,
+            'specialistName': complaint.specialistName,
+            'specialistPhone': complaint.specialistPhone,
+            'compDepartment': complaint.compDepartment,
+            'status': complaint.status
+          })
+          .eq('submit_date', complaint.submitDate)
+          .then((value) {
+            emit(editComplaintSuccessState());
+            fetchAllComplaints();
+          });
     } catch (e) {
       emit(editComplaintErrorState());
       print('Error editing complaint: $e');
@@ -266,12 +281,10 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
   Future<void> getTodaysReminder() async {
     emit(getTodaysReminderLoadingState());
     try {
-
       final today = DateTime.now();
 
-     final startOfDay = DateTime(today.year, today.month, today.day, 1, 0, 0);
-     final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
-
+      final startOfDay = DateTime(today.year, today.month, today.day, 1, 0, 0);
+      final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
 
       final response = await supabase
           .from('complaints')
@@ -297,23 +310,100 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       final pdf = pw.Document();
       pdf.addPage(
         pw.Page(
+          margin: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           build: (pw.Context context) {
-            return pw.Directionality(
-              textDirection: pw.TextDirection.rtl,
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text('تفاصيل الشكوى', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, font: arabicFont)),
-                  pw.SizedBox(height: 16),
-                  pw.Text('الاسم: ${complaint.name ?? ''}', style: pw.TextStyle(font: arabicFont)),
-                  pw.Text('الرقم القومي: ${complaint.nationalId ?? ''}', style: pw.TextStyle(font: arabicFont)),
-                  pw.Text('رقم الهاتف: ${complaint.phone ?? ''}', style: pw.TextStyle(font: arabicFont)),
-                  pw.Text('رقم هاتف إضافي: ${complaint.phone2 ?? ''}', style: pw.TextStyle(font: arabicFont)),
-                  pw.Text('العنوان: ${complaint.address ?? ''}', style: pw.TextStyle(font: arabicFont)),
-                  pw.Text('القسم: ${complaint.department ?? ''}', style: pw.TextStyle(font: arabicFont)),
-                  pw.Text('الموضوع: ${complaint.subject ?? ''}', style: pw.TextStyle(font: arabicFont)),
-                  pw.Text('تاريخ التقديم: ${complaint.submitDate.toString()}', style: pw.TextStyle(font: arabicFont)),
-                ],
+            return pw.Container(
+              decoration: pw.BoxDecoration(
+                border: pw.Border.all(color: PdfColors.black, width: 2),
+              ),
+              padding: const pw.EdgeInsets.all(20),
+              child: pw.Directionality(
+                textDirection: pw.TextDirection.rtl,
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Row(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Text on the right
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.center,
+                          children: [
+                            pw.Text('وزارة الدفاع',
+                                style: pw.TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: pw.FontWeight.bold,
+                                    font: arabicFont)),
+                            pw.Text('جهاز مستقبل مصر للتنمية المستدامة',
+                                style: pw.TextStyle(
+                                    fontSize: 12, font: arabicFont)),
+                            pw.Text('قطاع الضبعة',
+                                style: pw.TextStyle(
+                                    fontSize: 12, font: arabicFont)),
+                            pw.Text('مكتب السيد / مدير الجهاز',
+                                style: pw.TextStyle(
+                                    fontSize: 12, font: arabicFont)),
+                            pw.SizedBox(height: 4),
+                            pw.Text(
+                                'التاريخ: ${DateFormat('yyyy/MM/dd').format(DateTime.now())}',
+                                style: pw.TextStyle(
+                                    fontSize: 12, font: arabicFont)),
+                          ],
+                        ),
+
+                        // Logo on the left
+                        pw.Image(
+                          pw.MemoryImage(
+                            File('assets/images/logo1.png').readAsBytesSync(),
+                          ),
+                          width: 200,
+                          height: 200,
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 12),
+                    pw.Center(
+                      child: pw.Text('نموذج شكوى',
+                          style: pw.TextStyle(
+                              fontSize: 28,
+                              fontWeight: pw.FontWeight.bold,
+                              font: arabicFont)),
+                    ),
+                    pw.SizedBox(height: 16),
+                    pw.Text('تاريخ ووقت التقديم: ${complaint.submitDate.toString()}',
+                        style: pw.TextStyle(font: arabicFont)),
+                    pw.Divider(),
+                    pw.Text('موضوع الشكوى:',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, font: arabicFont)),
+                    pw.Text(complaint.subject,
+                        style: pw.TextStyle(font: arabicFont)),
+                    pw.SizedBox(height: 12),
+                    pw.Divider(),
+                    pw.Text('بيانات مقدم الشكوى:',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, font: arabicFont)),
+                    pw.Text('الاسم: ${complaint.name}',
+                        style: pw.TextStyle(font: arabicFont)),
+                    pw.Text('الرقم القومي: ${complaint.nationalId}',
+                        style: pw.TextStyle(font: arabicFont)),
+                    pw.Text('رقم الهاتف: ${complaint.phone}',
+                        style: pw.TextStyle(font: arabicFont)),
+                    pw.Text('رقم هاتف إضافي: ${complaint.phone2}',
+                        style: pw.TextStyle(font: arabicFont)),
+                    pw.Text('العنوان: ${complaint.address}',
+                        style: pw.TextStyle(font: arabicFont)),
+                    pw.SizedBox(height: 12),
+                    pw.Divider(),
+                    pw.Text('بيانات المستخدم:',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, font: arabicFont)),
+                    pw.Text('القسم: ${complaint.department}',
+                        style: pw.TextStyle(font: arabicFont)),
+                    // Add more user data fields here if available
+                  ],
+                ),
               ),
             );
           },
@@ -325,5 +415,4 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       emit(printComplaintError(e.toString()));
     }
   }
-
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:visits/models/Complaining/complaining_model.dart';
 
 import '../../shared/components/constants.dart';
-import 'cubit/cubit.dart';
 
 TextEditingController nameController = TextEditingController();
 TextEditingController nationalIdController = TextEditingController();
@@ -112,7 +111,7 @@ Widget updateDialog(context, ComplainingModel data, cubit) {
         ),
         onPressed: () {
           // Add update logic here
-          final ComplainingModel updated_complaint = ComplainingModel(
+          final ComplainingModel updatedComplaint = ComplainingModel(
               name: nameController.text,
               nationalId: nationalIdController.text,
               phone: phoneController.text,
@@ -129,7 +128,7 @@ Widget updateDialog(context, ComplainingModel data, cubit) {
               compDepartment: data.compDepartment,
               status: data.status,
           );
-          cubit.editComplaint(updated_complaint);
+          cubit.editComplaint(updatedComplaint);
         },
         child: const Text(edit),
       ),

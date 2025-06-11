@@ -11,6 +11,8 @@ import 'cubit/cubit.dart';
 import 'cubit/states.dart';
 
 class ComplainingScreen extends StatefulWidget {
+  const ComplainingScreen({super.key});
+
   @override
   _ComplainingScreenState createState() => _ComplainingScreenState();
 }

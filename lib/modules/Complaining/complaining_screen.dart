@@ -437,6 +437,8 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                                 addressController.text,
                                                 departmentController.text,
                                                 subjectController.text,
+                                                  cubit.filePath
+
                                               );
                                             }
                                           },
@@ -448,14 +450,14 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                           radius: 15,
                                           fSize: 20,
                                           background: Colors.green,
-                                          tColor: Colors.white,
+                                    tColor: Colors.white,
                                           text: addAttachment,
                                           function: () {
                                             cubit.pickAttachment();
                                           },
                                         ),
                                         SizedBox(width: 20.0,),
-                                        Text(cubit.filePath ?? '', style: TextStyle(color: Colors.green),),
+                                        Text(cubit.filePath, style: TextStyle(color: Colors.green),),
                                       ],
                                     ),
                                   ],
@@ -474,6 +476,7 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
           );
         },
         listener: (BuildContext context, state) {
+          final cubit = ComplainingCubit.get(context);
           if (state is addComplaintLoadingState) {
             showDialog(
                 context: context, builder: (context) => loadingDialog(context));
@@ -486,6 +489,7 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
             addressController.clear();
             departmentController.clear();
             subjectController.clear();
+            cubit.filePath = '';
             Navigator.pop(context);
             Toastification().show(
               context: context,

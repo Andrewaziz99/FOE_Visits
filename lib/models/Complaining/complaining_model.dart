@@ -9,6 +9,12 @@ class ComplainingModel {
   final DateTime submitDate;
   final DateTime reminderTime;
   final String? docPath;
+  final String? attachments;
+  final String? specialistName;
+  final String? specialistPhone;
+  final String? compDepartment;
+  // Assuming status is an integer representing the complaint status
+  final int? status;
 
   ComplainingModel({
     required this.name,
@@ -21,6 +27,11 @@ class ComplainingModel {
     required this.submitDate,
     required this.reminderTime,
     this.docPath,
+    this.attachments,
+    this.specialistName,
+    this.specialistPhone,
+    this.compDepartment,
+    this.status
   });
 
   Map<String, dynamic> toJson() => {
@@ -34,7 +45,14 @@ class ComplainingModel {
     'submit_date': submitDate.toIso8601String(),
     'reminder_time': reminderTime.toIso8601String(),
     'doc_path': docPath,
+    'attachments': attachments,
+    'specialistName': specialistName,
+    'specialistPhone': specialistPhone,
+    'compDepartment': compDepartment,
+    'status': status
   };
+
+
 
   factory ComplainingModel.fromJson(Map<String, dynamic> json) => ComplainingModel(
     name: json['name'],
@@ -47,6 +65,11 @@ class ComplainingModel {
     submitDate: DateTime.parse(json['submit_date']),
     reminderTime: DateTime.parse(json['reminder_time']),
     docPath: json['doc_path'],
+    attachments: json['attachments'],
+    specialistName: json['specialistName'],
+    specialistPhone: json['specialistPhone'],
+    compDepartment: json['compDepartment'],
+    status: json['status'],
   );
 }
 

@@ -4,7 +4,6 @@ import 'package:visits/modules/Home/password.dart';
 import 'package:visits/shared/components/components.dart';
 import '../../shared/components/constants.dart';
 import '../../shared/encrypt.dart';
-import '../Settings/settings_dialog.dart';
 import '../Visits/cubit/states.dart';
 
 

@@ -30,7 +30,7 @@ import 'cubit/cubit.dart';
 class HomeScreen extends StatefulWidget {
   final bool is_admin;
 
-  HomeScreen({super.key, required this.is_admin});
+  const HomeScreen({super.key, required this.is_admin});
   // const HomeScreen({super.key});
 
   @override

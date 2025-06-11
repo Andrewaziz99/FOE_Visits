@@ -65,7 +65,7 @@ Widget reminderDialog(context, ComplainingModel data, ComplainingCubit cubit) {
           foregroundColor: Colors.white,
         ),
         onPressed: () {
-          final edited_complaint = ComplainingModel(
+          final editedComplaint = ComplainingModel(
               name: data.name,
               nationalId: data.nationalId,
               phone: data.phone,
@@ -77,7 +77,7 @@ Widget reminderDialog(context, ComplainingModel data, ComplainingCubit cubit) {
               reminderTime: DateTime.parse(reminderController.text)
           );
 
-          cubit.editComplaint(edited_complaint);
+          cubit.editComplaint(editedComplaint);
           Navigator.of(context).pop();
         },
         child: const Text('تحديث'),

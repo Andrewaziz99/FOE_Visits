@@ -14,9 +14,6 @@ import '../../../models/User/user_model.dart';
 import '../../../models/Visit/visit_data_model.dart';
 import '../../../models/Visit/visit_model.dart';
 import '../../../models/Visitor/visitor_model.dart';
-import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import '../../../shared/components/components.dart';
 import '../../../shared/components/constants.dart';
 import '../../../shared/playSound.dart';
 

@@ -16,7 +16,7 @@ import 'cubit/states.dart';
 import 'eng_screen.dart';
 
 class AddNewVisit extends StatefulWidget {
-  AddNewVisit({super.key});
+  const AddNewVisit({super.key});
 
   @override
   State<AddNewVisit> createState() => _AddNewVisitState();

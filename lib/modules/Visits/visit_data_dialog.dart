@@ -1,7 +1,6 @@
 import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:new_textfield_search/new_textfield_search.dart';
 import 'package:quickalert/quickalert.dart';
 
 import '../../shared/components/components.dart';
@@ -265,7 +264,9 @@ UpdateSheet(context, data, cubit) {
               controller: visitorRankController,
               type: TextInputType.text,
               label: rank,
-              validate: (value) {}),
+              validate: (value) {
+                return null;
+              }),
 
           SizedBox(height: 20.0,),
 
@@ -275,7 +276,9 @@ UpdateSheet(context, data, cubit) {
               controller: visitorNameController,
               type: TextInputType.text,
               label: name,
-              validate: (value) {}),
+              validate: (value) {
+                return null;
+              }),
 
           SizedBox(height: 20.0,),
 
@@ -285,7 +288,9 @@ UpdateSheet(context, data, cubit) {
               controller: visitorPhoneController,
               type: TextInputType.text,
               label: phoneNo,
-              validate: (value) {}),
+              validate: (value) {
+                return null;
+              }),
 
           SizedBox(height: 20.0,),
 
@@ -295,7 +300,9 @@ UpdateSheet(context, data, cubit) {
               controller: visitorAdditionalPhoneController,
               type: TextInputType.text,
               label: additionalPhoneNo,
-              validate: (value) {}),
+              validate: (value) {
+                return null;
+              }),
 
           SizedBox(height: 20.0,),
 
@@ -305,7 +312,9 @@ UpdateSheet(context, data, cubit) {
               controller: visitorDepartmentController,
               type: TextInputType.text,
               label: department,
-              validate: (value) {}),
+              validate: (value) {
+                return null;
+              }),
 
           SizedBox(height: 20.0,),
 
@@ -315,7 +324,9 @@ UpdateSheet(context, data, cubit) {
               controller: visitReasonController,
               type: TextInputType.text,
               label: subject,
-              validate: (value) {}),
+              validate: (value) {
+                return null;
+              }),
 
           SizedBox(height: 20.0,),
 

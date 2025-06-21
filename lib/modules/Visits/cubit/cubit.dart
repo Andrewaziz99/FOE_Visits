@@ -278,13 +278,13 @@ class visitCubit extends Cubit<visitStates> {
   }
 
   final currentDate =
-      convertToArabic(DateFormat('yyyy/MM/dd').format(DateTime.now()));
+      convertToArabic(DateFormat('yyyy/MM/dd').format(selectedDate));
   final dayDate =
-      convertToArabic(DateFormat('yyyy-MM-dd').format(DateTime.now()));
+      convertToArabic(DateFormat('yyyy-MM-dd').format(selectedDate));
 
   Future<void> printDailyVisits() async {
     emit(printDailyVisitsLoading());
-    final weekday = getWeekDay(DateFormat('EEEE').format(DateTime.now()));
+    final weekday = getWeekDay(DateFormat('EEEE').format(selectedDate));
     try {
       // Locate and read the template
       final appDir = await getTemplatesFolder();

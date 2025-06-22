@@ -1,16 +1,15 @@
 import 'dart:io';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:docx_template/docx_template.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
-import 'package:pdf/pdf.dart';
-import 'package:printing/printing.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:visits/modules/Complaining/cubit/states.dart';
-
 import '../../../models/Visitor/visitor_model.dart';
 import '../../../shared/components/constants.dart';
 import '../../../models/Complaining/complaining_model.dart';
@@ -113,25 +112,47 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       final date = DateFormat('a hh:mm - yyyy/MM/dd')
           .format(complaint.submitDate.toLocal());
 
+      //Fetch the attachments if available
+      String? attachments =
+          complaint.attachments != null && complaint.attachments!.isNotEmpty
+              ? complaint.attachments
+              : null;
+      // Get the attachments folder path
+      final attachmentsFolder = await getAttachmentsFolder();
+
+      // Attachments full path
+      final attachmentsPaths = attachments != null
+          ? attachments.split(',').map((e) => '$attachmentsFolder\\$e').toList()
+          : [];
+      // Prepare table rows for attachments
+      List<RowContent> attachmentRows = [];
+      for (int i = 0; i < attachmentsPaths.length; i++) {
+        final filePath = attachmentsPaths[i];
+        final bytes = await File(filePath).readAsBytes();
+        attachmentRows.add(RowContent()
+          ..add(ImageContent('attachment', bytes))
+          ..add(TextContent('index', (i + 1).toString())));
+      }
       // Populate placeholders
       Content content = Content();
-      content
-        ..add(ImageContent("logo", logo))
-        ..add(TextContent("currentDate", currentDate))
-        ..add(TextContent("day", weekday))
-        ..add(TextContent("date", date))
-        ..add(TextContent("spacer", '\n'))
-        ..add(TextContent("username", currentUser.name))
-        ..add(TextContent("user_nationalId", currentUser.nationalId))
-        ..add(TextContent("user_phone", currentUser.phone))
-        ..add(TextContent("name", complaint.name))
-        ..add(TextContent("nationalId", complaint.nationalId))
-        ..add(TextContent("phone", complaint.phone))
-        ..add(TextContent("phone2", complaint.phone2))
-        ..add(TextContent("address", complaint.address))
-        ..add(TextContent("department", complaint.department))
-        ..add(TextContent("subject", complaint.subject));
-      // Generate the document for the current item
+      content.add(ImageContent("logo", logo));
+        content.add(TextContent("currentDate", currentDate));
+        content.add(TextContent("registrationNumber", complaint.registrationNumber));
+        content.add(TextContent("attachments_no", attachmentsPaths.length));
+        content.add(TextContent("day", weekday));
+        content.add(TextContent("date", date));
+        content.add(TextContent("spacer", '\n'));
+        content.add(TextContent("username", currentUser.name));
+        content.add(TextContent("user_nationalId", currentUser.nationalId));
+        content.add(TextContent("user_phone", currentUser.phone));
+        content.add(TextContent("name", complaint.name));
+        content.add(TextContent("nationalId", complaint.nationalId));
+        content.add(TextContent("phone", complaint.phone));
+        content.add(TextContent("phone2", complaint.phone2));
+        content.add(TextContent("address", complaint.address));
+        content.add(TextContent("department", complaint.department));
+        content.add(TextContent("subject", complaint.subject));
+        content.add(TableContent('table', attachmentRows));
       final generatedDoc = await doc.generate(content);
 
       if (generatedDoc != null) {
@@ -168,7 +189,7 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       );
       if (result != null) {
         // Optionally, you can store all file paths if needed
-        filePath = result.paths.join(',');
+        filePath = result.names.join(',');
         emit(getAttachmentSuccessState(result));
         return result;
       } else {
@@ -179,6 +200,26 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       emit(getAttachmentErrorState(e.toString()));
       return null;
     }
+  }
+
+  Future<String> getNextRegistrationNumber() async {
+    // Get current year in two digits
+    final year = DateTime.now().year % 100;
+    // Fetch the last registrationNumber from the database
+    final result = await supabase
+        .from('complaints')
+        .select('registrationNumber')
+        .order('submit_date', ascending: false)
+        .limit(1);
+    int nextNumber = 1;
+    if (result != null && result.isNotEmpty && result[0]['registrationNumber'] != null) {
+      final lastReg = result[0]['registrationNumber'] as String;
+      final parts = lastReg.split('/');
+      if (parts.length == 2 && int.tryParse(parts[1]) != null) {
+        nextNumber = int.parse(parts[1]) + 1;
+      }
+    }
+    return '$year/$nextNumber';
   }
 
   Future<void> addComplaint(
@@ -194,7 +235,7 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
     try {
       final submitDate = DateTime.now();
       final reminderTime = DateTime.now();
-
+      final registrationNumber = await getNextRegistrationNumber();
       final newComplaint = ComplainingModel(
         name: name,
         nationalId: nationalId,
@@ -211,9 +252,29 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
         specialistPhone: '',
         compDepartment: '',
         status: 0,
+        registrationNumber: registrationNumber,
       );
 
       await supabase.from('complaints').insert(newComplaint.toJson());
+      // Save attachments in a writable attachments folder
+      if (attachments.isNotEmpty) {
+        final attachmentPaths = attachments.split(',');
+        final dir = await getAttachmentsFolder();
+        final attachmentsDir = Directory(dir);
+        if (!await attachmentsDir.exists()) {
+          await attachmentsDir.create(recursive: true);
+        }
+        for (final path in attachmentPaths) {
+          final trimmedPath = path.trim();
+          if (trimmedPath.isEmpty) continue;
+          final sourceFile = File(trimmedPath);
+          if (await sourceFile.exists()) {
+            final fileName = sourceFile.uri.pathSegments.last;
+            final destPath = '${attachmentsDir.path}/$fileName';
+            await sourceFile.copy(destPath);
+          }
+        }
+      }
       emit(addComplaintSuccessState());
     } catch (e) {
       emit(addComplaintErrorState(e.toString()));
@@ -307,10 +368,8 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       final startOfDay = DateTime(today.year, today.month, today.day, 0, 0, 0);
       final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
 
-      final response = await supabase
-          .from('complaints')
-          .select()
-          .or('and(reminder_time.gte.${startOfDay.toIso8601String()},reminder_time.lte.${endOfDay.toIso8601String()}),status.eq.0,status.eq.1');
+      final response = await supabase.from('complaints').select().or(
+          'and(reminder_time.gte.${startOfDay.toIso8601String()},reminder_time.lte.${endOfDay.toIso8601String()}),status.eq.0,status.eq.1');
 
       todaysReminders = response
           .map<ComplainingModel>((json) => ComplainingModel.fromJson(json))
@@ -323,117 +382,163 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
     }
   }
 
-  Future<void> printComplaintPdf(ComplainingModel complaint) async {
+  int pages = 0;
+
+  /// Converts a DOCX file to PDF using ConvertAPI and counts the number of pages in the PDF.
+  /// [docxFilePath] is the local path to the DOCX file.
+  /// Returns the number of pages in the PDF, or throws an error.
+  Future<int> convertDocxToPdfAndCountPages(String docxFilePath) async {
     emit(printComplaintLoading());
     try {
-      final arabicFont = await PdfGoogleFonts.cairoRegular();
-      final pdf = pw.Document();
-      pdf.addPage(
-        pw.Page(
-          margin: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-          build: (pw.Context context) {
-            return pw.Container(
-              decoration: pw.BoxDecoration(
-                border: pw.Border.all(color: PdfColors.black, width: 2),
-              ),
-              padding: const pw.EdgeInsets.all(20),
-              child: pw.Directionality(
-                textDirection: pw.TextDirection.rtl,
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Row(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Text on the right
-                        pw.Column(
-                          crossAxisAlignment: pw.CrossAxisAlignment.center,
-                          children: [
-                            pw.Text('وزارة الدفاع',
-                                style: pw.TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: pw.FontWeight.bold,
-                                    font: arabicFont)),
-                            pw.Text('جهاز مستقبل مصر للتنمية المستدامة',
-                                style: pw.TextStyle(
-                                    fontSize: 12, font: arabicFont)),
-                            pw.Text('قطاع الضبعة',
-                                style: pw.TextStyle(
-                                    fontSize: 12, font: arabicFont)),
-                            pw.Text('مكتب السيد / مدير الجهاز',
-                                style: pw.TextStyle(
-                                    fontSize: 12, font: arabicFont)),
-                            pw.SizedBox(height: 4),
-                            pw.Text(
-                                'التاريخ: ${DateFormat('yyyy/MM/dd').format(DateTime.now())}',
-                                style: pw.TextStyle(
-                                    fontSize: 12, font: arabicFont)),
-                          ],
-                        ),
-
-                        // Logo on the left
-                        pw.Image(
-                          pw.MemoryImage(
-                            File('assets/images/logo1.png').readAsBytesSync(),
-                          ),
-                          width: 200,
-                          height: 200,
-                        ),
-                      ],
-                    ),
-                    pw.SizedBox(height: 12),
-                    pw.Center(
-                      child: pw.Text('نموذج شكوى',
-                          style: pw.TextStyle(
-                              fontSize: 28,
-                              fontWeight: pw.FontWeight.bold,
-                              font: arabicFont)),
-                    ),
-                    pw.SizedBox(height: 16),
-                    pw.Text(
-                        'تاريخ ووقت التقديم: ${complaint.submitDate.toString()}',
-                        style: pw.TextStyle(font: arabicFont)),
-                    pw.Divider(),
-                    pw.Text('موضوع الشكوى:',
-                        style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold, font: arabicFont)),
-                    pw.Text(complaint.subject,
-                        style: pw.TextStyle(font: arabicFont)),
-                    pw.SizedBox(height: 12),
-                    pw.Divider(),
-                    pw.Text('بيانات مقدم الشكوى:',
-                        style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold, font: arabicFont)),
-                    pw.Text('الاسم: ${complaint.name}',
-                        style: pw.TextStyle(font: arabicFont)),
-                    pw.Text('الرقم القومي: ${complaint.nationalId}',
-                        style: pw.TextStyle(font: arabicFont)),
-                    pw.Text('رقم الهاتف: ${complaint.phone}',
-                        style: pw.TextStyle(font: arabicFont)),
-                    pw.Text('رقم هاتف إضافي: ${complaint.phone2}',
-                        style: pw.TextStyle(font: arabicFont)),
-                    pw.Text('العنوان: ${complaint.address}',
-                        style: pw.TextStyle(font: arabicFont)),
-                    pw.SizedBox(height: 12),
-                    pw.Divider(),
-                    pw.Text('بيانات المستخدم:',
-                        style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold, font: arabicFont)),
-                    pw.Text('القسم: ${complaint.department}',
-                        style: pw.TextStyle(font: arabicFont)),
-                    // Add more user data fields here if available
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      );
-      await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+      final apiKey =
+          dotenv.env['CONVERTAPI_KEY']; // Replace with your ConvertAPI secret
+      print(apiKey);
+      final url = Uri.parse(
+          'https://v2.convertapi.com/convert/docx/to/pdf?Secret=$apiKey');
+      final docxFile = File(docxFilePath);
+      final request = http.MultipartRequest('POST', url)
+        ..files.add(await http.MultipartFile.fromPath('File', docxFile.path));
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      if (response.statusCode != 200) {
+        throw Exception('Failed to convert DOCX to PDF: ${response.body}');
+      }
+      final pdfUrl = RegExp(r'"Url"\s*:\s*"(.*?)"')
+          .firstMatch(response.body)
+          ?.group(1)
+          ?.replaceAll('\\/', '/');
+      if (pdfUrl == null) throw Exception('PDF URL not found in response');
+      // Download the PDF
+      final pdfResponse = await http.get(Uri.parse(pdfUrl));
+      if (pdfResponse.statusCode != 200) {
+        throw Exception('Failed to download PDF');
+      }
+      final tempDir = await getTemporaryDirectory();
+      final pdfFile = File('${tempDir.path}/converted.pdf');
+      await pdfFile.writeAsBytes(pdfResponse.bodyBytes);
+      // Count PDF pages
+      final pdfDoc = PdfDocument(inputBytes: pdfFile.readAsBytesSync());
+      final pageCount = pdfDoc.pages.count;
+      pdfDoc.dispose();
       emit(printComplaintSuccess());
+      return pageCount;
     } catch (e) {
       emit(printComplaintError(e.toString()));
+      rethrow;
     }
   }
+
+// Future<void> printComplaintPdf(ComplainingModel complaint) async {
+//   emit(printComplaintLoading());
+//   try {
+//     final arabicFont = await PdfGoogleFonts.cairoRegular();
+//     final pdf = pw.Document();
+//     pdf.addPage(
+//       pw.Page(
+//         margin: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+//         build: (pw.Context context) {
+//           return pw.Container(
+//             decoration: pw.BoxDecoration(
+//               border: pw.Border.all(color: PdfColors.black, width: 2),
+//             ),
+//             padding: const pw.EdgeInsets.all(20),
+//             child: pw.Directionality(
+//               textDirection: pw.TextDirection.rtl,
+//               child: pw.Column(
+//                 crossAxisAlignment: pw.CrossAxisAlignment.start,
+//                 children: [
+//                   pw.Row(
+//                     crossAxisAlignment: pw.CrossAxisAlignment.start,
+//                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+//                     children: [
+//                       // Text on the right
+//                       pw.Column(
+//                         crossAxisAlignment: pw.CrossAxisAlignment.center,
+//                         children: [
+//                           pw.Text('وزارة الدفاع',
+//                               style: pw.TextStyle(
+//                                   fontSize: 14,
+//                                   fontWeight: pw.FontWeight.bold,
+//                                   font: arabicFont)),
+//                           pw.Text('جهاز مستقبل مصر للتنمية المستدامة',
+//                               style: pw.TextStyle(
+//                                   fontSize: 12, font: arabicFont)),
+//                           pw.Text('قطاع الضبعة',
+//                               style: pw.TextStyle(
+//                                   fontSize: 12, font: arabicFont)),
+//                           pw.Text('مكتب السيد / مدير الجهاز',
+//                               style: pw.TextStyle(
+//                                   fontSize: 12, font: arabicFont)),
+//                           pw.SizedBox(height: 4),
+//                           pw.Text(
+//                               'التاريخ: ${DateFormat('yyyy/MM/dd').format(DateTime.now())}',
+//                               style: pw.TextStyle(
+//                                   fontSize: 12, font: arabicFont)),
+//                         ],
+//                       ),
+//
+//                       // Logo on the left
+//                       pw.Image(
+//                         pw.MemoryImage(
+//                           File('assets/images/logo1.png').readAsBytesSync(),
+//                         ),
+//                         width: 200,
+//                         height: 200,
+//                       ),
+//                     ],
+//                   ),
+//                   pw.SizedBox(height: 12),
+//                   pw.Center(
+//                     child: pw.Text('نموذج شكوى',
+//                         style: pw.TextStyle(
+//                             fontSize: 28,
+//                             fontWeight: pw.FontWeight.bold,
+//                             font: arabicFont)),
+//                   ),
+//                   pw.SizedBox(height: 16),
+//                   pw.Text(
+//                       'تاريخ ووقت التقديم: ${complaint.submitDate.toString()}',
+//                       style: pw.TextStyle(font: arabicFont)),
+//                   pw.Divider(),
+//                   pw.Text('موضوع الشكوى:',
+//                       style: pw.TextStyle(
+//                           fontWeight: pw.FontWeight.bold, font: arabicFont)),
+//                   pw.Text(complaint.subject,
+//                       style: pw.TextStyle(font: arabicFont)),
+//                   pw.SizedBox(height: 12),
+//                   pw.Divider(),
+//                   pw.Text('بيانات مقدم الشكوى:',
+//                       style: pw.TextStyle(
+//                           fontWeight: pw.FontWeight.bold, font: arabicFont)),
+//                   pw.Text('الاسم: ${complaint.name}',
+//                       style: pw.TextStyle(font: arabicFont)),
+//                   pw.Text('الرقم القومي: ${complaint.nationalId}',
+//                       style: pw.TextStyle(font: arabicFont)),
+//                   pw.Text('رقم الهاتف: ${complaint.phone}',
+//                       style: pw.TextStyle(font: arabicFont)),
+//                   pw.Text('رقم هاتف إضافي: ${complaint.phone2}',
+//                       style: pw.TextStyle(font: arabicFont)),
+//                   pw.Text('العنوان: ${complaint.address}',
+//                       style: pw.TextStyle(font: arabicFont)),
+//                   pw.SizedBox(height: 12),
+//                   pw.Divider(),
+//                   pw.Text('بيانات المستخدم:',
+//                       style: pw.TextStyle(
+//                           fontWeight: pw.FontWeight.bold, font: arabicFont)),
+//                   pw.Text('القسم: ${complaint.department}',
+//                       style: pw.TextStyle(font: arabicFont)),
+//                   // Add more user data fields here if available
+//                 ],
+//               ),
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+//     emit(printComplaintSuccess());
+//   } catch (e) {
+//     emit(printComplaintError(e.toString()));
+//   }
+// }
 }

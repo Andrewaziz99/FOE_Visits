@@ -134,3 +134,13 @@ class filterComplaintsByDepartmentErrorState extends ComplainingStates {
 
   filterComplaintsByDepartmentErrorState(this.error);
 }
+
+class takeCopyLoadingState extends ComplainingStates {}
+
+class takeCopySuccessState extends ComplainingStates {}
+
+class takeCopyErrorState extends ComplainingStates {
+  final String error;
+
+  takeCopyErrorState(this.error);
+}

@@ -4,7 +4,13 @@ import 'package:visits/modules/Complaining/cubit/cubit.dart';
 import 'package:visits/shared/components/constants.dart';
 
 Widget ComplaintDialog(context, ComplainingModel model, ComplainingCubit cubit) => AlertDialog.adaptive(
-  title: Text(complaintDetails),
+  title: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(complaintDetails),
+      Text(Status[model.status]!, style: TextStyle(color: model.status == 0 ? Color(0xFF595757) : model.status == 1 ? Colors.amberAccent : Colors.green),)
+    ],
+  ),
   content: SingleChildScrollView(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,9 +41,13 @@ Widget ComplaintDialog(context, ComplainingModel model, ComplainingCubit cubit) 
         Text('$phoneNo: ${currentUser.phone}', style: TextStyle(fontSize: 18.0, color: Color(0xFF595757)),),
         const SizedBox(height: 10.0,),
         Text('$nationalId: ${currentUser.nationalId}', style: TextStyle(fontSize: 18.0, color: Color(0xFF595757)),),
-
-
       ],
     ),
   ),
+  actions: [
+    TextButton(
+      onPressed: () => Navigator.pop(context),
+      child: const Text(close),
+    ),
+  ],
 );

@@ -36,7 +36,7 @@ const String addWarning = 'برجاء إضافة بيانات الزائر أو�
 
 const String addVisit = 'اضافة زيارة';
 const String complaining = 'تسجيل شكوى';
-const String manageComplaints = 'ادارة الشكاوى';
+const String manageComplaints = 'الشكاوى';
 const String archive = 'أرشيف';
 const String dailyVisits = 'الزيارات اليومية';
 const String agenda = 'الأجندة';
@@ -134,6 +134,10 @@ const String complaint = 'موضوع الشكوى';
 const String complaintDetails = 'تفاصيل الشكوى';
 const String complaintFileName = 'شكوى';
 
+const String specialistName = 'اسم المختص';
+const String specialistPhone = 'رقم هاتف المختص';
+const String complaintDepartment = 'متجه إلى';
+
 const String error = 'خطأ';
 const String warning = 'تحذير';
 const String success = 'نجاح';
@@ -173,13 +177,15 @@ const String noComplaintsFound = 'لا توجد شكاوى';
 const String assign = 'تعيين';
 var msg = '';
 
+const String solved = 'تم حل الشكوى';
+
 const String emptyNotifications = 'لا توجد إشعارات';
 
 const String engRegister = 'تسجيل المهندسين';
 
 const String addAttachment = 'اضافة مرفق';
 
-final Map<int, String> status = {
+final Map<int, String> Status = {
   0: 'تم إستلام الشكوى',
   1: 'جاري العمل على الشكوى وتوجيهها إلى المختصين',
   2: 'تم حل الشكوى',
@@ -358,11 +364,30 @@ Future<void> pickTemplatesFolder() async {
     print("An error occurred while picking folder: $e");
   }
 }
+Future<void> pickAttachmentsFolder() async {
+  try {
+    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+
+    if (selectedDirectory != null) {
+      print("Selected folder: $selectedDirectory");
+      CacheHelper.saveData(key: 'attachments_folder', value: selectedDirectory);
+    } else {
+      print("Folder selection canceled.");
+    }
+  } catch (e) {
+    print("An error occurred while picking folder: $e");
+  }
+}
 
 
 Future<String> getTemplatesFolder() async {
   final templatesFolder = await CacheHelper.getData(key: 'templates_folder');
   return templatesFolder;
+}
+
+Future<String> getAttachmentsFolder() async {
+  final attachmentsFolder = await CacheHelper.getData(key: 'attachments_folder');
+  return attachmentsFolder;
 }
 
 Future<void> getPassword() async{

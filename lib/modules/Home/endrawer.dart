@@ -89,6 +89,17 @@ Widget menu(context, cubit, AuthCubit, state) => Drawer(
         ),
 
         ListTile(
+          leading: Icon(Icons.folder_open_outlined, color: Colors.black,),
+          title: Text(
+            'Attachments Folder',
+            style: TextStyle(color: Colors.black, fontSize: 20),
+          ),
+          onTap: () async {
+            pickAttachmentsFolder();
+          },
+        ),
+
+        ListTile(
           leading: Icon(Icons.exit_to_app_rounded, color: Colors.redAccent,),
           title: Text(
             logout,

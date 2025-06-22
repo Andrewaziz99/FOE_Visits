@@ -15,6 +15,7 @@ class ComplainingModel {
   final String? compDepartment;
   // Assuming status is an integer representing the complaint status
   final int? status;
+  final String? registrationNumber;
 
   ComplainingModel({
     required this.name,
@@ -31,7 +32,8 @@ class ComplainingModel {
     this.specialistName,
     this.specialistPhone,
     this.compDepartment,
-    this.status
+    this.status,
+    this.registrationNumber,
   });
 
   Map<String, dynamic> toJson() => {
@@ -49,7 +51,8 @@ class ComplainingModel {
     'specialistName': specialistName,
     'specialistPhone': specialistPhone,
     'compDepartment': compDepartment,
-    'status': status
+    'status': status,
+    'registrationNumber': registrationNumber,
   };
 
 
@@ -70,7 +73,46 @@ class ComplainingModel {
     specialistPhone: json['specialistPhone'],
     compDepartment: json['compDepartment'],
     status: json['status'],
+    registrationNumber: json['registrationNumber'],
   );
+
+  ComplainingModel copyWith({
+    String? name,
+    String? nationalId,
+    String? phone,
+    String? phone2,
+    String? address,
+    String? department,
+    String? subject,
+    DateTime? submitDate,
+    DateTime? reminderTime,
+    String? docPath,
+    String? attachments,
+    String? specialistName,
+    String? specialistPhone,
+    String? compDepartment,
+    int? status,
+    String? registrationNumber,
+  }) {
+    return ComplainingModel(
+      name: name ?? this.name,
+      nationalId: nationalId ?? this.nationalId,
+      phone: phone ?? this.phone,
+      phone2: phone2 ?? this.phone2,
+      address: address ?? this.address,
+      department: department ?? this.department,
+      subject: subject ?? this.subject,
+      submitDate: submitDate ?? this.submitDate,
+      reminderTime: reminderTime ?? this.reminderTime,
+      docPath: docPath ?? this.docPath,
+      attachments: attachments ?? this.attachments,
+      specialistName: specialistName ?? this.specialistName,
+      specialistPhone: specialistPhone ?? this.specialistPhone,
+      compDepartment: compDepartment ?? this.compDepartment,
+      status: status ?? this.status,
+      registrationNumber: registrationNumber ?? this.registrationNumber,
+    );
+  }
 }
 
 

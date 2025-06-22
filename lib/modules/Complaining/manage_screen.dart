@@ -8,7 +8,7 @@ import 'package:visits/modules/Complaining/reminder.dart';
 import 'package:visits/shared/components/components.dart';
 import 'package:visits/shared/components/constants.dart';
 import '../../models/Complaining/complaining_model.dart';
-import '../loading_screen.dart';
+import 'assignDialog.dart';
 import 'complaint_dialog.dart';
 import 'cubit/cubit.dart';
 
@@ -27,7 +27,7 @@ class _ManageScreenState extends State<ManageScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (BuildContext context) =>
-          ComplainingCubit()..fetchAllComplaints(),
+          ComplainingCubit()..fetchAllComplaints()..getVisitors() ,
       child: BlocConsumer<ComplainingCubit, ComplainingStates>(
         builder: (BuildContext context, state) {
           final cubit = ComplainingCubit.get(context);
@@ -95,7 +95,7 @@ class _ManageScreenState extends State<ManageScreen> {
                                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                   ),
                                   subtitle: Text(
-                                    status[reminder.status]!,
+                                    Status[reminder.status]!,
                                     style: TextStyle(color: Colors.white70),
                                   ),
                                 );
@@ -177,7 +177,12 @@ class _ManageScreenState extends State<ManageScreen> {
                                 DropdownMenuEntry(value: value, label: value)
                             ],
                             onSelected: (val) {
-                              cubit.fetchComplaintsByDepartment(val);
+                              if (val == null || val.isEmpty) {
+                                cubit.fetchAllComplaints();
+                              } else {
+                                cubit.fetchComplaintsByDepartment(val);
+
+                              }
                             }),
                       ),
                       SizedBox(
@@ -199,14 +204,70 @@ class _ManageScreenState extends State<ManageScreen> {
                                 ),
                               );
                             }
+                            // Group complaints by status
+                            Map<int, List<ComplainingModel>> groupedComplaints = {};
+                            for (var complaint in complaints!) {
+                              final status = complaint.status ?? 0;
+                              if (!groupedComplaints.containsKey(status)) {
+                                groupedComplaints[status] = [];
+                              }
+                              groupedComplaints[status]!.add(complaint);
+                            }
+                            // Helper to get status label
+                            String getStatusLabel(int status) {
+                              switch (status) {
+                                case 0:
+                                  return Status[0]!;
+                                case 1:
+                                  return Status[1]!;
+                                case 2:
+                                  return Status[2]!;
+                                default:
+                                  return Status[0]!;
+                              }
+                            }
+                            // Define all possible statuses
+                            final List<int> allStatuses = [0, 1, 2];
                             return Padding(
                               padding: const EdgeInsets.all(20.0),
-                              child: ListView.separated(
-                                  itemBuilder: (context, index) =>
-                                      complaintItem(context, complaints![index], index, cubit),
-                                  separatorBuilder: (context, index) =>
-                                      SizedBox(height: 10.0,),
-                                  itemCount: complaints!.length),
+                              child: ListView(
+                                children: allStatuses.map((status) {
+                                  final complaintsList = groupedComplaints[status] ?? [];
+                                  return Column(
+                                    children: [
+                                      SizedBox(height: 20.0,),
+                                      ExpansionTile(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10.0),
+                                        ),
+                                        iconColor: Colors.white,
+                                        textColor: Colors.white,
+                                        title: Text(
+                                          getStatusLabel(status),
+                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        ),
+                                        collapsedBackgroundColor: Colors.grey[800],
+                                        backgroundColor: Colors.grey[900],
+                                        children: complaintsList.isEmpty
+                                            ? [
+                                                Padding(
+                                                  padding: const EdgeInsets.all(20.0),
+                                                  child: Text(
+                                                    'لا توجد شكاوى لهذه الحالة.',
+                                                    style: TextStyle(color: Colors.white70),
+                                                  ),
+                                                ),
+                                              ]
+                                            : complaintsList
+                                                .asMap()
+                                                .entries
+                                                .map((e) => complaintItem(context, e.value, e.key, cubit))
+                                                .toList(),
+                                      ),
+                                    ],
+                                  );
+                                }).toList(),
+                              ),
                             );
                           },
                           fallback: (context) {
@@ -227,22 +288,20 @@ class _ManageScreenState extends State<ManageScreen> {
           );
         },
         listener: (BuildContext context, state) {
-          final cubit = ComplainingCubit.get(context);
           if (state is fetchAllComplaintsLoadingState) {
-            showDialog(
-                context: context, builder: (context) => loadingDialog(context));
+
           }
           if (state is fetchAllComplaintsSuccessState) {
             // Navigator.pop(context); // Close the loading dialog
           }
 
           if (state is editComplaintLoadingState) {
-            showDialog(
-                context: context, builder: (context) => loadingDialog(context));
+            Center(child: CircularProgressIndicator(color: Colors.white,),);
+            // showDialog(
+            //     context: context, builder: (context) => loadingDialog(context));
           }
           if (state is editComplaintSuccessState) {
-            Navigator.pop(context);
-            Navigator.pop(context);
+            // Navigator.pop(context);
             Toastification().show(
               context: context,
               autoCloseDuration: Duration(seconds: 3),
@@ -266,16 +325,6 @@ class _ManageScreenState extends State<ManageScreen> {
               title: Text(errorMsg, style: TextStyle(color: Colors.white)),
             );
           }
-
-          if(state is filterComplaintsByDepartmentLoadingState){
-          }
-          if (state is filterComplaintsByDepartmentSuccessState) {
-            // Navigator.pop(context); // Close the loading dialog
-          }
-          if (state is filterComplaintsByDepartmentErrorState) {
-            // Navigator.pop(context);
-          }
-
         },
       ),
     );
@@ -291,7 +340,8 @@ Widget complaintItem(context, ComplainingModel complaint, index, ComplainingCubi
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(complaint.name, style: TextStyle(color: Colors.white)),
+              Text(complaint.compDepartment!.isNotEmpty ? complaint.compDepartment!: 'لم توجه*',
+                  style: TextStyle(color: complaint.compDepartment!.isNotEmpty ? Colors.green : Colors.redAccent)),
               SizedBox(
                 height: 10.0,
               )
@@ -315,7 +365,22 @@ Widget complaintItem(context, ComplainingModel complaint, index, ComplainingCubi
                       context: context,
                       builder: (context) {
                         return AlertDialog(
-                          title: Text('تفاصيل الشكوى'),
+                          title: Row(
+                            children: [
+                              Text('تفاصيل الشكوى'),
+                              Spacer(),
+                              Text(
+                                Status[complaint.status]!,
+                                style: TextStyle(
+                                  color: complaint.status == 0
+                                      ? Color(0xFF595757)
+                                      : complaint.status == 1
+                                          ? Colors.amberAccent
+                                          : Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
                           // "Complaint Details" in Arabic
                           content: SingleChildScrollView(
                             child: Text(complaint.subject,),
@@ -342,83 +407,137 @@ Widget complaintItem(context, ComplainingModel complaint, index, ComplainingCubi
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                icon: Icon(Icons.add, color: Colors.white),
-                tooltip: assign,
-                onPressed: () {
-                  // Handle download action
-
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.print, color: Colors.white),
-                tooltip: 'حفظ ملف word',
-                onPressed: () {
-                  // Handle print action
-                  cubit.printComplaint(complaint);
-                  // cubit.printComplaintPdf(complaint);
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.notification_add, color: Colors.amberAccent),
-                tooltip: 'تذكير',
-                onPressed: () {
-                  // Handle notify action
-                  showDialog(
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.withAlpha(50),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.add, color: Colors.white),
+                  tooltip: assign,
+                  onPressed: () {
+                    // Handle assign action
+                    showDialog(
                       context: context,
-                      builder: (context) =>
-                          reminderDialog(context, complaint, cubit));
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.edit, color: Colors.blue),
-                tooltip: edit,
-                onPressed: () {
-                  // Handle edit action
-                  showDialog(
-                      context: context,
-                      builder: (context) =>
-                          updateDialog(context, complaint, cubit));
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                tooltip: delete,
-                onPressed: () {
-                  // Handle delete action
-                  showDialog(context: context, builder: (context) {
-                    return AlertDialog(
-                      title: Text('تأكيد الحذف'),
-                      content: Text(confirmDelete),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text(close),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            cubit.deleteComplaint(complaint.submitDate);
-                            Navigator.of(context).pop();
-                            Toastification().show(
-                              context: context,
-                              autoCloseDuration: Duration(seconds: 3),
-                              backgroundColor: Colors.green,
-                              dragToClose: true,
-                              type: ToastificationType.success,
-                              title: Text(deleteSuccess, style: TextStyle(color: Colors.white)),
-                            );
-                          },
-                          child: Text(delete), // "Delete" in Arabic
-                        ),
-                      ],
+                      builder: (context) => assignDialog(context, complaint, cubit),
                     );
-                  });
-                },
+                  },
+                ),
               ),
+              SizedBox(width: 10.0,),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.withAlpha(50),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.print, color: Colors.white),
+                  tooltip: 'حفظ ملف word',
+                  onPressed: () {
+                    // Handle print action
+                    cubit.printComplaint(complaint);
+                    // cubit.printComplaintPdf(complaint);
+                  },
+                ),
+              ),
+              SizedBox(width: 10.0,),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.withAlpha(50),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.notification_add, color: Colors.amberAccent),
+                  tooltip: 'تذكير',
+                  onPressed: () {
+                    // Handle notify action
+                    showDialog(
+                        context: context,
+                        builder: (context) =>
+                            reminderDialog(context, complaint, cubit));
+                  },
+                ),
+              ),
+              SizedBox(width: 10.0,),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.withAlpha(50),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.edit, color: Colors.blue),
+                  tooltip: edit,
+                  onPressed: () {
+                    // Handle edit action
+                    showDialog(
+                        context: context,
+                        builder: (context) =>
+                            updateDialog(context, complaint, cubit));
+                  },
+                ),
+              ),
+              SizedBox(width: 10.0,),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.withAlpha(50),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red),
+                  tooltip: delete,
+                  onPressed: () {
+                    // Handle delete action
+                    showDialog(context: context, builder: (context) {
+                      return AlertDialog(
+                        title: Text('تأكيد الحذف'),
+                        content: Text(confirmDelete),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text(close),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              cubit.deleteComplaint(complaint.submitDate);
+                              Navigator.of(context).pop();
+                              Toastification().show(
+                                context: context,
+                                autoCloseDuration: Duration(seconds: 3),
+                                backgroundColor: Colors.green,
+                                dragToClose: true,
+                                type: ToastificationType.success,
+                                title: Text(deleteSuccess, style: TextStyle(color: Colors.white)),
+                              );
+                            },
+                            child: Text(delete), // "Delete" in Arabic
+                          ),
+                        ],
+                      );
+                    });
+                  },
+                ),
+              ),
+              SizedBox(width: 10.0,),
+              IconButton(
+                icon: Icon(Icons.check_circle, color: complaint.status == 2 ? Colors.green : Colors.grey),
+                tooltip: solved,
+                onPressed: () {
+                  // Handle assign action
+                  final solvedComplaint = complaint.copyWith(status: 2);
+                  cubit.editComplaint(solvedComplaint);
+                }
+              )
             ],
           ),
-          leading: Text('${index + 1}',
-              style: TextStyle(color: Colors.white, fontSize: 18))),
+          leading: Column(
+            children: [
+              Text(complaint.submitDate.toString().substring(0, 10),
+                  style: TextStyle(color: Colors.white70, fontSize: 14)),
+              SizedBox(height: 10.0,),
+              Text('${complaint.registrationNumber}',
+                  style: TextStyle(color: Colors.white, fontSize: 12)),
+            ],
+          )),
     ),
   );
 }

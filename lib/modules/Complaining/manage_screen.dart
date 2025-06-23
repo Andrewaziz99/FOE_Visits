@@ -1,5 +1,6 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:toastification/toastification.dart';
 import 'package:visits/modules/Complaining/cubit/states.dart';
@@ -35,9 +36,9 @@ class _ManageScreenState extends State<ManageScreen> {
           return Scaffold(
             appBar: AppBar(
               iconTheme: const IconThemeData(
-                color: Colors.white, // Change the color of the back button
+                color: Colors.black, // Change the color of the back button
               ),
-              backgroundColor: Color(0xFF2b2d30),
+              backgroundColor: Color(0xffd9f9f8),
               elevation: 0,
               title: Text(
                 manageComplaints,
@@ -105,8 +106,8 @@ class _ManageScreenState extends State<ManageScreen> {
                         );
                       },
                       icon: Icon(
-                        Icons.notification_important_rounded,
-                        size: 30,
+                        Icons.notifications_outlined, color: Colors.black,
+                        size: 40,
                       )),
                   if (cubit.todaysReminders.isNotEmpty)
                     Positioned(
@@ -144,12 +145,33 @@ class _ManageScreenState extends State<ManageScreen> {
               fit: StackFit.expand,
               children: [
                 //Background gradient
-                Container(
-                  decoration: const BoxDecoration(
-                    gradient: RadialGradient(colors: [
-                      Color(0xFF3B3B40),
-                      Color(0xFF2b2d30),
-                    ]),
+                // Container(
+                //   decoration: const BoxDecoration(
+                //     gradient: RadialGradient(colors: [
+                //       Color(0xFFF4F4FB),
+                //       Color(0xff9c9e9f),
+                //       Color(0xffd9f9f8),
+                //     ]),
+                //   ),
+                // ),
+                Positioned.fill(
+                  child: Image.asset(
+                    'assets/images/bg2.jpg',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
+                    // opacity: const AlwaysStoppedAnimation(0.5),
+                    // color: Colors.black.withOpacity(0.5),
+                    colorBlendMode: BlendMode.darken,
+                  ),
+                ),
+                //Background image
+                Positioned.fill(
+                  child: Image.asset(
+                    'assets/images/logo_transparent.png',
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.center,
+                    opacity: const AlwaysStoppedAnimation(0.5),
+                    colorBlendMode: BlendMode.screen,
                   ),
                 ),
 
@@ -185,6 +207,8 @@ class _ManageScreenState extends State<ManageScreen> {
                               }
                             }),
                       ),
+
+
                       SizedBox(
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height * 0.7,
@@ -244,10 +268,17 @@ class _ManageScreenState extends State<ManageScreen> {
                                         textColor: Colors.white,
                                         title: Text(
                                           getStatusLabel(status),
-                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                          style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold),
                                         ),
-                                        collapsedBackgroundColor: Colors.grey[800],
-                                        backgroundColor: Colors.grey[900],
+                                        collapsedBackgroundColor: status == 0
+                                            ? Colors.green.withValues(alpha: 0.8)
+                                            : status == 1
+                                            ? Colors.amberAccent.withValues(alpha: 0.8)
+                                            : Colors.red.withValues(alpha: 0.8),
+
+
+                                        backgroundColor: Color(0xfff3f7fa).withValues(alpha: 0.8),
+
                                         children: complaintsList.isEmpty
                                             ? [
                                                 Padding(
@@ -335,16 +366,14 @@ Widget complaintItem(context, ComplainingModel complaint, index, ComplainingCubi
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: Card(
-      color: Colors.white.withValues(alpha: 0.1),
+      color: Color(0xfff3f7fa),
       child: ListTile(
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(complaint.compDepartment!.isNotEmpty ? complaint.compDepartment!: 'لم توجه*',
                   style: TextStyle(color: complaint.compDepartment!.isNotEmpty ? Colors.green : Colors.redAccent)),
-              SizedBox(
-                height: 10.0,
-              )
+              SizedBox(height: 10.0,)
             ],
           ),
           subtitle: Column(
@@ -352,7 +381,7 @@ Widget complaintItem(context, ComplainingModel complaint, index, ComplainingCubi
             children: [
               Text(
                 complaint.subject,
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: Colors.black54),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -373,17 +402,17 @@ Widget complaintItem(context, ComplainingModel complaint, index, ComplainingCubi
                                 Status[complaint.status]!,
                                 style: TextStyle(
                                   color: complaint.status == 0
-                                      ? Color(0xFF595757)
+                                      ? Colors.green
                                       : complaint.status == 1
                                           ? Colors.amberAccent
-                                          : Colors.green,
+                                          : Colors.red,
                                 ),
                               ),
                             ],
                           ),
                           // "Complaint Details" in Arabic
                           content: SingleChildScrollView(
-                            child: Text(complaint.subject,),
+                            child: Text(complaint.subject,style: TextStyle(color: Colors.black54),),
                           ),
                           actions: [
                             TextButton(
@@ -413,7 +442,7 @@ Widget complaintItem(context, ComplainingModel complaint, index, ComplainingCubi
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.add, color: Colors.white),
+                  icon: Icon(Icons.add, color: Colors.black54),
                   tooltip: assign,
                   onPressed: () {
                     // Handle assign action
@@ -431,7 +460,7 @@ Widget complaintItem(context, ComplainingModel complaint, index, ComplainingCubi
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.print, color: Colors.white),
+                  icon: Icon(Icons.print, color: Colors.black54),
                   tooltip: 'حفظ ملف word',
                   onPressed: () {
                     // Handle print action
@@ -532,10 +561,10 @@ Widget complaintItem(context, ComplainingModel complaint, index, ComplainingCubi
           leading: Column(
             children: [
               Text(complaint.submitDate.toString().substring(0, 10),
-                  style: TextStyle(color: Colors.white70, fontSize: 14)),
+                  style: TextStyle(color: Colors.black, fontSize: 14)),
               SizedBox(height: 10.0,),
               Text('${complaint.registrationNumber}',
-                  style: TextStyle(color: Colors.white, fontSize: 12)),
+                  style: TextStyle(color: Colors.black, fontSize: 12)),
             ],
           )),
     ),

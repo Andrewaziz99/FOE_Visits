@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:cherry_toast/cherry_toast.dart';
 import 'package:cherry_toast/resources/arrays.dart';
@@ -56,32 +55,50 @@ class _HomeScreenState extends State<HomeScreen> {
           table: 'daily_visits',
           callback: (payload) {
             playSound('sfx/alert.mp3');
-            CherryToast.warning(
-              height: MediaQuery
-                  .of(context)
-                  .size
-                  .height * 0.2,
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width * 0.5,
-              textDirection: TextDirection.rtl,
+            // CherryToast.warning(
+            //   height: MediaQuery
+            //       .of(context)
+            //       .size
+            //       .height * 0.2,
+            //   width: MediaQuery
+            //       .of(context)
+            //       .size
+            //       .width * 0.5,
+            //   textDirection: TextDirection.rtl,
+            //   backgroundColor: Colors.amber.withAlpha(100),
+            //   title: Text(newVisit,
+            //       style: TextStyle(color: Colors.white, fontSize: 14)),
+            //   animationCurve: Curves.easeInCubic,
+            //   animationDuration: Duration(seconds: 3),
+            //   enableIconAnimation: true,
+            //   toastPosition: Position.top,
+            //   autoDismiss: true,
+            //   toastDuration: Duration(minutes: 1),
+            //   description: Text(newVisitDescription,
+            //       style: TextStyle(color: Colors.white,)),
+            //   action: Text(view, style: TextStyle(color: Colors.blue),),
+            //   actionHandler: () {
+            //     navigateTo(context, VisitsScreen());
+            //   },
+            // ).show(context);
+            Toastification().show(
+              style: ToastificationStyle.flatColored,
+              type: ToastificationType.warning,
               backgroundColor: Colors.amber.withAlpha(100),
+              borderSide: BorderSide(color: Colors.amber, width: 1.0),
+              showIcon: true,
+              showProgressBar: true,
               title: Text(newVisit,
-                  style: TextStyle(color: Colors.white, fontSize: 14)),
-              animationCurve: Curves.easeInCubic,
-              animationDuration: Duration(seconds: 3),
-              enableIconAnimation: true,
-              toastPosition: Position.top,
-              autoDismiss: true,
-              toastDuration: Duration(minutes: 1),
-              description: Text(newVisitDescription,
-                  style: TextStyle(color: Colors.white,)),
-              action: Text(view, style: TextStyle(color: Colors.blue),),
-              actionHandler: () {
-                navigateTo(context, VisitsScreen());
-              },
-            ).show(context);
+                  style: TextStyle(color: Colors.black, fontSize: 24)),
+              borderRadius: BorderRadius.circular(20.0),
+              dragToClose: true,
+              autoCloseDuration: const Duration(seconds: 8),
+              applyBlurEffect: true,
+              direction: TextDirection.rtl,
+              icon: Icon(Icons.warning_amber_rounded, color: Colors.amber),
+              alignment: Alignment.topLeft,
+            );
+
           })
           .subscribe(
             (status, error) {

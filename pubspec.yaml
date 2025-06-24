@@ -74,6 +74,7 @@ dependencies:
   web_socket_channel: any
   awesome_snackbar_content: ^0.1.5
   pdf_render: ^1.4.12
+  carousel_slider: ^5.1.1
 
 
 

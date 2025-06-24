@@ -264,8 +264,8 @@ class _ManageScreenState extends State<ManageScreen> {
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(10.0),
                                         ),
-                                        iconColor: Colors.white,
-                                        textColor: Colors.white,
+                                        iconColor: Colors.black,
+                                        textColor: Colors.black,
                                         title: Text(
                                           getStatusLabel(status),
                                           style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold),
@@ -285,7 +285,7 @@ class _ManageScreenState extends State<ManageScreen> {
                                                   padding: const EdgeInsets.all(20.0),
                                                   child: Text(
                                                     'لا توجد شكاوى لهذه الحالة.',
-                                                    style: TextStyle(color: Colors.white70),
+                                                    style: TextStyle(color: Colors.grey[600]),
                                                   ),
                                                 ),
                                               ]

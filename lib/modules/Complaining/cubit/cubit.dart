@@ -179,7 +179,7 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
 
   var filePath = '';
 
-  Future<FilePickerResult?> pickAttachment() async {
+  Future<List<String?>?> pickAttachment() async {
     emit(getAttachmentLoadingState());
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -189,9 +189,10 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       );
       if (result != null) {
         // Optionally, you can store all file paths if needed
-        filePath = result.names.join(',');
+        filePath = result.paths.join(',');
         emit(getAttachmentSuccessState(result));
-        return result;
+        print(result.paths);
+        return result.paths;
       } else {
         emit(getAttachmentCancelledState());
         return null;
@@ -212,7 +213,7 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
         .order('submit_date', ascending: false)
         .limit(1);
     int nextNumber = 1;
-    if (result != null && result.isNotEmpty && result[0]['registrationNumber'] != null) {
+    if (result.isNotEmpty && result[0]['registrationNumber'] != null) {
       final lastReg = result[0]['registrationNumber'] as String;
       final parts = lastReg.split('/');
       if (parts.length == 2 && int.tryParse(parts[1]) != null) {
@@ -230,7 +231,7 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       String address,
       String department,
       String subject,
-      String attachments) async {
+        String attachments) async {
     emit(addComplaintLoadingState());
     try {
       final submitDate = DateTime.now();
@@ -246,7 +247,7 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
         subject: subject,
         submitDate: submitDate,
         reminderTime: reminderTime,
-        attachments: attachments,
+        attachments: attachments.split('\\').last,
         docPath: '',
         specialistName: '',
         specialistPhone: '',
@@ -255,26 +256,34 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
         registrationNumber: registrationNumber,
       );
 
-      await supabase.from('complaints').insert(newComplaint.toJson());
-      // Save attachments in a writable attachments folder
-      if (attachments.isNotEmpty) {
-        final attachmentPaths = attachments.split(',');
-        final dir = await getAttachmentsFolder();
-        final attachmentsDir = Directory(dir);
-        if (!await attachmentsDir.exists()) {
-          await attachmentsDir.create(recursive: true);
+      await supabase.from('complaints').insert(newComplaint.toJson())
+          .then((value) async {
+            emit(takeCopyLoadingState());
+        // Save attachments in a writable attachments folder
+        if (attachments.isNotEmpty) {
+          final attachmentPaths = attachments.split(',');
+          final dir = await getAttachmentsFolder();
+          final attachmentsDir = Directory(dir);
+          if (!await attachmentsDir.exists()) {
+        await attachmentsDir.create(recursive: true);
         }
         for (final path in attachmentPaths) {
-          final trimmedPath = path.trim();
-          if (trimmedPath.isEmpty) continue;
-          final sourceFile = File(trimmedPath);
-          if (await sourceFile.exists()) {
-            final fileName = sourceFile.uri.pathSegments.last;
-            final destPath = '${attachmentsDir.path}/$fileName';
-            await sourceFile.copy(destPath);
-          }
+        final trimmedPath = path.trim();
+        if (trimmedPath.isEmpty) continue;
+        final sourceFile = File(trimmedPath);
+        if (await sourceFile.exists()) {
+        final fileName = sourceFile.uri.pathSegments.last;
+        final destPath = '${attachmentsDir.path}\\$fileName';
+        await sourceFile.copy(destPath);
+        emit(takeCopySuccessState());
+        }
         }
       }
+      })
+      .catchError((error) {
+        emit(takeCopyErrorState(error.toString()));
+        print('Error taking copy of attachments: $error');
+      });
       emit(addComplaintSuccessState());
     } catch (e) {
       emit(addComplaintErrorState(e.toString()));
@@ -387,46 +396,46 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
   /// Converts a DOCX file to PDF using ConvertAPI and counts the number of pages in the PDF.
   /// [docxFilePath] is the local path to the DOCX file.
   /// Returns the number of pages in the PDF, or throws an error.
-  Future<int> convertDocxToPdfAndCountPages(String docxFilePath) async {
-    emit(printComplaintLoading());
-    try {
-      final apiKey =
-          dotenv.env['CONVERTAPI_KEY']; // Replace with your ConvertAPI secret
-      print(apiKey);
-      final url = Uri.parse(
-          'https://v2.convertapi.com/convert/docx/to/pdf?Secret=$apiKey');
-      final docxFile = File(docxFilePath);
-      final request = http.MultipartRequest('POST', url)
-        ..files.add(await http.MultipartFile.fromPath('File', docxFile.path));
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
-      if (response.statusCode != 200) {
-        throw Exception('Failed to convert DOCX to PDF: ${response.body}');
-      }
-      final pdfUrl = RegExp(r'"Url"\s*:\s*"(.*?)"')
-          .firstMatch(response.body)
-          ?.group(1)
-          ?.replaceAll('\\/', '/');
-      if (pdfUrl == null) throw Exception('PDF URL not found in response');
-      // Download the PDF
-      final pdfResponse = await http.get(Uri.parse(pdfUrl));
-      if (pdfResponse.statusCode != 200) {
-        throw Exception('Failed to download PDF');
-      }
-      final tempDir = await getTemporaryDirectory();
-      final pdfFile = File('${tempDir.path}/converted.pdf');
-      await pdfFile.writeAsBytes(pdfResponse.bodyBytes);
-      // Count PDF pages
-      final pdfDoc = PdfDocument(inputBytes: pdfFile.readAsBytesSync());
-      final pageCount = pdfDoc.pages.count;
-      pdfDoc.dispose();
-      emit(printComplaintSuccess());
-      return pageCount;
-    } catch (e) {
-      emit(printComplaintError(e.toString()));
-      rethrow;
-    }
-  }
+  // Future<int> convertDocxToPdfAndCountPages(String docxFilePath) async {
+  //   emit(printComplaintLoading());
+  //   try {
+  //     final apiKey =
+  //         dotenv.env['CONVERTAPI_KEY']; // Replace with your ConvertAPI secret
+  //     print(apiKey);
+  //     final url = Uri.parse(
+  //         'https://v2.convertapi.com/convert/docx/to/pdf?Secret=$apiKey');
+  //     final docxFile = File(docxFilePath);
+  //     final request = http.MultipartRequest('POST', url)
+  //       ..files.add(await http.MultipartFile.fromPath('File', docxFile.path));
+  //     final streamedResponse = await request.send();
+  //     final response = await http.Response.fromStream(streamedResponse);
+  //     if (response.statusCode != 200) {
+  //       throw Exception('Failed to convert DOCX to PDF: ${response.body}');
+  //     }
+  //     final pdfUrl = RegExp(r'"Url"\s*:\s*"(.*?)"')
+  //         .firstMatch(response.body)
+  //         ?.group(1)
+  //         ?.replaceAll('\\/', '/');
+  //     if (pdfUrl == null) throw Exception('PDF URL not found in response');
+  //     // Download the PDF
+  //     final pdfResponse = await http.get(Uri.parse(pdfUrl));
+  //     if (pdfResponse.statusCode != 200) {
+  //       throw Exception('Failed to download PDF');
+  //     }
+  //     final tempDir = await getTemporaryDirectory();
+  //     final pdfFile = File('${tempDir.path}/converted.pdf');
+  //     await pdfFile.writeAsBytes(pdfResponse.bodyBytes);
+  //     // Count PDF pages
+  //     final pdfDoc = PdfDocument(inputBytes: pdfFile.readAsBytesSync());
+  //     final pageCount = pdfDoc.pages.count;
+  //     pdfDoc.dispose();
+  //     emit(printComplaintSuccess());
+  //     return pageCount;
+  //   } catch (e) {
+  //     emit(printComplaintError(e.toString()));
+  //     rethrow;
+  //   }
+  // }
 
 // Future<void> printComplaintPdf(ComplainingModel complaint) async {
 //   emit(printComplaintLoading());

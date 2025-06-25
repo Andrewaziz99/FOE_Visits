@@ -188,20 +188,10 @@ Widget assignDialog(
               // Combine all specialist names and phones as comma-separated strings
               String names = specialists.map((s) => s.nameController.text).where((n) => n.isNotEmpty).join(',');
               String phones = specialists.map((s) => s.phoneController.text).where((p) => p.isNotEmpty).join(',');
-              final updatedComplaint = ComplainingModel(
-                name: complaint.name,
-                nationalId: complaint.nationalId,
-                phone: complaint.phone,
-                phone2: complaint.phone2,
-                address: complaint.address,
-                department: complaint.department,
-                subject: complaint.subject,
-                submitDate: complaint.submitDate,
-                reminderTime: complaint.reminderTime,
-                status: 1,
+              final updatedComplaint = complaint.copyWith(
+                compDepartment: complaintDepartmentController.text,
                 specialistName: names,
                 specialistPhone: phones,
-                compDepartment: complaintDepartmentController.text,
               );
               cubit.editComplaint(updatedComplaint);
               Navigator.pop(context);

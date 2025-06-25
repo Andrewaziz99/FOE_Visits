@@ -65,16 +65,8 @@ Widget reminderDialog(context, ComplainingModel data, ComplainingCubit cubit) {
           foregroundColor: Colors.white,
         ),
         onPressed: () {
-          final editedComplaint = ComplainingModel(
-              name: data.name,
-              nationalId: data.nationalId,
-              phone: data.phone,
-              phone2: data.phone2,
-              address: data.address,
-              department: data.department,
-              subject: data.subject,
-              submitDate: data.submitDate,
-              reminderTime: DateTime.parse(reminderController.text)
+          final editedComplaint = data.copyWith(
+            reminderTime: DateTime.parse(reminderController.text),
           );
 
           cubit.editComplaint(editedComplaint);

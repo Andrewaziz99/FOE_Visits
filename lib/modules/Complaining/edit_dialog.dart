@@ -126,6 +126,7 @@ Widget updateDialog(context, ComplainingModel data, cubit) {
               specialistName: data.specialistName,
               specialistPhone: data.specialistPhone,
               compDepartment: data.compDepartment,
+              registrationNumber: data.registrationNumber,
               status: data.status,
           );
           cubit.editComplaint(updatedComplaint);

@@ -1,5 +1,7 @@
 import 'dart:math';
+
 import 'package:blurrycontainer/blurrycontainer.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cherry_toast/cherry_toast.dart';
 import 'package:cherry_toast/resources/arrays.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +32,7 @@ class HomeScreen extends StatefulWidget {
   final bool is_admin;
 
   const HomeScreen({super.key, required this.is_admin});
+
   // const HomeScreen({super.key});
 
   @override
@@ -55,50 +58,31 @@ class _HomeScreenState extends State<HomeScreen> {
           table: 'daily_visits',
           callback: (payload) {
             playSound('sfx/alert.mp3');
-            // CherryToast.warning(
-            //   height: MediaQuery
-            //       .of(context)
-            //       .size
-            //       .height * 0.2,
-            //   width: MediaQuery
-            //       .of(context)
-            //       .size
-            //       .width * 0.5,
-            //   textDirection: TextDirection.rtl,
-            //   backgroundColor: Colors.amber.withAlpha(100),
-            //   title: Text(newVisit,
-            //       style: TextStyle(color: Colors.white, fontSize: 14)),
-            //   animationCurve: Curves.easeInCubic,
-            //   animationDuration: Duration(seconds: 3),
-            //   enableIconAnimation: true,
-            //   toastPosition: Position.top,
-            //   autoDismiss: true,
-            //   toastDuration: Duration(minutes: 1),
-            //   description: Text(newVisitDescription,
-            //       style: TextStyle(color: Colors.white,)),
-            //   action: Text(view, style: TextStyle(color: Colors.blue),),
-            //   actionHandler: () {
-            //     navigateTo(context, VisitsScreen());
-            //   },
-            // ).show(context);
-            Toastification().show(
-              style: ToastificationStyle.flatColored,
-              type: ToastificationType.warning,
+            CherryToast.warning(
+              height: MediaQuery.of(context).size.height * 0.2,
+              width: MediaQuery.of(context).size.width * 0.5,
+              textDirection: TextDirection.rtl,
               backgroundColor: Colors.amber.withAlpha(100),
-              borderSide: BorderSide(color: Colors.amber, width: 1.0),
-              showIcon: true,
-              showProgressBar: true,
               title: Text(newVisit,
-                  style: TextStyle(color: Colors.black, fontSize: 24)),
-              borderRadius: BorderRadius.circular(20.0),
-              dragToClose: true,
-              autoCloseDuration: const Duration(seconds: 8),
-              applyBlurEffect: true,
-              direction: TextDirection.rtl,
-              icon: Icon(Icons.warning_amber_rounded, color: Colors.amber),
-              alignment: Alignment.topLeft,
-            );
-
+                  style: TextStyle(color: Colors.white, fontSize: 14)),
+              animationCurve: Curves.easeInCubic,
+              animationDuration: Duration(seconds: 3),
+              enableIconAnimation: true,
+              toastPosition: Position.top,
+              autoDismiss: true,
+              toastDuration: Duration(minutes: 1),
+              description: Text(newVisitDescription,
+                  style: TextStyle(
+                    color: Colors.white,
+                  )),
+              action: Text(
+                view,
+                style: TextStyle(color: Colors.blue),
+              ),
+              actionHandler: () {
+                navigateTo(context, VisitsScreen());
+              },
+            ).show(context);
           })
           .subscribe(
             (status, error) {
@@ -122,7 +106,6 @@ class _HomeScreenState extends State<HomeScreen> {
       child: BlocConsumer<homeCubit, homeStates>(
         builder: (BuildContext context, state) {
           var cubit = homeCubit.get(context);
-          //get the current attachments path
           return Scaffold(
             appBar: AppBar(
               backgroundColor: Colors.transparent,
@@ -186,292 +169,210 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-
                 SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: Row(
-                        children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  if (widget.is_admin || !widget.is_admin)
-                                    Container(
-                                      width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                      height:
-                                      MediaQuery.of(context).size.height * 0.4,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withAlpha(100),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Stack(
-                                        fit: StackFit.expand,
-                                        children: [
-                                          BlurryContainer(
-                                            elevation: 20,
-                                            child: Image.asset(
-                                              'assets/images/add.gif',
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                          InkWell(
-                                            onTap: () {
-                                              navigateTo(context, AddNewVisit());
-                                            },
-                                            child: Container(
-                                              height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                                  0.5,
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withAlpha(100),
-                                                borderRadius:
-                                                BorderRadius.circular(20),
-                                              ),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    addVisit,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 30,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                    child: Row(
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Add New Visit Section
+                                if (!widget.is_admin)
+                                  Container(
+                                    width:
+                                    MediaQuery.of(context).size.width * 0.3,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.4,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withAlpha(100),
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
-                                  SizedBox(width: 50.0,),
-                                  if(!widget.is_admin)
-                                    Container(
-                                      width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                      height:
-                                      MediaQuery.of(context).size.height * 0.4,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withAlpha(100),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Stack(
-                                        fit: StackFit.expand,
-                                        children: [
-                                          BlurryContainer(
-                                            elevation: 20,
-                                            child: Image.asset(
-                                              'assets/images/comlpaining.gif',
-                                              fit: BoxFit.cover,
-                                            ),
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        BlurryContainer(
+                                          elevation: 20,
+                                          child: Image.asset(
+                                            'assets/images/add.gif',
+                                            fit: BoxFit.cover,
                                           ),
-                                          InkWell(
-                                            onTap: () {
-                                              navigateTo(context, ComplainingScreen());
-                                            },
-                                            child: Container(
-                                              height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                                  0.5,
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withAlpha(100),
-                                                borderRadius:
-                                                BorderRadius.circular(20),
-                                              ),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    complaining,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 30,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
+                                        ),
+                                        InkWell(
+                                          onTap: () {
+                                            navigateTo(context, AddNewVisit());
+                                          },
+                                          child: Container(
+                                            height: MediaQuery.of(context)
+                                                .size
+                                                .height *
+                                                0.5,
+                                            decoration: BoxDecoration(
+                                              color:
+                                              Colors.white.withAlpha(100),
+                                              borderRadius:
+                                              BorderRadius.circular(20),
+                                            ),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  addVisit,
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 30,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
-                                                ],
-                                              ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                  SizedBox(
-                                    width: 50.0,
                                   ),
-                                  if(widget.is_admin)
-                                    Container(
-                                      width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                      height:
-                                      MediaQuery.of(context).size.height * 0.4,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withAlpha(100),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Stack(
-                                        fit: StackFit.expand,
-                                        children: [
-                                          BlurryContainer(
-                                            elevation: 20,
-                                            child: Image.asset(
-                                              'assets/images/archive.gif',
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                          InkWell(
-                                            onTap: () {
-                                              navigateTo(context, ArchiveScreen());
-                                            },
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withAlpha(100),
-                                                borderRadius:
-                                                BorderRadius.circular(20),
-                                              ),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    archive,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 30,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                SizedBox(
+                                  width: 50.0,
+                                ),
+                                // Add Complain Section for non-admin users
+                                if (!widget.is_admin)
+                                  Container(
+                                    width:
+                                    MediaQuery.of(context).size.width * 0.3,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.4,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withAlpha(100),
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 20.0,
-                              ),
-                              if (widget.is_admin)
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        BlurryContainer(
+                                          elevation: 20,
+                                          child: Image.asset(
+                                            'assets/images/comlpaining.gif',
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        InkWell(
+                                          onTap: () {
+                                            navigateTo(
+                                                context, ComplainingScreen());
+                                          },
+                                          child: Container(
+                                            height: MediaQuery.of(context)
+                                                .size
+                                                .height *
+                                                0.5,
+                                            decoration: BoxDecoration(
+                                              color:
+                                              Colors.white.withAlpha(100),
+                                              borderRadius:
+                                              BorderRadius.circular(20),
+                                            ),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  complaining,
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 30,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        // Calendar Section
+
+                      ],
+                    ),
+                  ),
+                ),
+                if (widget.is_admin)
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.7,
+                        height: MediaQuery.of(context).size.height * 0.4,
+                        child: CarouselSlider(
+                          carouselController: CarouselSliderController(),
+                          disableGesture: false,
+                          options: CarouselOptions(
+                            autoPlay: true,
+                            enableInfiniteScroll: true,
+                            pauseAutoPlayOnManualNavigate: true,
+                            autoPlayInterval: Duration(seconds: 5),
+                            autoPlayAnimationDuration: Duration(seconds: 2),
+                            autoPlayCurve: Curves.fastOutSlowIn,
+                            aspectRatio: 16 / 9,
+                            scrollDirection: Axis.horizontal,
+                            viewportFraction: 1.0,
+                            height: MediaQuery.of(context).size.height *
+                                0.4,
+                          ),
+                          items: [
+                            // Add New Visit Section
+                            InkWell(
+                              onTap: () {
+                                print('Add New Visit tapped');
+                                navigateTo(context, AddNewVisit());
+                              },
+                              child: Container(
+                                width:
+                                MediaQuery.of(context).size.width * 0.3,
+                                height: MediaQuery.of(context).size.height *
+                                    0.4,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withAlpha(100),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Stack(
+                                  fit: StackFit.expand,
                                   children: [
-                                    Container(
-                                      width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                      height:
-                                      MediaQuery.of(context).size.height * 0.4,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withAlpha(100),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Stack(
-                                        fit: StackFit.expand,
-                                        children: [
-                                          BlurryContainer(
-                                            elevation: 20,
-                                            child: Image.asset(
-                                              'assets/images/visits.gif',
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                          InkWell(
-                                            onTap: () {
-                                              navigateTo(context, VisitsScreen());
-                                            },
-                                            child: Container(
-                                              height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                                  0.5,
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withAlpha(100),
-                                                borderRadius:
-                                                BorderRadius.circular(20),
-                                              ),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    dailyVisitsLogs,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 30,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                    BlurryContainer(
+                                      elevation: 20,
+                                      child: Image.asset(
+                                        'assets/images/add.gif',
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: 50.0,
-                                    ),
-                                    //Complaining Section
                                     Container(
-                                      width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                      height:
-                                      MediaQuery.of(context).size.height * 0.4,
+                                      height: MediaQuery.of(context)
+                                          .size
+                                          .height *
+                                          0.5,
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withAlpha(100),
-                                        borderRadius: BorderRadius.circular(20),
+                                        color:
+                                        Colors.white.withAlpha(100),
+                                        borderRadius:
+                                        BorderRadius.circular(20),
                                       ),
-                                      child: Stack(
-                                        fit: StackFit.expand,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
                                         children: [
-                                          BlurryContainer(
-                                            elevation: 20,
-                                            child: Image.asset(
-                                              'assets/images/comlpaining.gif',
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                          InkWell(
-                                            onTap: () {
-                                              navigateTo(context, ManageScreen());
-                                            },
-                                            child: Container(
-                                              height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                                  0.5,
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withAlpha(100),
-                                                borderRadius:
-                                                BorderRadius.circular(20),
-                                              ),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    manageComplaints,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 30,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
+                                          Text(
+                                            addVisit,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ],
@@ -479,44 +380,193 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ],
                                 ),
-                            ],
-                          ),
-                          SizedBox(
-                            width: 20.0,
-                          ),
-                          if (widget.is_admin)
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                BlurryContainer(
-                                  borderRadius: BorderRadius.circular(25),
-                                  color: Colors.white30,
-                                  width: MediaQuery.of(context).size.width * 0.3,
-                                  height: MediaQuery.of(context).size.height * 0.3,
-                                  child: CalendarDatePicker(
-                                      initialDate: selectedDate,
-                                      firstDate: DateTime(2024),
-                                      lastDate: DateTime.now(),
-                                      onDateChanged: (date) {
-                                        selectedDate = date;
-                                        // if (cubit.user!.is_admin!) {
-                                        //   print(cubit.visits_data?.length);
-                                        //   cubit.getRealTimeVisitsByDate(date).then((value){
-                                        //     showDialog(context: context, builder: (BuildContext context) => visitDialog(context, cubit.visits_data, cubit.visitorsData));
-                                        //   });
-                                        // } else {
-                                        //   cubit.getVisitsByDate(date);
-                                        // }
-
-                                      }),
-                                ),
-                              ],
+                              ),
                             ),
+                            // Archive Section for admin users
+                            InkWell(
+                              onTap: () {
+                                navigateTo(
+                                    context, ArchiveScreen());
+                              },
+                              child: Container(
+                                width:
+                                MediaQuery.of(context).size.width * 0.3,
+                                height: MediaQuery.of(context).size.height *
+                                    0.4,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withAlpha(100),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color:
+                                        Colors.white.withAlpha(100),
+                                        borderRadius:
+                                        BorderRadius.circular(20),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            archive,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    BlurryContainer(
+                                      elevation: 20,
+                                      child: Image.asset(
+                                        'assets/images/archive.gif',
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            // Visits Section
+                            InkWell(
+                              onTap: () {
+                                navigateTo(context, VisitsScreen());
+                              },
+                              child: Container(
+                                width:
+                                MediaQuery.of(context).size.width * 0.3,
+                                height: MediaQuery.of(context).size.height *
+                                    0.4,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withAlpha(100),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    BlurryContainer(
+                                      elevation: 20,
+                                      child: Image.asset(
+                                        'assets/images/visits.gif',
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Container(
+                                      height: MediaQuery.of(context)
+                                          .size
+                                          .height *
+                                          0.5,
+                                      decoration: BoxDecoration(
+                                        color:
+                                        Colors.white.withAlpha(100),
+                                        borderRadius:
+                                        BorderRadius.circular(20),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            dailyVisitsLogs,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            //Complaining Section
+                            InkWell(
+                              onTap: () {
+                                navigateTo(context, ManageScreen());
+                              },
+                              child: Container(
+                                width:
+                                MediaQuery.of(context).size.width * 0.3,
+                                height: MediaQuery.of(context).size.height *
+                                    0.4,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withAlpha(100),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    BlurryContainer(
+                                      elevation: 20,
+                                      child: Image.asset(
+                                        'assets/images/comlpaining.gif',
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Container(
+                                      height: MediaQuery.of(context)
+                                          .size
+                                          .height *
+                                          0.5,
+                                      decoration: BoxDecoration(
+                                        color:
+                                        Colors.white.withAlpha(100),
+                                        borderRadius:
+                                        BorderRadius.circular(20),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            manageComplaints,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                          ],
+                        ),
+                      ),
+                      Spacer(),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          BlurryContainer(
+                            borderRadius: BorderRadius.circular(25),
+                            color: Colors.white30,
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            height:
+                            MediaQuery.of(context).size.height * 0.3,
+                            child: CalendarDatePicker(
+                                initialDate: selectedDate,
+                                firstDate: DateTime(2024),
+                                lastDate: DateTime.now(),
+                                onDateChanged: (date) {
+                                  selectedDate = date;
+                                }),
+                          ),
                         ],
                       ),
-                    ),
+                    ],
                   ),
-                ),
               ],
             ),
           );

@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -13,6 +15,8 @@ import 'package:visits/modules/Complaining/cubit/states.dart';
 import '../../../models/Visitor/visitor_model.dart';
 import '../../../shared/components/constants.dart';
 import '../../../models/Complaining/complaining_model.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ComplainingCubit extends Cubit<ComplainingStates> {
   ComplainingCubit() : super(ComplainingInitial());
@@ -392,162 +396,4 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
   }
 
   int pages = 0;
-
-  /// Converts a DOCX file to PDF using ConvertAPI and counts the number of pages in the PDF.
-  /// [docxFilePath] is the local path to the DOCX file.
-  /// Returns the number of pages in the PDF, or throws an error.
-  // Future<int> convertDocxToPdfAndCountPages(String docxFilePath) async {
-  //   emit(printComplaintLoading());
-  //   try {
-  //     final apiKey =
-  //         dotenv.env['CONVERTAPI_KEY']; // Replace with your ConvertAPI secret
-  //     print(apiKey);
-  //     final url = Uri.parse(
-  //         'https://v2.convertapi.com/convert/docx/to/pdf?Secret=$apiKey');
-  //     final docxFile = File(docxFilePath);
-  //     final request = http.MultipartRequest('POST', url)
-  //       ..files.add(await http.MultipartFile.fromPath('File', docxFile.path));
-  //     final streamedResponse = await request.send();
-  //     final response = await http.Response.fromStream(streamedResponse);
-  //     if (response.statusCode != 200) {
-  //       throw Exception('Failed to convert DOCX to PDF: ${response.body}');
-  //     }
-  //     final pdfUrl = RegExp(r'"Url"\s*:\s*"(.*?)"')
-  //         .firstMatch(response.body)
-  //         ?.group(1)
-  //         ?.replaceAll('\\/', '/');
-  //     if (pdfUrl == null) throw Exception('PDF URL not found in response');
-  //     // Download the PDF
-  //     final pdfResponse = await http.get(Uri.parse(pdfUrl));
-  //     if (pdfResponse.statusCode != 200) {
-  //       throw Exception('Failed to download PDF');
-  //     }
-  //     final tempDir = await getTemporaryDirectory();
-  //     final pdfFile = File('${tempDir.path}/converted.pdf');
-  //     await pdfFile.writeAsBytes(pdfResponse.bodyBytes);
-  //     // Count PDF pages
-  //     final pdfDoc = PdfDocument(inputBytes: pdfFile.readAsBytesSync());
-  //     final pageCount = pdfDoc.pages.count;
-  //     pdfDoc.dispose();
-  //     emit(printComplaintSuccess());
-  //     return pageCount;
-  //   } catch (e) {
-  //     emit(printComplaintError(e.toString()));
-  //     rethrow;
-  //   }
-  // }
-
-// Future<void> printComplaintPdf(ComplainingModel complaint) async {
-//   emit(printComplaintLoading());
-//   try {
-//     final arabicFont = await PdfGoogleFonts.cairoRegular();
-//     final pdf = pw.Document();
-//     pdf.addPage(
-//       pw.Page(
-//         margin: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-//         build: (pw.Context context) {
-//           return pw.Container(
-//             decoration: pw.BoxDecoration(
-//               border: pw.Border.all(color: PdfColors.black, width: 2),
-//             ),
-//             padding: const pw.EdgeInsets.all(20),
-//             child: pw.Directionality(
-//               textDirection: pw.TextDirection.rtl,
-//               child: pw.Column(
-//                 crossAxisAlignment: pw.CrossAxisAlignment.start,
-//                 children: [
-//                   pw.Row(
-//                     crossAxisAlignment: pw.CrossAxisAlignment.start,
-//                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-//                     children: [
-//                       // Text on the right
-//                       pw.Column(
-//                         crossAxisAlignment: pw.CrossAxisAlignment.center,
-//                         children: [
-//                           pw.Text('وزارة الدفاع',
-//                               style: pw.TextStyle(
-//                                   fontSize: 14,
-//                                   fontWeight: pw.FontWeight.bold,
-//                                   font: arabicFont)),
-//                           pw.Text('جهاز مستقبل مصر للتنمية المستدامة',
-//                               style: pw.TextStyle(
-//                                   fontSize: 12, font: arabicFont)),
-//                           pw.Text('قطاع الضبعة',
-//                               style: pw.TextStyle(
-//                                   fontSize: 12, font: arabicFont)),
-//                           pw.Text('مكتب السيد / مدير الجهاز',
-//                               style: pw.TextStyle(
-//                                   fontSize: 12, font: arabicFont)),
-//                           pw.SizedBox(height: 4),
-//                           pw.Text(
-//                               'التاريخ: ${DateFormat('yyyy/MM/dd').format(DateTime.now())}',
-//                               style: pw.TextStyle(
-//                                   fontSize: 12, font: arabicFont)),
-//                         ],
-//                       ),
-//
-//                       // Logo on the left
-//                       pw.Image(
-//                         pw.MemoryImage(
-//                           File('assets/images/logo1.png').readAsBytesSync(),
-//                         ),
-//                         width: 200,
-//                         height: 200,
-//                       ),
-//                     ],
-//                   ),
-//                   pw.SizedBox(height: 12),
-//                   pw.Center(
-//                     child: pw.Text('نموذج شكوى',
-//                         style: pw.TextStyle(
-//                             fontSize: 28,
-//                             fontWeight: pw.FontWeight.bold,
-//                             font: arabicFont)),
-//                   ),
-//                   pw.SizedBox(height: 16),
-//                   pw.Text(
-//                       'تاريخ ووقت التقديم: ${complaint.submitDate.toString()}',
-//                       style: pw.TextStyle(font: arabicFont)),
-//                   pw.Divider(),
-//                   pw.Text('موضوع الشكوى:',
-//                       style: pw.TextStyle(
-//                           fontWeight: pw.FontWeight.bold, font: arabicFont)),
-//                   pw.Text(complaint.subject,
-//                       style: pw.TextStyle(font: arabicFont)),
-//                   pw.SizedBox(height: 12),
-//                   pw.Divider(),
-//                   pw.Text('بيانات مقدم الشكوى:',
-//                       style: pw.TextStyle(
-//                           fontWeight: pw.FontWeight.bold, font: arabicFont)),
-//                   pw.Text('الاسم: ${complaint.name}',
-//                       style: pw.TextStyle(font: arabicFont)),
-//                   pw.Text('الرقم القومي: ${complaint.nationalId}',
-//                       style: pw.TextStyle(font: arabicFont)),
-//                   pw.Text('رقم الهاتف: ${complaint.phone}',
-//                       style: pw.TextStyle(font: arabicFont)),
-//                   pw.Text('رقم هاتف إضافي: ${complaint.phone2}',
-//                       style: pw.TextStyle(font: arabicFont)),
-//                   pw.Text('العنوان: ${complaint.address}',
-//                       style: pw.TextStyle(font: arabicFont)),
-//                   pw.SizedBox(height: 12),
-//                   pw.Divider(),
-//                   pw.Text('بيانات المستخدم:',
-//                       style: pw.TextStyle(
-//                           fontWeight: pw.FontWeight.bold, font: arabicFont)),
-//                   pw.Text('القسم: ${complaint.department}',
-//                       style: pw.TextStyle(font: arabicFont)),
-//                   // Add more user data fields here if available
-//                 ],
-//               ),
-//             ),
-//           );
-//         },
-//       ),
-//     );
-//     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
-//     emit(printComplaintSuccess());
-//   } catch (e) {
-//     emit(printComplaintError(e.toString()));
-//   }
-// }
 }

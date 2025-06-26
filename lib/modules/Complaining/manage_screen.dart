@@ -476,6 +476,20 @@ Widget complaintItem(context, ComplainingModel complaint, index, ComplainingCubi
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
+                  icon: Icon(Icons.print, color: Colors.red),
+                  tooltip: 'حفظ ملف pdf',
+                  onPressed: () {
+                    // Handle print action
+                  },
+                ),
+              ),
+              SizedBox(width: 10.0,),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.withAlpha(50),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
                   icon: Icon(Icons.notification_add, color: Colors.amberAccent),
                   tooltip: 'تذكير',
                   onPressed: () {

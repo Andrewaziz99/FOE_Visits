@@ -75,6 +75,7 @@ dependencies:
   awesome_snackbar_content: ^0.1.5
   pdf_render: ^1.4.12
   carousel_slider: ^5.1.1
+  syncfusion_flutter_pdf: ^28.2.12
 
 
 

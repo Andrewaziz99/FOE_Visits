@@ -430,7 +430,8 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                           tColor: Colors.white,
                                           text: addComplaint,
                                           function: () {
-                                            if (_formkey.currentState!.validate()) {
+                                            if (_formkey.currentState!
+                                                .validate()) {
                                               cubit.addComplaint(
                                                 nameController.text,
                                                 nationalIdController.text,
@@ -439,8 +440,10 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                                 addressController.text,
                                                 departmentController.text,
                                                 subjectController.text,
-                                                  cubit.filePath
-
+                                                cubit.filePath,
+                                                currentUser.name!,
+                                                currentUser.nationalId!,
+                                                currentUser.phone!,
                                               );
                                             }
                                           },
@@ -452,14 +455,19 @@ class _ComplainingScreenState extends State<ComplainingScreen> {
                                           radius: 15,
                                           fSize: 20,
                                           background: Colors.green,
-                                    tColor: Colors.white,
+                                          tColor: Colors.white,
                                           text: addAttachment,
                                           function: () {
                                             cubit.pickAttachment();
                                           },
                                         ),
-                                        SizedBox(width: 20.0,),
-                                        Text(cubit.filePath, style: TextStyle(color: Colors.green),),
+                                        SizedBox(
+                                          width: 20.0,
+                                        ),
+                                        Text(
+                                          cubit.filePath,
+                                          style: TextStyle(color: Colors.green),
+                                        ),
                                       ],
                                     ),
                                   ],

@@ -146,9 +146,9 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
         content.add(TextContent("day", weekday));
         content.add(TextContent("date", date));
         content.add(TextContent("spacer", '\n'));
-        content.add(TextContent("username", currentUser.name));
-        content.add(TextContent("user_nationalId", currentUser.nationalId));
-        content.add(TextContent("user_phone", currentUser.phone));
+        content.add(TextContent("username", complaint.registrarName));
+        content.add(TextContent("user_nationalId", complaint.registrarNationalId));
+        content.add(TextContent("user_phone", complaint.registrarPhone));
         content.add(TextContent("name", complaint.name));
         content.add(TextContent("nationalId", complaint.nationalId));
         content.add(TextContent("phone", complaint.phone));
@@ -235,7 +235,11 @@ class ComplainingCubit extends Cubit<ComplainingStates> {
       String address,
       String department,
       String subject,
-        String attachments) async {
+      String attachments,
+      String registrarName,
+      String registrarPhone,
+      String registrarNationalId
+      ) async {
     emit(addComplaintLoadingState());
     try {
       final submitDate = DateTime.now();

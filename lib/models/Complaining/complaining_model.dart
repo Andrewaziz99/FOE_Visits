@@ -16,6 +16,9 @@ class ComplainingModel {
   // Assuming status is an integer representing the complaint status
   final int? status;
   final String? registrationNumber;
+  final String? registrarName;
+  final String? registrarPhone;
+  final String? registrarNationalId;
 
   ComplainingModel({
     required this.name,
@@ -34,6 +37,9 @@ class ComplainingModel {
     this.compDepartment,
     this.status,
     this.registrationNumber,
+    this.registrarName,
+    this.registrarPhone,
+    this.registrarNationalId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -53,6 +59,9 @@ class ComplainingModel {
     'compDepartment': compDepartment,
     'status': status,
     'registrationNumber': registrationNumber,
+    'registrarName': registrarName,
+    'registrarPhone': registrarPhone,
+    'registrarNationalId': registrarNationalId,
   };
 
 
@@ -74,6 +83,10 @@ class ComplainingModel {
     compDepartment: json['compDepartment'],
     status: json['status'],
     registrationNumber: json['registrationNumber'],
+    registrarName: json['registrarName'],
+    registrarPhone: json['registrarPhone'],
+    registrarNationalId: json['registrarNationalId'],
+
   );
 
   ComplainingModel copyWith({
@@ -93,6 +106,9 @@ class ComplainingModel {
     String? compDepartment,
     int? status,
     String? registrationNumber,
+    String? registrarName,
+    String? registrarPhone,
+    String? registrarNationalId,
   }) {
     return ComplainingModel(
       name: name ?? this.name,
@@ -111,6 +127,9 @@ class ComplainingModel {
       compDepartment: compDepartment ?? this.compDepartment,
       status: status ?? this.status,
       registrationNumber: registrationNumber ?? this.registrationNumber,
+      registrarName: this.registrarName,
+      registrarPhone: this.registrarPhone,
+      registrarNationalId: this.registrarNationalId,
     );
   }
 }

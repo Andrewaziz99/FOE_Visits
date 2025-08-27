@@ -4,6 +4,8 @@ import 'package:visits/modules/Home/password.dart';
 import 'package:visits/shared/components/components.dart';
 import '../../shared/components/constants.dart';
 import '../../shared/encrypt.dart';
+import '../../shared/image_helper.dart';
+import '../../shared/network/local/cache_helper.dart';
 import '../Visits/cubit/states.dart';
 
 
@@ -96,6 +98,48 @@ Widget menu(context, cubit, AuthCubit, state) => Drawer(
           ),
           onTap: () async {
             pickAttachmentsFolder();
+          },
+        ),
+
+        StatefulBuilder(
+          builder: (context, setState) {
+            bool useStaticImages = CacheHelper.getBoolean(key: 'use_static_images') ?? false;
+
+            return SwitchListTile(
+              secondary: Icon(
+                useStaticImages ? Icons.image : Icons.gif,
+                color: Colors.black,
+              ),
+              title: Text(
+                use_static_images,
+                style: TextStyle(color: Colors.black, fontSize: 20),
+              ),
+              subtitle: Text(
+                useStaticImages ? 'الصور الثابتة مفعلة' : 'الرسوم المتحركة مفعلة',
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              ),
+              value: useStaticImages,
+              onChanged: (bool value) async {
+                await ImageHelper.toggleStaticImages(value);
+                setState(() {
+                  useStaticImages = value;
+                });
+
+                // Show feedback to user
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      value ? 'تم تفعيل الصور الثابتة' : 'تم تفعيل الرسوم المتحركة',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              activeColor: Colors.green,
+              inactiveThumbColor: Colors.grey,
+            );
           },
         ),
 

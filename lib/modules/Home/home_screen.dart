@@ -22,6 +22,7 @@ import 'package:visits/modules/Visits/visits_screen.dart';
 import 'package:visits/modules/loading_screen.dart';
 import 'package:visits/shared/components/components.dart';
 import 'package:visits/shared/components/constants.dart';
+ import 'package:visits/shared/image_helper.dart';
 import 'package:visits/shared/playSound.dart';
 import '../../models/Visitor/visitor_model.dart';
 import '../Auth/cubit/cubit.dart';
@@ -121,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   fit: StackFit.expand,
                   children: [
                     Image.asset(
-                      'assets/images/bar.gif',
+                      ImageHelper.getImagePath('assets/images/bar.gif'),
                       fit: BoxFit.cover,
                     ),
                     Container(
@@ -197,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         BlurryContainer(
                                           elevation: 20,
                                           child: Image.asset(
-                                            'assets/images/add.gif',
+                                            ImageHelper.getImagePath('assets/images/add.gif'),
                                             fit: BoxFit.cover,
                                           ),
                                         ),
@@ -255,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         BlurryContainer(
                                           elevation: 20,
                                           child: Image.asset(
-                                            'assets/images/comlpaining.gif',
+                                            ImageHelper.getImagePath('assets/images/comlpaining.gif'),
                                             fit: BoxFit.cover,
                                           ),
                                         ),
@@ -348,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     BlurryContainer(
                                       elevation: 20,
                                       child: Image.asset(
-                                        'assets/images/add.gif',
+                                        ImageHelper.getImagePath('assets/images/add.gif'),
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -400,6 +401,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: Stack(
                                   fit: StackFit.expand,
                                   children: [
+                                    BlurryContainer(
+                                      elevation: 20,
+                                      child: Image.asset(
+                                        ImageHelper.getImagePath('assets/images/archive.gif'),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
                                     Container(
                                       decoration: BoxDecoration(
                                         color:
@@ -420,13 +428,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ),
                                           ),
                                         ],
-                                      ),
-                                    ),
-                                    BlurryContainer(
-                                      elevation: 20,
-                                      child: Image.asset(
-                                        'assets/images/archive.gif',
-                                        fit: BoxFit.cover,
                                       ),
                                     ),
                                   ],
@@ -453,7 +454,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     BlurryContainer(
                                       elevation: 20,
                                       child: Image.asset(
-                                        'assets/images/visits.gif',
+                                        ImageHelper.getImagePath('assets/images/visits.gif'),
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -507,7 +508,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     BlurryContainer(
                                       elevation: 20,
                                       child: Image.asset(
-                                        'assets/images/comlpaining.gif',
+                                        ImageHelper.getImagePath('assets/images/comlpaining.gif'),
                                         fit: BoxFit.cover,
                                       ),
                                     ),

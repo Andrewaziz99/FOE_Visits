@@ -9,6 +9,7 @@ import 'package:visits/modules/loading_screen.dart';
 
 import '../../shared/components/components.dart';
 import '../../shared/components/constants.dart';
+import '../../shared/image_helper.dart';
 import 'cubit/cubit.dart';
 
 TextEditingController oldPasswordController = TextEditingController();
@@ -130,7 +131,7 @@ class ChangePasswordScreen extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     Image.asset(
-                      'assets/images/bar.gif',
+                      ImageHelper.getImagePath('assets/images/bar.gif'),
                       fit: BoxFit.cover,
                     ),
                     Container(

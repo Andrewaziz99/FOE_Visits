@@ -10,6 +10,7 @@ import 'package:visits/modules/loading_screen.dart';
 import '../../models/Visitor/visitor_model.dart';
 import '../../shared/components/components.dart';
 import '../../shared/components/constants.dart';
+import '../../shared/image_helper.dart';
 import 'add_new_visitor.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
@@ -72,7 +73,7 @@ class _AddNewVisitState extends State<AddNewVisit> {
                   fit: StackFit.expand,
                   children: [
                     Image.asset(
-                      'assets/images/bar.gif',
+                      ImageHelper.getImagePath('assets/images/bar.gif'),
                       fit: BoxFit.cover,
                     ),
                     Container(

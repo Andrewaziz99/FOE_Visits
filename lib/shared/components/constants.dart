@@ -1,4 +1,3 @@
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:visits/models/User/user_model.dart';
@@ -51,6 +50,7 @@ const String newVisitDescription = 'تم اضافة زيارة جديدة';
 const String view = 'عرض';
 const String settings = 'الاعدادات';
 const String activate_gifs = 'تفعيل الرسوم المتحركة';
+const String use_static_images = 'استخدام الصور الثابتة';
 
 const String visitorExists = 'هذا الزائر موجود بالفعل';
 

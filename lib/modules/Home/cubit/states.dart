@@ -143,3 +143,10 @@ class modifyVisitLoading extends homeStates {}
 class modifyVisitSuccess extends homeStates {}
 
 class modifyVisitError extends homeStates {}
+
+// States for deleting visit
+class deleteVisitLoading extends homeStates {}
+
+class deleteVisitSuccess extends homeStates {}
+
+class deleteVisitError extends homeStates {}

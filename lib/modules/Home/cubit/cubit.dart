@@ -750,4 +750,20 @@ class homeCubit extends Cubit<homeStates> {
       print('Error modifying visit: $error');
     }
   }
+
+  // Function to delete a visit
+  Future<void> deleteVisit({
+    required int visitId,
+  }) async {
+    emit(deleteVisitLoading());
+
+    try {
+      await supabase.from('daily_visits').delete().eq('id', visitId);
+
+      emit(deleteVisitSuccess());
+    } catch (error) {
+      emit(deleteVisitError());
+      print('Error deleting visit: $error');
+    }
+  }
 }

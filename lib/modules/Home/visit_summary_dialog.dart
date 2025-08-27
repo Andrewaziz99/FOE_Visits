@@ -152,18 +152,27 @@ class _VisitSummaryDialogState extends State<VisitSummaryDialog> {
                     color: Colors.green[800],
                   ),
                 ),
-                IconButton(
-                  icon: Icon(_isEditingVisit ? Icons.save : Icons.edit),
-                  color: _isEditingVisit ? Colors.green : Colors.blue,
-                  onPressed: () {
-                    if (_isEditingVisit) {
-                      _saveVisitChanges();
-                    } else {
-                      setState(() {
-                        _isEditingVisit = true;
-                      });
-                    }
-                  },
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.delete),
+                      color: Colors.red,
+                      onPressed: _showDeleteConfirmation,
+                    ),
+                    IconButton(
+                      icon: Icon(_isEditingVisit ? Icons.save : Icons.edit),
+                      color: _isEditingVisit ? Colors.green : Colors.blue,
+                      onPressed: () {
+                        if (_isEditingVisit) {
+                          _saveVisitChanges();
+                        } else {
+                          setState(() {
+                            _isEditingVisit = true;
+                          });
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -400,6 +409,49 @@ class _VisitSummaryDialogState extends State<VisitSummaryDialog> {
     );
   }
 
+  void _showDeleteConfirmation() {
+    QuickAlert.show(
+      context: context,
+      type: QuickAlertType.confirm,
+      title: 'تأكيد الحذف',
+      text: 'هل أنت متأكد من حذف هذه الزيارة؟',
+      confirmBtnText: 'حذف',
+      cancelBtnText: 'إلغاء',
+      confirmBtnColor: Colors.red,
+      onConfirmBtnTap: () {
+        Navigator.of(context).pop(); // Close confirmation dialog
+        _deleteVisit();
+      },
+    );
+  }
+
+  void _deleteVisit() {
+    final visitId = int.tryParse(widget.visitData['visitId'] ?? '0');
+    if (visitId != null && visitId > 0) {
+      widget.cubit.deleteVisit(visitId: visitId);
+
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.success,
+        title: 'تم حذف الزيارة',
+        text: 'تم حذف الزيارة بنجاح',
+        autoCloseDuration: Duration(seconds: 2),
+        onConfirmBtnTap: () {
+          Navigator.of(context).pop(); // Close success dialog
+          Navigator.of(context).pop(); // Close summary dialog
+        },
+      );
+    } else {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'خطأ',
+        text: 'حدث خطأ أثناء حذف الزيارة',
+        autoCloseDuration: Duration(seconds: 3),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -465,25 +517,7 @@ class _VisitSummaryDialogState extends State<VisitSummaryDialog> {
             // Action buttons
             Row(
               children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      // Navigate to visits screen to show today's visits
-                      // navigateTo(context, VisitsScreen());
-                    },
-                    icon: Icon(Icons.list_alt),
-                    label: Text('عرض زيارات اليوم'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ),
+
                 SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton.icon(

@@ -2,9 +2,7 @@ import 'package:visits/models/Engineers/engineers_model.dart';
 
 abstract class homeStates {}
 
-class homeInitialState extends homeStates {
-
-}
+class homeInitialState extends homeStates {}
 
 class getUserDataLoading extends homeStates {}
 
@@ -131,3 +129,17 @@ class EngineersUpdatedState extends homeStates {
 
   EngineersUpdatedState(this.engineers);
 }
+
+// States for modifying visitor
+class modifyVisitorLoading extends homeStates {}
+
+class modifyVisitorSuccess extends homeStates {}
+
+class modifyVisitorError extends homeStates {}
+
+// States for modifying visit
+class modifyVisitLoading extends homeStates {}
+
+class modifyVisitSuccess extends homeStates {}
+
+class modifyVisitError extends homeStates {}

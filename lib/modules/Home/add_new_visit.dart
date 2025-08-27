@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:collection/collection.dart';
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,10 +12,12 @@ import '../../models/Visitor/visitor_model.dart';
 import '../../shared/components/components.dart';
 import '../../shared/components/constants.dart';
 import '../../shared/image_helper.dart';
+import '../Visits/visits_screen.dart';
 import 'add_new_visitor.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
 import 'eng_screen.dart';
+import 'visit_summary_dialog.dart';
 
 class AddNewVisit extends StatefulWidget {
   const AddNewVisit({super.key});
@@ -512,7 +515,7 @@ class _AddNewVisitState extends State<AddNewVisit> {
                                           background: Colors.blue,
                                           tColor: Colors.white,
                                           text: add,
-                                          function: () {
+                                          function: () async {
                                             if (subjectController.text.isEmpty || departmentController.text.isEmpty) {
                                               setState(() {
                                                 showWarningIcon = true;
@@ -525,7 +528,7 @@ class _AddNewVisitState extends State<AddNewVisit> {
                                               cubit.addSubject(
                                                   subjectName:
                                                       subjectController.text);
-                                              cubit.addVisitorAndVisit(
+                                              final result = await cubit.addVisitorAndVisit(
                                                 rank: rankController.text,
                                                 name: nameController.text,
                                                 phone_number: phoneController.text,
@@ -538,6 +541,12 @@ class _AddNewVisitState extends State<AddNewVisit> {
                                                 visitReason: subjectController.text,
                                                 context: context,
                                               );
+
+                                              if (result != null) {
+                                                // Store the IDs for use in the listener
+                                                cubit.lastCreatedVisitorId = result['visitorId'];
+                                                cubit.lastCreatedVisitId = result['visitId'];
+                                              }
                                             }
                                           },
                                         ),
@@ -661,24 +670,41 @@ class _AddNewVisitState extends State<AddNewVisit> {
               calendarData.addEvents([event]);
             });
             Navigator.pop(context);
-            QuickAlert.show(
-                width: MediaQuery.of(context).size.width * 0.2,
-                borderRadius: 15,
-                animType: QuickAlertAnimType.scale,
-                context: context,
-                type: QuickAlertType.success,
-                autoCloseDuration: Duration(seconds: 2),
-                barrierDismissible: true,
-                title: addSuccessMessage,
-                confirmBtnText: done);
 
-            rankController.clear();
-            nameController.clear();
-            phoneController.clear();
-            additionalPhoneController.clear();
-            departmentController.clear();
-            feedbackController.clear();
-            subjectController.clear();
+            // Create visit data map for the summary dialog using the stored IDs
+            Map<String, String> visitData = {
+              'rank': rankController.text,
+              'name': nameController.text,
+              'phoneNo': phoneController.text,
+              'additionalPhoneNo': additionalPhoneController.text,
+              'department': departmentController.text,
+              'feedback': feedbackController.text,
+              'visitReason': subjectController.text,
+              'visitorId': cubit.lastCreatedVisitorId?.toString() ?? '',
+              'visitId': cubit.lastCreatedVisitId?.toString() ?? '',
+              'visitDate': DateTime.now().toIso8601String(),
+            };
+
+            // Show the comprehensive visit summary dialog instead of simple alert
+            showVisitSummaryDialog(
+              context,
+              visitData,
+              cubit,
+              () {
+                // Callback for "Add Another Visit" button
+                // Clear all controllers for new visit
+                rankController.clear();
+                nameController.clear();
+                phoneController.clear();
+                additionalPhoneController.clear();
+                departmentController.clear();
+                feedbackController.clear();
+                subjectController.clear();
+                setState(() {
+                  showWarningIcon = false;
+                });
+              },
+            );
 
             cubit.getVisitors();
           }

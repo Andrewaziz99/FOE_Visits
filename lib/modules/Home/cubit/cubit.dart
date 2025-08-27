@@ -24,6 +24,10 @@ class homeCubit extends Cubit<homeStates> {
 
   final supabase = Supabase.instance.client;
 
+  // Store the last created visitor and visit IDs
+  int? lastCreatedVisitorId;
+  int? lastCreatedVisitId;
+
   Future<void> addSubject({
     required String subjectName,
   }) async {
@@ -63,6 +67,7 @@ class homeCubit extends Cubit<homeStates> {
   }
 
   List<String> visitSubject = [];
+
   Future<void> getSubjects() async {
     emit(getSubjectsLoading());
     await supabase
@@ -78,6 +83,7 @@ class homeCubit extends Cubit<homeStates> {
   }
 
   List<String> departments = [];
+
   void getDepartments() {
     emit(getDepartmentsLoading());
     supabase
@@ -122,12 +128,12 @@ class homeCubit extends Cubit<homeStates> {
             .update({'new_password': newPass})
             .eq('user_id', supabase.auth.currentUser!.id)
             .then((value) {
-              emit(changePasswordSuccess());
-            })
+          emit(changePasswordSuccess());
+        })
             .catchError((error) {
-              emit(changePasswordError());
-              print(error);
-            });
+          emit(changePasswordError());
+          print(error);
+        });
       } else {
         emit(changePasswordError());
       }
@@ -314,7 +320,8 @@ class homeCubit extends Cubit<homeStates> {
   }) async {
     // Check if the visitor already exists
     final existingVisitor = visitors?.lastWhereOrNull(
-      (visitor) => visitor.name == name || visitor.phone_number == phone_number
+            (visitor) =>
+        visitor.name == name || visitor.phone_number == phone_number
     );
     if (existingVisitor != null) {
       // If the visitor exists, directly add the visit
@@ -326,7 +333,8 @@ class homeCubit extends Cubit<homeStates> {
         borderSide: BorderSide(color: Colors.red, width: 1.0),
         showIcon: true,
         showProgressBar: false,
-        title: Text(visitorExists, style: TextStyle(color: Colors.white, fontSize: 18)),
+        title: Text(
+            visitorExists, style: TextStyle(color: Colors.white, fontSize: 18)),
         borderRadius: BorderRadius.circular(20.0),
         dragToClose: true,
         autoCloseDuration: const Duration(seconds: 5),
@@ -335,7 +343,6 @@ class homeCubit extends Cubit<homeStates> {
         icon: Icon(Icons.warning_amber_rounded, color: Colors.amber),
         alignment: Alignment.topCenter,
       );
-
     } else {
       emit(addVisitorLoading());
       await supabase.from('visitors').insert({
@@ -375,7 +382,7 @@ class homeCubit extends Cubit<homeStates> {
   }
 
 
-  Future<void> addVisitorAndVisit({
+  Future<Map<String, dynamic>?> addVisitorAndVisit({
     required String rank,
     required String name,
     required String phone_number,
@@ -387,33 +394,44 @@ class homeCubit extends Cubit<homeStates> {
   }) async {
     // Check if the visitor already exists
     final existingVisitor = visitors?.lastWhereOrNull(
-            (visitor) => visitor.name == name || visitor.phone_number == phone_number
+            (visitor) =>
+        visitor.name == name || visitor.phone_number == phone_number
     );
 
     if (existingVisitor != null) {
       // Visitor exists - add visit directly
       try {
         emit(addVisitLoading());
-        await supabase.from('daily_visits').insert({
+        final response = await supabase.from('daily_visits').insert({
           'user_id': supabase.auth.currentUser!.id,
           'visitor_id': existingVisitor.id, // Use the existing visitor's ID
           'feedback': feedback,
           'subject': visitReason,
           'visitDate': DateTime.now().toIso8601String(),
           'region': user?.region,
-        });
+        }).select();
+
+        // Store IDs before emitting success
+        lastCreatedVisitorId = existingVisitor.id;
+        lastCreatedVisitId = response.isNotEmpty ? response[0]['id'] as int? : null;
+
         emit(addVisitSuccess());
+
+        // Return the visitor and visit data
+        return {
+          'visitorId': lastCreatedVisitorId,
+          'visitId': lastCreatedVisitId,
+        };
       } catch (error) {
         emit(addVisitError());
         print(error);
-        // Optionally show error toast here
-        return;
+        return null;
       }
     } else {
       // Visitor doesn't exist - add visitor first, then add visit
       try {
         // Add new visitor
-        final response = await supabase.from('visitors').insert({
+        final visitorResponse = await supabase.from('visitors').insert({
           'rank': rank,
           'name': name,
           'phone_number': phone_number,
@@ -422,25 +440,36 @@ class homeCubit extends Cubit<homeStates> {
           'created_at': DateTime.now().toIso8601String(),
         }).select();
 
-        if (response.isNotEmpty) {
-          final newVisitorId = response[0]['id'] as int;
+        if (visitorResponse.isNotEmpty) {
+          final newVisitorId = visitorResponse[0]['id'] as int;
 
           // Now add the visit
           try {
             emit(addVisitLoading());
-            await supabase.from('daily_visits').insert({
+            final visitResponse = await supabase.from('daily_visits').insert({
               'user_id': supabase.auth.currentUser!.id,
               'visitor_id': newVisitorId,
               'feedback': feedback,
               'subject': visitReason,
               'visitDate': DateTime.now().toIso8601String(),
               'region': user?.region,
-            });
+            }).select();
+
+            // Store IDs before emitting success
+            lastCreatedVisitorId = newVisitorId;
+            lastCreatedVisitId = visitResponse.isNotEmpty ? visitResponse[0]['id'] as int? : null;
+
             emit(addVisitSuccess());
+
+            // Return the visitor and visit data
+            return {
+              'visitorId': lastCreatedVisitorId,
+              'visitId': lastCreatedVisitId,
+            };
           } catch (error) {
             emit(addVisitError());
             print(error);
-            // Optionally show error toast here
+            return null;
           }
         }
       } catch (error) {
@@ -452,7 +481,8 @@ class homeCubit extends Cubit<homeStates> {
           borderSide: BorderSide(color: Colors.red, width: 1.0),
           showIcon: true,
           showProgressBar: false,
-          title: Text(addError, style: TextStyle(color: Colors.white, fontSize: 18)),
+          title: Text(
+              addError, style: TextStyle(color: Colors.white, fontSize: 18)),
           borderRadius: BorderRadius.circular(20.0),
           dragToClose: true,
           autoCloseDuration: const Duration(seconds: 5),
@@ -462,10 +492,11 @@ class homeCubit extends Cubit<homeStates> {
           alignment: Alignment.topCenter,
         );
         print(error);
+        return null;
       }
     }
+    return null;
   }
-
 
 
   File? image;
@@ -481,7 +512,9 @@ class homeCubit extends Cubit<homeStates> {
         image = File(pickedImage.path);
 
         // Step 2: Upload the image to Supabase storage
-        final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final String fileName = '${DateTime
+            .now()
+            .millisecondsSinceEpoch}.jpg';
         final String filePath = 'images/$fileName';
 
         await supabase.storage
@@ -490,7 +523,7 @@ class homeCubit extends Cubit<homeStates> {
 
         // Step 3: Get the image URL
         final String imageUrl =
-            supabase.storage.from('images').getPublicUrl(filePath);
+        supabase.storage.from('images').getPublicUrl(filePath);
 
         // Step 4: Update the users table with the image URL
         final user = supabase.auth.currentUser;
@@ -551,6 +584,7 @@ class homeCubit extends Cubit<homeStates> {
   }
 
   List<VisitDataModel> searchBySubjectResults = [];
+
   Future<void> searchBySubject(String search) async {
     emit(searchBySubjectLoading());
     await supabase
@@ -650,9 +684,70 @@ class homeCubit extends Cubit<homeStates> {
   void removeEngineerAt(int index) {
     if (index >= 0 && index < engineers.length) {
       engineers.removeAt(index);
-      emit(EngineersUpdatedState(engineers)); // Replace with the appropriate state
+      emit(EngineersUpdatedState(
+          engineers)); // Replace with the appropriate state
     }
   }
 
+  // Function to modify/update visitor information
+  Future<void> modifyVisitor({
+    required int visitorId,
+    required String rank,
+    required String name,
+    required String phone_number,
+    String? additional_phone_number,
+    required String department,
+  }) async {
+    emit(modifyVisitorLoading());
 
+    try {
+      await supabase.from('visitors').update({
+        'rank': rank,
+        'name': name,
+        'phone_number': phone_number,
+        'additional_phone_number': additional_phone_number,
+        'department': department,
+      }).eq('id', visitorId);
+
+      // Refresh visitors list after update
+      await getVisitors();
+
+      emit(modifyVisitorSuccess());
+    } catch (error) {
+      emit(modifyVisitorError());
+      print('Error modifying visitor: $error');
+    }
+  }
+
+  // Function to modify/update visit information
+  Future<void> modifyVisit({
+    required int visitId,
+    required String feedback,
+    required String visitReason,
+    String? visitDate,
+  }) async {
+    emit(modifyVisitLoading());
+    print("DSADASDSADSADSADMODASDSAODMSAODMASD");
+    print(visitId);
+    print(feedback);
+    print(visitReason);
+    try {
+      Map<String, dynamic> updateData = {
+        'feedback': feedback,
+        'subject': visitReason,
+      };
+
+      // Only update visit date if provided
+      if (visitDate != null) {
+        updateData['visitDate'] = visitDate;
+      }
+
+      await supabase.from('daily_visits').update(updateData).eq('id', visitId);
+
+      emit(modifyVisitSuccess());
+    } catch (error) {
+      emit(modifyVisitError());
+      print('Error modifying visit: $error');
+    }
+  }
 }

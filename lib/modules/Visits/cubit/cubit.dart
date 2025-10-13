@@ -171,6 +171,7 @@ class visitCubit extends Cubit<visitStates> {
               DateTime(selectedDate.year, selectedDate.month,
                       selectedDate.day + 1)
                   .toString())
+          .order('visitDate')
           .then((value) {
         // visits = value.map((e) => VisitModel.fromJson(e)).toList();
         visitsData = value.map((e) => VisitDataModel.fromJson(e)).toList();
@@ -205,7 +206,7 @@ class visitCubit extends Cubit<visitStates> {
 
   Future<void> getRealTimeVisits() async {
     emit(getRealTimeVisitsLoading());
-    await supabase.from('daily_visits').select().then((value) {
+    await supabase.from('daily_visits').select().order('created_at').then((value) {
       visits = value.map((e) => VisitModel.fromJson(e)).toList();
       visitorsData = visitors!
           .where((element) =>
